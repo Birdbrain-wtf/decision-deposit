@@ -302,11 +302,17 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   const call = (pool, data, from) => rpc("eth_call", [{ to: pool, data, ...(from ? { from } : {}) }, "latest"]);
   const read = async (pool, name, args = "") => call(pool, "0x" + SEL[name] + args);
 
+  function noFunds() {
+    const where = NET_KEY === "paseo" ? " Get free test " + NET.symbol + " from faucet.polkadot.io: choose Paseo, then Asset Hub, and paste your 0x address." : "";
+    return "Your wallet does not hold enough " + NET.symbol + " on " + NET.name + " to pay this and the small network fee. Nothing was sent." + where;
+  }
+
   function revertMessage(e) {
     const d = typeof e?.data === "string" ? e.data : e?.data?.data;
     const m = String(d || e?.message || "");
     for (const k in ERRORS) if (m.includes(k.slice(2))) return ERRORS[k];
     if (e?.code === 4001 || /reject|denied/i.test(m)) return "You cancelled it in your wallet. Nothing was sent.";
+    if (/insufficient funds|have 0\b/i.test(m)) return noFunds();
     return "That did not go through: " + (e?.message || "unknown error");
   }
 
@@ -337,7 +343,10 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     const now = head && head.timestamp ? BigInt(head.timestamp) : BigInt(Math.floor(Date.now() / 1000));
     const next = { ref: Number(word(ref, 0)), dep: word(dep, 0), min: word(min, 0), dl: word(dl, 0), st: STATES[Number(word(st, 0))],
           tot: word(tot, 0), people, now, mine: 0n };
-    if (account) next.mine = word(await read(POOL, "contributed", hex(BigInt(account))), 0);
+    if (account) {
+      next.mine = word(await read(POOL, "contributed", hex(BigInt(account))), 0);
+      next.bal = BigInt(await rpc("eth_getBalance", [account, "latest"]));
+    }
     if (mine !== loadSeq) return;
     S = next;
     render();
@@ -396,7 +405,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   function renderActions() {
     const s = S, full = s.tot === s.dep, closed = s.now >= s.dl;
     $("connect").hidden = !!account;
-    $("walletline").textContent = account ? "Connected as " + short(account) + " on " + NET.name + "." : "Connect an Ethereum-style wallet such as MetaMask. It will be switched to " + NET.name + ".";
+    $("walletline").textContent = account ? "Connected as " + short(account) + " on " + NET.name + (s.bal !== undefined ? ", holding " + ksm(s.bal) + " " + NET.symbol : "") + "." : "Connect an Ethereum-style wallet such as MetaMask. It will be switched to " + NET.name + ".";
     $("contributeBox").hidden = !(s.st === "open" && !full && !closed);
     $("contribute").disabled = busy || !account || !$("ack").checked;
     $("mine").hidden = !account || s.mine === 0n;
@@ -437,6 +446,8 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     let done;
     try {
       say("Checking it will go through…");
+      const bal = BigInt(await rpc("eth_getBalance", [account, "latest"]));
+      if (bal <= value) throw new Error("insufficient funds");
       await rpc("eth_call", [tx, "latest"]);
       const chain = await window.ethereum.request({ method: "eth_chainId" });
       if (parseInt(chain, 16) !== CHAIN_ID) throw new Error("Your wallet is not on " + NET.name + ". Reconnect to switch it.");
