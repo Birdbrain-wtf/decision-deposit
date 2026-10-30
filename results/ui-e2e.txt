@@ -1,0 +1,31 @@
+pool 0x6621a62d9686a6fe0cba2ce4ad92cfba315154b3 for #676 on the fork
+
+# empty state
+PASS  with no pool listed, the page says no pool is open
+
+# Eve pays in and takes it back
+PASS  an unlisted pool carries the warning
+PASS  the page reads the pool: #676, 0 of 666.6666 KSM, Open  (0 of 666.6666)
+PASS  Pay in is disabled until the kill risk is acknowledged
+PASS  Eve's 20 KSM is recorded on the chain
+PASS  the page shows 20 KSM in and Eve marked as you
+PASS  Eve's withdrawal clears her share on the chain
+
+# Alice, Bob, then Carol fills it
+PASS  5 KSM is refused on the page before anything is sent
+PASS  more than the pool needs is refused on the page
+PASS  the page says 66.6666 KSM still needed
+PASS  Fill the rest puts in exactly the remainder
+PASS  Carol's payment placed the deposit: the page shows Deposit placed
+PASS  on the chain #676 is deciding with the pool's account as depositor
+
+# Dave, with no stake, brings it back
+PASS  bringing it back while #676 runs is stopped before the wallet, in plain words
+root cancel: Ok
+PASS  the page moves to Paying back
+PASS  the page says everyone has been paid back
+PASS  alice got exactly what they paid in back  (300 KSM)
+PASS  bob got exactly what they paid in back  (300 KSM)
+PASS  carol got exactly what they paid in back  (66.66666666 KSM)
+
+19 passed, 0 failed

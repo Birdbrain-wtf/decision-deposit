@@ -1,0 +1,111 @@
+fork of Kusama Asset Hub at #23191985, spec 2005001
+PASS  WishForChange decision deposit on chain is 666.66666666 KSM  (666.66666666 KSM)
+PASS  #676 is ongoing with no decision deposit
+
+# 1. Three groups fund #676, the deposit goes on, the referendum ends, everyone is repaid
+pool 0x6621a62d9686a6fe0cba2ce4ad92cfba315154b3 (native account EtEQ2oqrAdn28s3r6yJURzGomTAr84jib519tgxS3E3Qxbm)
+PASS  contract builds the same XCM message the chain encodes  (0x0504060100185c01a4020000)
+PASS  place before full is refused
+PASS  a 5 KSM payment is under the minimum and refused
+PASS  a payment with sub-planck dust is refused
+PASS  Carol's 66.67 KSM top-up is accepted although it is the final amount
+PASS  Carol's payment that fills the pool places the deposit in the same transaction  (Contributed Placed)
+PASS  that same transaction moved #676 into deciding  (referenda.DecisionStarted referenda.DecisionDepositPlaced)
+PASS  paying past the deposit is refused
+PASS  three contributors recorded
+PASS  the fallback place is refused once placed
+PASS  nobody but the pool can call its internal placing hook
+PASS  #676's decision deposit is now held by the pool's own account
+PASS  #676 has started deciding
+PASS  pool is Placed
+PASS  the 666.67 KSM is reserved on the pool's account  (666.67877219 KSM)
+PASS  withdrawing once placed is refused
+PASS  reclaim while #676 is still live is refused and changes nothing  (NothingCameBack)
+root cancel: Ok
+PASS  #676 is ended (cancelled by Root here; approved/rejected refund the same way)  (Cancelled)
+PASS  anyone can reclaim once it has ended  (balances.Unreserved referenda.DecisionDepositRefunded)
+PASS  pool is Returning
+PASS  anyone can pay every contributor back in one transaction  (3 events)
+PASS  alice got exactly 300.00000000 KSM back  (balance moved by 300.00000000 KSM)
+PASS  bob got exactly 300.00000000 KSM back  (balance moved by 300.00000000 KSM)
+PASS  carol got exactly 66.66666666 KSM back  (balance moved by 66.66666666 KSM)
+PASS  nothing is left owed
+PASS  pool's spendable balance is back to zero  (0 wei)
+PASS  a second payout is harmless
+PASS  claim with nothing owed is refused
+
+# 2. Referendum rejected; a stranger claims the refund straight from governance, the pool still settles
+PASS  the filling payment places on #678
+PASS  #678 is rejected
+PASS  a stranger refunds the decision deposit directly on governance
+PASS  reclaim still succeeds (the KSM already landed in the pool)
+PASS  payout succeeds
+PASS  alice got exactly 300.00000000 KSM back  (balance moved by 300.00000000 KSM)
+PASS  bob got exactly 300.00000000 KSM back  (balance moved by 300.00000000 KSM)
+PASS  carol got exactly 66.66666666 KSM back  (balance moved by 66.66666666 KSM)
+
+# 3. Referendum killed: the deposit is slashed and the pool cannot get it back
+PASS  the filling payment places on #679
+root kill: Ok
+PASS  #679 is killed
+PASS  the 666.67 KSM is gone from the pool's account  (reserved 0.01210553 KSM)
+PASS  reclaim is refused: nothing came back  (NothingCameBack)
+PASS  pool stays Placed, with nothing to pay out (the known risk)
+
+# 4. Pool never fills before its deadline: anyone abandons it and everyone is repaid
+PASS  alice pays 100.00000000 KSM
+PASS  bob pays 50.00000000 KSM
+PASS  abandon before the deadline is refused
+PASS  paying in after the deadline is refused
+PASS  placing after the deadline is refused
+PASS  anyone can abandon after the deadline
+PASS  payout succeeds
+PASS  alice got exactly 100.00000000 KSM back  (balance moved by 100.00000000 KSM)
+PASS  bob got exactly 50.00000000 KSM back  (balance moved by 50.00000000 KSM)
+
+# 5. Someone else places the deposit first: the pool refuses to place, groups withdraw
+PASS  Bob pays 50 KSM
+PASS  Bob pays another 25 KSM (adds to his share, no new slot)
+PASS  Ferdie places #680's deposit directly
+PASS  Carol's filling payment is accepted although the automatic placing fails  (Contributed AutoPlaceFailed)
+PASS  the pool stays Open and full, its balance untouched
+PASS  pool's place is refused and no KSM leaves  (DepositNotTaken)
+PASS  bob withdraws
+PASS  alice withdraws
+PASS  carol withdraws
+PASS  alice got 300.00000000 KSM back, give or take her own withdraw fee and storage deposit  (moved 299.99997048 KSM)
+PASS  carol got 291.66666666 KSM back, give or take her own withdraw fee and storage deposit  (moved 291.66672515 KSM)
+PASS  Bob is out only his transaction fees  (net cost 0.00066842 KSM)
+
+# 6. One contributor's address refuses payment: everyone else is still paid
+PASS  Alice pays 100 KSM
+PASS  a contract that refuses payments pays 20 KSM in
+PASS  Bob pays 30 KSM
+PASS  anyone abandons after the deadline
+PASS  payout completes despite the refusal
+PASS  alice got exactly 100.00000000 KSM back  (balance moved by 100.00000000 KSM)
+PASS  bob got exactly 30.00000000 KSM back  (balance moved by 30.00000000 KSM)
+PASS  the refuser's 20 KSM stays owed to it, claimable later
+
+# 7. A group pays from an ordinary Polkadot account (not an Ethereum wallet) and is repaid to that account
+PASS  Ferdie pays 40 KSM with a plain Substrate Revive.call
+PASS  the pool credits Ferdie's EVM address
+PASS  anyone abandons after the deadline
+PASS  payout succeeds
+PASS  Ferdie's own Polkadot account gets exactly 40 KSM back  (moved 40.00000000 KSM)
+
+# 8. The automatic attempt fails (the referendum is not open yet); later anyone places with the fallback
+PASS  filling a pool for #681, not yet submitted, is accepted and the automatic attempt fails  (Contributed AutoPlaceFailed)
+PASS  pool stays Open and full, every planck still in it
+PASS  the deposit is not reserved on the pool's account, only its storage deposit  (reserved 0.01201753 KSM)
+PASS  #681 is now submitted
+PASS  anyone can place with the fallback
+PASS  #681's decision deposit is held by the pool's own account
+root cancel: Ok
+PASS  reclaim succeeds
+PASS  payout succeeds
+PASS  alice got exactly 300.00000000 KSM back  (balance moved by 300.00000000 KSM)
+PASS  bob got exactly 300.00000000 KSM back  (balance moved by 300.00000000 KSM)
+PASS  carol got exactly 66.66666666 KSM back  (balance moved by 66.66666666 KSM)
+
+88/88 checks passed

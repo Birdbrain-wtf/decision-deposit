@@ -1,0 +1,10 @@
+# Chopsticks fork of Kusama Asset Hub for the decision-deposit pool tests.
+# Pinned so every run forks identical state. #676 is Ongoing here with no decision deposit.
+endpoint:
+  - wss://rpc-asset-hub-kusama.luckyfriday.io
+  - wss://sys.ibp.network/asset-hub-kusama
+  - wss://kusama-asset-hub-rpc.polkadot.io
+block: 23191985
+mock-signature-host: true
+runtime-log-level: 3
+port: 8010

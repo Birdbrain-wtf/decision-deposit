@@ -1,0 +1,33 @@
+Paseo Asset Hub, pool 0xc87bb5fff76a0ae3544150e9f75dd11e2a6dffb1, referendum #145, 2026-10-30T14:06:56.074Z
+PASS  weiPerPlanck on the pool is Paseo's ratio (1e8)
+PASS  deposit is 1 PAS
+
+(already placed: re-checking the chain only; the transactions are in the earlier run below)
+PASS  pool is Placed (state 1)
+PASS  pool's balance fell by the deposit
+  on chain: #145 Ongoing, decision deposit {"who":"5GbaBcyniLA1h6itCuxRHhkPXiiFdcfG8bwUAPwUa2mssWsY","amount":"10000000000"}
+PASS  #145's decision deposit is held by the pool's own account (5GbaBcyniLA1h6itCuxRHhkPXiiFdcfG8bwUAPwUa2mssWsY)
+PASS  #145 is deciding
+PASS  the deposit is 1 PAS
+
+the refund: after #145 ends (its decision period, at most 7 days), anyone sends reclaim then payout.
+
+7 passed, 0 failed
+
+---- earlier run (the transactions) ----
+Paseo Asset Hub, pool 0xc87bb5fff76a0ae3544150e9f75dd11e2a6dffb1, referendum #145, 2026-10-30T13:58:45.891Z
+PASS  weiPerPlanck on the pool is Paseo's ratio (1e8)
+PASS  deposit is 1 PAS
+
+# Alice pays in half and takes it back
+  contribute from 0xE6a697 → success, block 15105084, tx 0x758e9ea22f69dfef64696ecbafac08f795fe4208c82dc84a1e32cc1564a6a347
+PASS  Alice's 0.5 PAS is recorded
+  withdraw from 0xE6a697 → success, block 15105085, tx 0x7fbbece236b222e474173a67c17b477a4b3bcb7612ce9f1956919ca1ce128495
+PASS  Alice's withdrawal clears her share
+
+# Alice and Bob fill it; Bob's payment places the deposit through XCM
+  contribute from 0xE6a697 → success, block 15105086, tx 0xc8c86d33c359fd7cba5f8ef4bea2b2ed9c65aadfd3a318c34972cb5a9d9c7dff
+  contribute from 0xEA08Fb → success, block 15105087, tx 0xe9326d2fa11aef88f5c9ddf6798f96d3e32e3f700ac6fee8e24d0b15c9afb47d
+PASS  pool is Placed (state 1)
+PASS  pool's balance fell by the deposit
+(the referendum read in this run was at the finalised block, one behind; the re-check above reads the best block)

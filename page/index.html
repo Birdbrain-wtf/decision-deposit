@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Collaborative decision deposits · Birdbrain</title>
+<meta name="description" content="Several groups carry one Kusama referendum's decision deposit together, and every group is paid back when the referendum ends.">
+<meta property="og:title" content="Collaborative decision deposits · Birdbrain">
+<meta property="og:description" content="Several groups carry one referendum's decision deposit together, and every group is paid back when it ends.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://birdbrain.wtf/deposit">
+<meta property="og:image" content="https://birdbrain.wtf/deposit/social-v2.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://birdbrain.wtf/deposit/social-v2.png">
+<style>
+:root{--ink:#202a31;--muted:#596771;--line:#dfe4e7;--soft:#f6f8f9;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 75% 10%,#f3f5f7,transparent 40%),#fff;color:var(--ink);font:16px/1.7 Inter,Arial,sans-serif}
+a{color:inherit;text-underline-offset:5px}
+button,input{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #526875;outline-offset:4px}
+header{display:flex;justify-content:space-between;align-items:center;padding:25px 5vw;border-bottom:1px solid var(--line)}
+.brand{font-size:22px;letter-spacing:-1px;text-decoration:none}
+.brand svg{width:25px;vertical-align:middle;margin-right:10px}
+.meta,.eyebrow{font:11px/1.6 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.14em}
+.muted{color:var(--muted)}
+main{max-width:1120px;margin:auto;padding:0 5vw}
+h1,h2,h3{font-style:normal;font-weight:400;line-height:1.08;letter-spacing:-.04em}
+h1{font-size:clamp(44px,6vw,84px);margin:20px 0 24px;max-width:820px}
+h2{font-size:clamp(30px,3.6vw,46px);margin:12px 0 22px}
+h3{font-size:22px;margin:0 0 10px;letter-spacing:-.02em}
+p{max-width:660px}
+.hero{padding:75px 0 45px}
+.lead{font-size:20px;color:var(--muted);max-width:640px}
+.banner{border:1px solid var(--line);border-left:2px solid rgba(245,158,11,.9);background:#fffdf8;padding:14px 18px;font-size:14px;max-width:760px}
+section{padding:60px 0;border-top:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:start}
+.card{border:1px solid var(--line);background:#fff;padding:28px}
+.card.soft{background:var(--soft)}
+.amount{font-size:clamp(34px,4vw,52px);letter-spacing:-.04em;line-height:1.1}
+.amount small{font-size:.42em;letter-spacing:0;color:var(--muted)}
+.bar{height:8px;background:var(--ghost,#eef1f3);border-radius:8px;margin:18px 0 10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,rgba(6,182,212,.55),rgba(139,92,246,.55));transition:width 1.2s var(--ease)}
+dl{margin:22px 0 0}
+dl div{display:grid;grid-template-columns:150px 1fr;border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
+dd .mono{word-break:break-all}
+.state{display:inline-block;border:1px solid #bfc9d0;border-radius:30px;padding:3px 12px;font:11px/1.8 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em}
+.state.open{border-color:rgba(16,185,129,.6)}.state.placed{border-color:rgba(59,130,246,.6)}.state.returning{border-color:rgba(245,158,11,.7)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+td{border-top:1px solid var(--line);padding:9px 0}
+td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,monospace;font-size:13px}
+.btn{display:inline-block;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:40px;padding:12px 24px;cursor:pointer;transition:background .45s var(--ease),color .45s var(--ease),box-shadow .45s var(--ease)}
+.btn:hover:not(:disabled){box-shadow:0 0 0 4px rgba(139,92,246,.12)}
+.btn.ghost{background:#fff;color:var(--ink);border-color:var(--line)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.field{display:flex;border:1px solid var(--line);border-radius:40px;overflow:hidden;background:#fff}
+.field input{border:0;padding:12px 18px;width:170px;background:transparent;outline:none}
+.field span{padding:12px 18px 12px 0;color:var(--muted)}
+.linkbtn{background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:4px;cursor:pointer;font-size:14px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:18px 0 6px}
+.check input{margin-top:5px}
+.note{font-size:14px;color:var(--muted)}
+#msg{min-height:24px;font-size:14px;margin-top:16px}
+#msg.bad{color:#9b2c2c}#msg.good{color:#1f6b52}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.steps div{padding:24px 18px 24px 0;font-size:14px}
+.steps div+div{border-left:1px solid var(--line);padding-left:18px}
+.steps b{display:block;font:11px ui-monospace,monospace;letter-spacing:.14em;color:var(--muted);margin-bottom:10px;font-weight:400}
+.risks{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.risks article{border-top:1px solid var(--line);padding-top:16px}
+.risks p{font-size:15px;color:var(--muted)}
+details{border-top:1px solid var(--line);padding:16px 0}
+summary{cursor:pointer}
+code{font:13px ui-monospace,monospace;background:var(--soft);padding:1px 5px;border-radius:3px;word-break:break-all}
+footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:25px;font-size:12px;color:var(--muted)}
+[hidden]{display:none!important}
+@media(max-width:820px){.grid,.risks{grid-template-columns:1fr;gap:28px}.steps{grid-template-columns:1fr}.steps div+div{border-left:0;padding-left:0;border-top:1px solid var(--line)}dl div{grid-template-columns:1fr}footer{display:block}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.history{padding-left:1.1em;margin:0 0 1em;max-width:42em}.history li{margin:.6em 0}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="https://birdbrain.wtf"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3L30 28H2Z M16 3L12 22L30 28 M2 28L12 22" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>birdbrain</a>
+  <span class="meta">Shared decision deposit<br>Testing in the open</span>
+</header>
+<main>
+<div class="hero">
+  <div class="eyebrow muted" id="kicker">Kusama governance</div>
+  <h1>Collaborative decision deposits</h1>
+  <p class="lead">A referendum on Kusama cannot be voted on until someone places its decision deposit. This pool lets several groups put in what they can. The payment that fills it places the deposit, and when the referendum ends every group is paid back to the address it paid from.</p>
+  <p class="banner" id="trust">This contract has been tested on a copy of the live chain. Nobody outside Birdbrain has reviewed it yet. Do not put in KSM you cannot afford to have locked for the length of a referendum.</p>
+</div>
+
+<section id="pool">
+  <div id="nopool" hidden>
+    <h2>No pool is open yet.</h2>
+    <p class="muted">The first pool on Kusama is waiting on an outside review. When one opens, it appears here with its referendum, its total and every contribution.</p>
+    <p id="tryPaseo" hidden><a href="?net=paseo">Try the practice pool on Paseo, Polkadot's test network</a>. It runs the same contract with test money.</p>
+  </div>
+  <div class="grid" id="poolview" hidden>
+    <div>
+      <div class="eyebrow muted" id="refline">Referendum</div>
+      <h2 id="reftitle">Loading the pool</h2>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin:0"><span class="state" id="state">…</span><span class="note" id="updated"></span></div>
+        <div class="amount" style="margin-top:16px"><span id="total">0</span> <small>of <span id="deposit">0</span> <span class="sym">KSM</span></small></div>
+        <div class="bar" aria-hidden="true"><i id="fill"></i></div>
+        <div class="note" id="remaining"></div>
+        <dl>
+          <div><dt>What happens next</dt><dd id="next"></dd></div>
+          <div><dt>Funding closes</dt><dd id="deadline"></dd></div>
+          <div><dt>Smallest payment</dt><dd id="min"></dd></div>
+          <div><dt>Pool contract</dt><dd><span class="mono" id="address"></span><br><a id="explorerLink" class="note" target="_blank" rel="noopener">Its verified code on Blockscout</a> · <a id="sourceLink" class="note" target="_blank" rel="noopener">source and tests</a></dd></div>
+        </dl>
+      </div>
+      <h3 style="margin-top:34px">Who has paid in</h3>
+      <p class="note" id="nobody">Nobody yet.</p>
+      <table id="contribs"><tbody></tbody></table>
+    </div>
+
+    <div class="card soft" id="act">
+      <h3>Take part</h3>
+      <p class="note" id="walletline">Connect an Ethereum-style wallet such as MetaMask.</p>
+      <div class="row"><button class="btn" id="connect">Connect wallet</button></div>
+
+      <div id="contributeBox" hidden>
+        <label class="check"><input type="checkbox" id="ack"> <span>I understand that if governance <strong>kills</strong> this referendum the deposit is lost, and my share with it. Every other ending pays it back.</span></label>
+        <div class="row">
+          <div class="field"><input id="amt" inputmode="decimal" placeholder="0.0" aria-label="Amount"><span class="sym">KSM</span></div>
+          <button class="btn" id="contribute" disabled>Pay in</button>
+        </div>
+        <div class="row" style="margin-top:8px"><button class="linkbtn" id="rest">Fill the rest</button></div>
+      </div>
+
+      <div id="mine" class="note" hidden></div>
+      <div class="row" id="moreActions"></div>
+      <div id="msg" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow muted">The problem</div>
+  <h2>One account has to carry the whole deposit.</h2>
+  <p>Kusama's governance takes a decision deposit from a single account. On the Wish for Change track it is 666.67 KSM. The deposit comes back when the referendum ends, so it costs nothing in the end, but few groups can lock that much up for weeks. A referendum that nobody can carry on their own times out without a vote, however many people would have backed it.</p>
+  <p>Sharing the deposit has been asked for since 2023 and has not been built yet:</p>
+  <ul class="history">
+    <li><b>August 2023.</b> Moonbeam's team <a href="https://forum.polkadot.network/t/opengov-exploring-collaborative-decision-deposits-seeking-your-feedback/3723" target="_blank" rel="noopener">asked the forum about collaborative decision deposits</a>. One reply suggested that, on a chain with smart contracts, a contract holding its own account is the natural place for it. That is what this pool is.</li>
+    <li><b>February 2024.</b> <a href="https://forum.polkadot.network/t/creating-a-decision-deposit-referendum-track/5982" target="_blank" rel="noopener">A proposal for a referendum track that places decision deposits</a>, written up as <a href="https://github.com/polkadot-fellows/RFCs/pull/73" target="_blank" rel="noopener">Fellowship RFC 73</a>. It was closed without being adopted.</li>
+    <li><b>2025.</b> <a href="https://github.com/polkadot-fellows/RFCs/pull/151" target="_blank" rel="noopener">RFC 151, crowdsourced decision deposits</a>, would have built sharing into governance itself. It came up again in the <a href="https://forum.polkadot.network/t/opengov-adjustments-2025/14295" target="_blank" rel="noopener">OpenGov Adjustments 2025</a> thread. The RFC was closed, and the <a href="https://github.com/paritytech/polkadot-sdk/issues/6041" target="_blank" rel="noopener">issue to add it to the code</a> is still open.</li>
+  </ul>
+  <p>This pool needs no change to governance. It works on Kusama Asset Hub as it runs today.</p>
+</section>
+
+<section>
+  <div class="eyebrow muted">How it works</div>
+  <h2>Five steps, and none of them needs us.</h2>
+  <div class="steps">
+    <div><b>01</b>A pool is fixed to one referendum and its exact deposit when it is created. It has no owner and cannot be changed.</div>
+    <div><b>02</b>Groups pay KSM in. Each payment is recorded against the address it came from, and can be taken back while the pool is open.</div>
+    <div><b>03</b>The payment that fills the pool places the deposit on the referendum, from the pool's own account. If that attempt fails, anyone can place it later.</div>
+    <div><b>04</b>When the referendum ends, anyone presses one button to bring the deposit back. A watcher does it in the next block.</div>
+    <div><b>05</b>Every group is paid back to the address it paid from. If the pool never fills, the same happens after its deadline.</div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow muted">Before you pay in</div>
+  <h2>What this does not do.</h2>
+  <div class="risks">
+    <article><h3>A killed referendum loses the deposit</h3><p>Approved, rejected, cancelled and timed out all refund. Killed does not, and the pool cannot recover it. Kills are rare and are meant for proposals that abuse the system.</p></article>
+    <article><h3>Nothing fires by itself</h3><p>A referendum ending writes a record on the chain, and a record cannot call a contract. Someone sends the transaction that brings the deposit back. Anyone can, including you, from this page.</p></article>
+    <article><h3>It has not been reviewed</h3><p>The contract is about 230 lines and holds other people's KSM. It passed 88 checks on a copy of Kusama Asset Hub, and on Paseo, Polkadot's test network, it placed a real decision deposit. An outside review is still to come.</p></article>
+    <article><h3>One pool, one referendum</h3><p>A pool cannot be moved to another referendum. If the referendum it was made for times out before the pool fills, everyone is repaid after the deadline.</p></article>
+  </div>
+  <details>
+    <summary>Paying from a Polkadot account or a multisig</summary>
+    <p class="note">A group without an Ethereum-style wallet can pay in from any <span class="netname">Kusama Asset Hub</span> account, including a multisig, with a <code>revive.call</code> extrinsic in polkadot.js. Set <code>dest</code> to the pool contract above, <code>value</code> to the amount in planck (<span id="planckNote">1 KSM is 1,000,000,000,000</span>), and <code>data</code> to <code>0xd7bb99ba</code>. The payment is recorded against that account and repaid to it. To take it back while the pool is open, send the same call with <code>value</code> 0 and <code>data</code> <code>0x3ccfd60b</code>.</p>
+  </details>
+</section>
+</main>
+<footer><span>Birdbrain is a Decent initiative that tests, learns and educates in public.</span><span id="source"><a href="https://github.com/Birdbrain-wtf/decision-deposit">Contract source, tests and test logs</a></span></footer>
+
+<script>
+(() => {
+  // Where a pool can live. EVM amounts are always 18 decimals (1 KSM or 1 PAS is 10^18 wei);
+  // the chain's own planck is coarser, and each pool says by how much (weiPerPlanck).
+  const NETS = {
+    kusama: { chainId: 420420418, name: "Kusama Asset Hub", symbol: "KSM", rpc: "https://eth-rpc-kusama.polkadot.io",
+              explorer: "https://blockscout-kusama.polkadot.io", subsquare: "https://kusama.subsquare.io/referenda/", test: false },
+    paseo:  { chainId: 420420417, name: "Paseo Asset Hub", symbol: "PAS", rpc: "https://eth-rpc-testnet.polkadot.io",
+              explorer: "https://blockscout-testnet.polkadot.io", subsquare: "https://paseo.subsquare.io/referenda/", test: true },
+  };
+  // Pools Birdbrain lists. Anything else opened with ?pool= is shown with a warning.
+  const POOLS = [
+    { net: "paseo", address: "0x023f8bf3acc31cee9990a7d9a198c53b2ac3f151", referendum: 146, title: "Practice pool, Paseo referendum #146" },
+  ];
+  const SOURCE = "https://github.com/Birdbrain-wtf/decision-deposit";
+  const q = new URLSearchParams(location.search);
+  const NET_KEY = NETS[q.get("net")] ? q.get("net") : "kusama";
+  const NET = NETS[NET_KEY];
+  const CHAIN_ID = NET.chainId;
+  const CHAIN = { chainId: "0x" + CHAIN_ID.toString(16), chainName: NET.name,
+    nativeCurrency: { name: NET.symbol, symbol: NET.symbol, decimals: 18 }, rpcUrls: [NET.rpc], blockExplorerUrls: [NET.explorer] };
+  const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  // A different RPC is only honoured when testing on this machine.
+  const RPC = local && q.get("rpc") ? q.get("rpc") : NET.rpc;
+  const UNIT = 10n ** 18n;
+  let WEI_PER_PLANCK = 1000000n, DECIMALS = 12;
+
+  const SEL = {
+    referendum: "e9b59f15", deposit: "d0e30db0", minContribution: "aaffadf3", fundingDeadline: "796b23bb",
+    state: "c19d93fb", total: "2ddbd13a", contributorCount: "ecfd8928", contributors: "3cb5d100",
+    contributed: "995c5e9d", weiPerPlanck: "22ac2d41", contribute: "d7bb99ba", withdraw: "3ccfd60b", place: "93cca918",
+    reclaim: "80e9071b", abandon: "88318834", payout: "5aa6cf97", claim: "4e71d92d",
+  };
+  const ERRORS = {
+    "0x749b5939": "That amount is not accepted. It must be at least the smallest payment, no more than what is left, and in whole planck.",
+    "0xb1d130d6": "The deposit did not go on. The referendum may not be open for a deposit, or someone else placed it first. Nothing left the pool.",
+    "0xd9b5acd5": "The pool is not full yet.",
+    "0x085de625": "Too early. The funding deadline has not passed.",
+    "0xecdd1c29": "Funding for this pool has closed.",
+    "0xde4168ba": "The pool is not at the right stage for that. The page will refresh.",
+    "0x4f2f720d": "Not yet. The referendum is still running, so governance has not released the deposit.",
+    "0xab143c06": "Another action was in progress. Try again.",
+  };
+  const STATES = ["open", "placed", "returning"];
+
+  const $ = (id) => document.getElementById(id);
+  const hex = (n) => BigInt(n).toString(16).padStart(64, "0");
+  const word = (h, i) => BigInt("0x" + h.slice(2 + i * 64, 2 + (i + 1) * 64));
+  const addr = (h) => "0x" + h.slice(-40);
+  const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+
+  function ksm(wei, dp = 4) {
+    wei = BigInt(wei);
+    const whole = wei / UNIT, frac = (wei % UNIT).toString().padStart(18, "0").slice(0, Math.min(dp, DECIMALS)).replace(/0+$/, "");
+    return whole.toLocaleString("en-GB") + (frac ? "." + frac : "");
+  }
+  // Whole planck only: at most DECIMALS places, so the result is a multiple of WEI_PER_PLANCK.
+  function parseKsm(s) {
+    s = String(s).trim().replace(/,/g, "");
+    if (!new RegExp("^\\d+(\\.\\d{1," + DECIMALS + "})?$").test(s)) return null;
+    const [w, f = ""] = s.split(".");
+    return BigInt(w) * UNIT + BigInt(f.padEnd(18, "0"));
+  }
+
+  let id = 0;
+  async function rpc(method, params = []) {
+    const r = await fetch(RPC, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params }) });
+    const j = await r.json();
+    if (j.error) { const e = new Error(j.error.message || "RPC error"); e.data = j.error.data; throw e; }
+    return j.result;
+  }
+  const call = (pool, data, from) => rpc("eth_call", [{ to: pool, data, ...(from ? { from } : {}) }, "latest"]);
+  const read = async (pool, name, args = "") => call(pool, "0x" + SEL[name] + args);
+
+  function revertMessage(e) {
+    const d = typeof e?.data === "string" ? e.data : e?.data?.data;
+    const m = String(d || e?.message || "");
+    for (const k in ERRORS) if (m.includes(k.slice(2))) return ERRORS[k];
+    if (e?.code === 4001 || /reject|denied/i.test(m)) return "You cancelled it in your wallet. Nothing was sent.";
+    return "That did not go through: " + (e?.message || "unknown error");
+  }
+
+  // ---------------------------------------------------------------- pool
+  const listed = POOLS.find((p) => p.net === NET_KEY && (!q.get("pool") || p.address.toLowerCase() === q.get("pool").toLowerCase()));
+  const POOL = (q.get("pool") || (listed && listed.address) || "").toLowerCase();
+  let S = null, account = null, busy = false;
+
+  let loadSeq = 0;
+  async function load() {
+    // Only the newest read may draw, so a slow refresh started before a payment
+    // never overwrites what the page read after it.
+    const mine = ++loadSeq;
+    const code = await rpc("eth_getCode", [POOL, "latest"]).catch(() => "0x");
+    if (!code || code === "0x") throw new Error("There is no contract at " + POOL + " on " + NET.name + ".");
+    WEI_PER_PLANCK = word(await read(POOL, "weiPerPlanck"), 0);
+    DECIMALS = 18 - (WEI_PER_PLANCK.toString().length - 1);
+    const [ref, dep, min, dl, st, tot, n] = await Promise.all(
+      ["referendum", "deposit", "minContribution", "fundingDeadline", "state", "total", "contributorCount"].map((k) => read(POOL, k)));
+    const count = Number(word(n, 0));
+    const people = [];
+    for (let i = 0; i < count; i++) {
+      const a = addr(await read(POOL, "contributors", hex(i)));
+      people.push({ a, amt: word(await read(POOL, "contributed", hex(BigInt(a))), 0) });
+    }
+    // The contract judges the deadline by the chain's clock, so the page does too.
+    const head = await rpc("eth_getBlockByNumber", ["latest", false]).catch(() => null);
+    const now = head && head.timestamp ? BigInt(head.timestamp) : BigInt(Math.floor(Date.now() / 1000));
+    const next = { ref: Number(word(ref, 0)), dep: word(dep, 0), min: word(min, 0), dl: word(dl, 0), st: STATES[Number(word(st, 0))],
+          tot: word(tot, 0), people, now, mine: 0n };
+    if (account) next.mine = word(await read(POOL, "contributed", hex(BigInt(account))), 0);
+    if (mine !== loadSeq) return;
+    S = next;
+    render();
+  }
+
+  function render() {
+    const s = S, full = s.tot === s.dep, closed = s.now >= s.dl;
+    $("poolview").hidden = false;
+    $("refline").textContent = (NET.test ? "Paseo" : "Kusama") + " referendum #" + s.ref;
+    $("reftitle").innerHTML = "";
+    const a = document.createElement("a");
+    a.href = NET.subsquare + s.ref; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = (listed && listed.title) || "Referendum #" + s.ref;
+    $("reftitle").append(a);
+    $("state").textContent = { open: full ? "Full" : closed ? "Closed" : "Open", placed: "Deposit placed", returning: "Paying back" }[s.st];
+    $("state").className = "state " + s.st;
+    const shown = s.st === "open" ? s.tot : s.dep;
+    $("total").textContent = ksm(s.st === "returning" ? s.tot : shown);
+    $("deposit").textContent = ksm(s.dep);
+    $("fill").style.width = (Number((s.st === "returning" ? s.tot : shown) * 10000n / s.dep) / 100) + "%";
+    $("remaining").textContent = s.st === "open" && !full ? ksm(s.dep - s.tot) + " " + NET.symbol + " still needed." : s.st === "returning" ? ksm(s.tot) + " " + NET.symbol + " still to pay back." : "";
+    $("next").textContent = {
+      open: full ? "The pool is full but the deposit is not on yet. Anyone can place it below." : closed ? "Funding closed before the pool filled. Anyone can close it and pay everyone back." : "The payment that fills the pool places the deposit on #" + s.ref + ".",
+      placed: "The deposit is on #" + s.ref + ". When the referendum ends, anyone can bring it back and pay everyone.",
+      returning: s.tot === 0n ? "Everyone has been paid back." : "The " + NET.symbol + " is back in the pool. Anyone can pay every group back now.",
+    }[s.st];
+    $("deadline").textContent = new Date(Number(s.dl) * 1000).toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" });
+    $("min").textContent = ksm(s.min) + " " + NET.symbol + " (the last payment can be smaller, to fill the pool)";
+    $("address").textContent = POOL;
+    $("explorerLink").href = NET.explorer + "/address/" + POOL + "?tab=contract";
+    $("sourceLink").href = SOURCE;
+    const tb = $("contribs").tBodies[0]; tb.innerHTML = "";
+    $("nobody").hidden = s.people.length > 0;
+    for (const p of s.people) {
+      const tr = tb.insertRow();
+      const c1 = tr.insertCell(); c1.className = "mono"; c1.textContent = short(p.a) + (account && p.a === account ? "  (you)" : "");
+      tr.insertCell().textContent = p.amt === 0n ? (s.st === "open" ? "withdrawn" : "paid back") : ksm(p.amt) + " " + NET.symbol;
+    }
+    $("updated").textContent = "Read from the chain " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    renderActions();
+  }
+
+  function button(label, fn, ghost) {
+    const b = document.createElement("button");
+    b.className = "btn" + (ghost ? " ghost" : ""); b.textContent = label; b.disabled = busy || !account;
+    b.onclick = fn; $("moreActions").append(b);
+  }
+
+  function renderActions() {
+    const s = S, full = s.tot === s.dep, closed = s.now >= s.dl;
+    $("connect").hidden = !!account;
+    $("walletline").textContent = account ? "Connected as " + short(account) + " on " + NET.name + "." : "Connect an Ethereum-style wallet such as MetaMask. It will be switched to " + NET.name + ".";
+    $("contributeBox").hidden = !(s.st === "open" && !full && !closed);
+    $("contribute").disabled = busy || !account || !$("ack").checked;
+    $("mine").hidden = !account || s.mine === 0n;
+    $("mine").textContent = "You have " + ksm(s.mine) + " " + NET.symbol + " in this pool.";
+    $("moreActions").innerHTML = "";
+    if (s.st === "open" && s.mine > 0n) button("Take my " + NET.symbol + " back", () => act("withdraw"), true);
+    if (s.st === "open" && full && !closed) button("Place the deposit", () => act("place"));
+    if (s.st === "open" && closed) button("Close the pool and pay everyone back", () => act("abandon"));
+    if (s.st === "placed") button("Bring the deposit back", () => act("reclaim"));
+    if (s.st === "returning" && s.tot > 0n) button("Pay everyone back", () => act("payout", hex(0) + hex(s.people.length)));
+    if (s.st === "returning" && s.mine > 0n) button("Claim my share", () => act("claim"), true);
+  }
+
+  function say(text, kind) { $("msg").textContent = text; $("msg").className = kind || ""; }
+
+  // ---------------------------------------------------------------- wallet
+  async function connect() {
+    const eth = window.ethereum;
+    if (!eth) return say("No Ethereum-style wallet found in this browser. Install MetaMask, or pay in from a Polkadot account (see below).", "bad");
+    try {
+      [account] = (await eth.request({ method: "eth_requestAccounts" })).map((a) => a.toLowerCase());
+      try { await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN.chainId }] }); }
+      catch (e) {
+        if (e.code === 4902 || /unrecognized|not added/i.test(e.message || "")) await eth.request({ method: "wallet_addEthereumChain", params: [CHAIN] });
+        else throw e;
+      }
+      eth.on?.("accountsChanged", (a) => { account = (a[0] || "").toLowerCase() || null; load(); });
+      say("");
+      await load();
+    } catch (e) { account = null; say(revertMessage(e), "bad"); }
+  }
+
+  async function act(name, args = "", value = 0n) {
+    if (busy) return;
+    const data = "0x" + SEL[name] + args;
+    const tx = { from: account, to: POOL, data, value: "0x" + value.toString(16) };
+    busy = true; renderActions();
+    let done;
+    try {
+      say("Checking it will go through…");
+      await rpc("eth_call", [tx, "latest"]);
+      const chain = await window.ethereum.request({ method: "eth_chainId" });
+      if (parseInt(chain, 16) !== CHAIN_ID) throw new Error("Your wallet is not on " + NET.name + ". Reconnect to switch it.");
+      say("Confirm it in your wallet…");
+      const hash = await window.ethereum.request({ method: "eth_sendTransaction", params: [tx] });
+      say("Sent. Waiting for the next block…");
+      let receipt = null;
+      for (let i = 0; i < 60 && !receipt; i++) { receipt = await rpc("eth_getTransactionReceipt", [hash]); if (!receipt) await new Promise((r) => setTimeout(r, 2000)); }
+      if (!receipt) done = ["Sent, but not confirmed yet. Transaction " + short(hash) + ". Refresh in a minute."];
+      else if (receipt.status !== "0x1") done = ["The transaction was included but failed. Nothing changed.", "bad"];
+      else done = [{ contribute: "Paid in. Thank you.", withdraw: "Your " + NET.symbol + " is on its way back.", place: "The deposit is on the referendum.",
+                 reclaim: "The deposit is back in the pool. Now pay everyone back.", abandon: "The pool is closed. Now pay everyone back.",
+                 payout: "Everyone who could be paid has been paid.", claim: "Your share is on its way back." }[name], "good"];
+    } catch (e) { done = [revertMessage(e), "bad"]; }
+    // Re-read the pool before saying how it went, so the page and the message agree.
+    // Still busy, so the background refresh cannot start a newer read that wins.
+    say("Reading the pool again…"); await load().catch(() => {});
+    busy = false; if (S) renderActions();
+    say(done[0], done[1]);
+  }
+
+  $("connect").onclick = connect;
+  $("ack").onchange = () => renderActions();
+  $("rest").onclick = () => { if (S) $("amt").value = ksm(S.dep - S.tot, 18).replace(/,/g, ""); };
+  $("contribute").onclick = () => {
+    const wei = parseKsm($("amt").value), left = S.dep - S.tot;
+    if (wei === null || wei === 0n) return say("Enter an amount in " + NET.symbol + ", up to " + DECIMALS + " decimal places.", "bad");
+    if (wei > left) return say("That is more than the pool still needs (" + ksm(left, 18) + " " + NET.symbol + ").", "bad");
+    if (wei < S.min && wei !== left) return say("The smallest payment is " + ksm(S.min) + " " + NET.symbol + ", unless it fills the pool exactly.", "bad");
+    act("contribute", "", wei);
+  };
+
+  document.querySelectorAll(".sym").forEach((e) => (e.textContent = NET.symbol));
+  document.querySelectorAll(".netname").forEach((e) => (e.textContent = NET.name));
+  if (NET.test) {
+    $("kicker").textContent = "Practice on Paseo";
+    $("trust").innerHTML = 'This is the practice pool on Paseo, Polkadot\'s test network. It runs the same contract as a Kusama pool, with PAS, test money that has no value. Get some free from <a href="https://faucet.polkadot.io/" target="_blank" rel="noopener">faucet.polkadot.io</a>: choose Paseo, then Asset Hub.';
+    $("planckNote").textContent = "1 PAS is 10,000,000,000";
+  }
+  if (!POOL) { $("nopool").hidden = false; $("tryPaseo").hidden = NET.test || !POOLS.some((p) => p.net === "paseo"); return; }
+  if (!listed) $("trust").textContent = "This pool is not one Birdbrain lists. Anyone can create a contract and send you a link to it here. Check the address with the group that sent it before you pay in.";
+  load().catch((e) => { $("poolview").hidden = true; $("nopool").hidden = false; $("nopool").querySelector("h2").textContent = "This pool could not be read."; $("nopool").querySelector("p").textContent = e.message; });
+  setInterval(() => { if (!busy) load().catch(() => {}); }, 20000);
+})();
+</script>
+</body>
+</html>
