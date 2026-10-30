@@ -100,7 +100,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   <div class="eyebrow muted" id="kicker">Kusama governance</div>
   <h1>Collaborative decision deposits</h1>
   <p class="lead">A referendum on Kusama cannot be voted on until someone places its decision deposit. This pool lets several groups put in what they can. The payment that fills it places the deposit, and when the referendum ends every group is paid back to the address it paid from.</p>
-  <p class="banner" id="trust">This contract has been tested on a copy of the live chain. Nobody outside Birdbrain has reviewed it yet. Do not put in KSM you cannot afford to have locked for the length of a referendum.</p>
+  <p class="banner" id="trust">This contract has been tested on a copy of the live chain and runs on Paseo. Nobody outside Birdbrain has reviewed it yet, and <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">the code is open for review</a>. Do not put in KSM you cannot afford to have locked for up to 14 days.</p>
 </div>
 
 <section id="pool">
@@ -212,7 +212,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   <div class="risks">
     <article><h3>A killed referendum loses the deposit</h3><p>Approved, rejected, cancelled and timed out all refund. Killed does not, and the pool cannot recover it. Kills are rare and are meant for proposals that abuse the system.</p></article>
     <article><h3>Nothing fires by itself</h3><p>A referendum ending writes a record on the chain, and a record cannot call a contract. Someone sends the transaction that brings the deposit back. Anyone can, including you, from this page.</p></article>
-    <article><h3>It has not been reviewed</h3><p>The contract is about 230 lines and holds other people's KSM. It passed 88 checks on a copy of Kusama Asset Hub, and on Paseo, Polkadot's test network, it placed a real decision deposit. An outside review is still to come.</p></article>
+    <article><h3>It has not been reviewed</h3><p>The contract is about 230 lines and holds other people's KSM. It passed 88 checks on a copy of Kusama Asset Hub, and on Paseo, Polkadot's test network, it placed a real decision deposit. An outside review is still to come, and <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">the code is public</a> for anyone to read.</p></article>
     <article><h3>One pool, one referendum</h3><p>A pool cannot be moved to another referendum. If the referendum it was made for times out before the pool fills, everyone is repaid after the deadline.</p></article>
   </div>
   <details>
@@ -235,18 +235,11 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   };
   // Pools Birdbrain lists. Anything else opened with ?pool= is shown with a warning.
   const POOLS = [
-    // WFC-01. Pending: no contract until the Paseo rehearsal and an outside review are done.
-    { net: "kusama", pending: true, referendum: 676, deposit: "666.67", timeout: "about 3 November 2026, if nobody places the deposit",
-      title: "An independent Kusama on a reduced JAM, keeping its validators", track: "Wish for Change",
-      proposal: "0xe6abe7f11ad89116d0b1a9704db80e5ad793d39f3d351e7a412389c9a1ab8e97",
-      mirror: "0x8f728b1edecd0786d26b9fd023039033e2f85187",
-      checks: [["done", "The contract passes 88 checks on a copy of Kusama Asset Hub"],
-               ["done", "On Paseo, a pool placed a real decision deposit"],
-               ["now", "The same referendum and pool run end to end on Paseo"],
-               ["", "Someone outside Birdbrain reviews the contract"],
-               ["", "The Kusama pool is created and listed here"]] },
+    // WFC-01. Live on Kusama 2026-10-30. Funding closes 3 Nov 12:00 UTC; #676 times out about 18:45 UTC that day.
+    { net: "kusama", address: "0x4d8b316355ee2d334ef3494be1fa3ef8c7114c87", referendum: 676, title: "An independent Kusama on a reduced JAM, keeping its validators", short: "WFC-01, Kusama #676",
+      note: 'Funding closes on 3 November at 12:00 UTC. #676 times out about six hours later if nobody has placed its deposit. Once the deposit is on, #676 decides for up to 14 days, and the KSM comes back when it ends, sooner if it passes. Before paying in, you can <a href="?net=paseo">watch the same proposal run on Paseo</a> with test money, and <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">read the code</a>.' },
     { net: "paseo", address: "0x8f728b1edecd0786d26b9fd023039033e2f85187", referendum: 147, title: "An independent Kusama on a reduced JAM, keeping its validators", short: "The Wish for Change rehearsal, #147",
-      note: 'This mirrors <a href="https://kusama.subsquare.io/referenda/676" target="_blank" rel="noopener">Kusama referendum #676</a>: the same proposal, byte for byte, on the same Wish for Change track with the same enactment. Paseo asks 20,000 PAS as the deposit where Kusama asks 666.67 KSM, and times out a referendum with no deposit after 3 days where Kusama waits 14.' },
+      note: 'This mirrors <a href="https://kusama.subsquare.io/referenda/676" target="_blank" rel="noopener">Kusama referendum #676</a>: the same proposal, byte for byte, on the same Wish for Change track with the same enactment. Paseo asks 20,000 PAS as the deposit where Kusama asks 666.67 KSM, and times out a referendum with no deposit after 3 days where Kusama waits 14. Once the deposit is on, Paseo decides for 28 days where Kusama decides for 14, so the payback here comes later than it would on Kusama. The first payback on a real network is the 1 PAS proof pool on Paseo #145, due around 6 November. The real pool for #676 is <a href="./">open on Kusama</a>.' },
     { net: "paseo", address: "0x023f8bf3acc31cee9990a7d9a198c53b2ac3f151", referendum: 146, title: "Practice pool, Paseo referendum #146", short: "The small practice pool, #146" },
   ];
   const SOURCE = "https://github.com/Birdbrain-wtf/decision-deposit";
