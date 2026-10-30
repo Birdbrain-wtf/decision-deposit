@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Collaborative decision deposits · Birdbrain</title>
-<meta name="description" content="Several groups carry one Kusama referendum's decision deposit together, and every group is paid back when the referendum ends.">
+<meta name="description" content="Share a Kusama referendum's decision deposit. Try it on Paseo, inspect the contract and understand the risks before contributing.">
 <meta property="og:title" content="Collaborative decision deposits · Birdbrain">
-<meta property="og:description" content="Several groups carry one referendum's decision deposit together, and every group is paid back when it ends.">
+<meta property="og:description" content="Share a referendum's decision deposit. Try it on Paseo and review the code before contributing.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://birdbrain.wtf/tools/cdd">
 <meta property="og:image" content="https://birdbrain.wtf/tools/cdd/social-v2.png">
@@ -28,21 +28,21 @@ header{display:flex;justify-content:space-between;align-items:center;padding:25p
 .muted{color:var(--muted)}
 main{max-width:1120px;margin:auto;padding:0 5vw}
 h1,h2,h3{font-style:normal;font-weight:400;line-height:1.08;letter-spacing:-.04em}
-h1{font-size:clamp(44px,6vw,84px);margin:20px 0 24px;max-width:820px}
-h2{font-size:clamp(30px,3.6vw,46px);margin:12px 0 22px}
+h1{font-size:clamp(36px,4.4vw,56px);margin:20px 0 24px;max-width:820px}
+h2{font-size:clamp(26px,2.8vw,36px);margin:12px 0 22px}
 h3{font-size:22px;margin:0 0 10px;letter-spacing:-.02em}
 p{max-width:660px}
-.hero{padding:75px 0 45px}
-.lead{font-size:20px;color:var(--muted);max-width:640px}
+.hero{padding:28px 0 20px}
+.lead{font-size:18px;color:var(--muted);max-width:640px}
 .banner{border:1px solid var(--line);border-left:2px solid rgba(245,158,11,.9);background:#fffdf8;padding:14px 18px;font-size:14px;max-width:760px}
-section{padding:60px 0;border-top:1px solid var(--line)}
+section{padding:32px 0;border-top:1px solid var(--line)}
 .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:start}
 .card{border:1px solid var(--line);background:#fff;padding:28px}
 .card.soft{background:var(--soft)}
 .amount{font-size:clamp(34px,4vw,52px);letter-spacing:-.04em;line-height:1.1}
 .amount small{font-size:.42em;letter-spacing:0;color:var(--muted)}
 .bar{height:8px;background:var(--ghost,#eef1f3);border-radius:8px;margin:18px 0 10px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,rgba(6,182,212,.55),rgba(139,92,246,.55));transition:width 1.2s var(--ease)}
+.bar i{display:block;height:100%;width:0;background:#657983;transition:width 1.2s var(--ease)}
 dl{margin:22px 0 0}
 dl div{display:grid;grid-template-columns:150px 1fr;border-top:1px solid var(--line);padding:10px 0;font-size:14px}
 dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
@@ -69,7 +69,7 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums}
 .note{font-size:14px;color:var(--muted)}
 #msg{min-height:24px;font-size:14px;margin-top:16px}
 #msg.bad{color:#9b2c2c}#msg.good{color:#1f6b52}
-.steps{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .steps div{padding:24px 18px 24px 0;font-size:14px}
 .steps div+div{border-left:1px solid var(--line);padding-left:18px}
 .steps b{display:block;font:11px ui-monospace,monospace;letter-spacing:.14em;color:var(--muted);margin-bottom:10px;font-weight:400}
@@ -99,8 +99,9 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 <div class="hero">
   <div class="eyebrow muted" id="kicker">Kusama governance</div>
   <h1>Collaborative decision deposits</h1>
-  <p class="lead">A referendum on Kusama cannot be voted on until someone places its decision deposit. This pool lets several groups put in what they can. The payment that fills it places the deposit, and when the referendum ends every group is paid back to the address it paid from.</p>
-  <p class="banner" id="trust">This contract has been tested on a copy of the live chain and runs on Paseo. Nobody outside Birdbrain has reviewed it yet, and <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">the code is open for review</a>. Do not put in KSM you cannot afford to have locked for up to 14 days.</p>
+  <p class="lead">Share the deposit that brings a referendum to a vote. Contribute together, then recover your share after it ends, unless governance kills it.</p>
+  <div class="row network-nav" aria-label="Choose network"><a class="btn ghost" href="?net=kusama">Kusama · real KSM</a><a class="btn ghost" href="?net=paseo">Paseo · free test PAS</a></div>
+  <p class="banner" id="trust">Experimental contract. No independent review yet. A killed referendum loses the deposit. <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">Review the code</a> or try Paseo first.</p>
 </div>
 
 <section id="pool">
@@ -157,7 +158,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 
     <div class="card soft" id="act">
       <h3>Take part</h3>
-      <p class="note" id="walletline">Connect an Ethereum-style wallet such as MetaMask.</p>
+      <p class="note" id="walletline">Connect an Ethereum account in Talisman or MetaMask.</p>
       <div class="row"><button class="btn" id="connect">Connect wallet</button></div>
 
       <div id="faucetBox" class="faucet" hidden>
@@ -166,7 +167,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       </div>
 
       <div id="contributeBox" hidden>
-        <label class="check"><input type="checkbox" id="ack"> <span>I understand that if governance <strong>kills</strong> this referendum the deposit is lost, and my share with it. Every other ending pays it back.</span></label>
+        <label class="check"><input type="checkbox" id="ack"> <span>I understand that if governance <strong>kills</strong> this referendum the deposit is lost, and my share with it. Other outcomes allow the deposit to be reclaimed. This contract has not had an independent review.</span></label>
         <div class="row">
           <div class="field"><input id="amt" inputmode="decimal" placeholder="0.0" aria-label="Amount"><span class="sym">KSM</span></div>
           <button class="btn" id="contribute" disabled>Pay in</button>
@@ -181,43 +182,29 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   </div>
 </section>
 
-<section>
-  <div class="eyebrow muted">The problem</div>
-  <h2>One account has to carry the whole deposit.</h2>
-  <p>Kusama's governance takes a decision deposit from a single account. On the Wish for Change track it is 666.67 KSM. The deposit comes back when the referendum ends, so it costs nothing in the end, but few groups can lock that much up for weeks. A referendum that nobody can carry on their own times out without a vote, however many people would have backed it.</p>
-  <p>Sharing the deposit has been asked for since 2023 and has not been built yet:</p>
-  <ul class="history">
-    <li><b>August 2023.</b> Moonbeam's team <a href="https://forum.polkadot.network/t/opengov-exploring-collaborative-decision-deposits-seeking-your-feedback/3723" target="_blank" rel="noopener">asked the forum about collaborative decision deposits</a>. One reply suggested that, on a chain with smart contracts, a contract holding its own account is the natural place for it. That is what this pool is.</li>
-    <li><b>February 2024.</b> <a href="https://forum.polkadot.network/t/creating-a-decision-deposit-referendum-track/5982" target="_blank" rel="noopener">A proposal for a referendum track that places decision deposits</a>, written up as <a href="https://github.com/polkadot-fellows/RFCs/pull/73" target="_blank" rel="noopener">Fellowship RFC 73</a>. It was closed without being adopted.</li>
-    <li><b>2025.</b> <a href="https://github.com/polkadot-fellows/RFCs/pull/151" target="_blank" rel="noopener">RFC 151, crowdsourced decision deposits</a>, would have built sharing into governance itself. It came up again in the <a href="https://forum.polkadot.network/t/opengov-adjustments-2025/14295" target="_blank" rel="noopener">OpenGov Adjustments 2025</a> thread. The RFC was closed, and the <a href="https://github.com/paritytech/polkadot-sdk/issues/6041" target="_blank" rel="noopener">issue to add it to the code</a> is still open.</li>
-  </ul>
-  <p>This pool needs no change to governance. It works on Kusama Asset Hub as it runs today.</p>
-</section>
-
-<section>
-  <div class="eyebrow muted">How it works</div>
-  <h2>Five steps, and none of them needs us.</h2>
+<section class="explain">
+  <h2>From contributions to a vote.</h2>
   <div class="steps">
-    <div><b>01</b>A pool is fixed to one referendum and its exact deposit when it is created. It has no owner and cannot be changed.</div>
-    <div><b>02</b>Groups pay KSM in. Each payment is recorded against the address it came from, and can be taken back while the pool is open.</div>
-    <div><b>03</b>The payment that fills the pool places the deposit on the referendum, from the pool's own account. If that attempt fails, anyone can place it later.</div>
-    <div><b>04</b>When the referendum ends, anyone presses one button to bring the deposit back. A watcher does it in the next block.</div>
-    <div><b>05</b>Every group is paid back to the address it paid from. If the pool never fills, the same happens after its deadline.</div>
+    <div><b>01 · FUND</b>Pay in together. You can withdraw while the pool is open, before the deposit is placed.</div>
+    <div><b>02 · PLACE</b>The final payment tries to place the whole deposit. If it fails, anyone can retry.</div>
+    <div><b>03 · RETURN</b>After the referendum ends, anyone can reclaim the deposit and send the payouts back to the contributing accounts.</div>
   </div>
-</section>
-
-<section>
-  <div class="eyebrow muted">Before you pay in</div>
-  <h2>What this does not do.</h2>
-  <div class="risks">
-    <article><h3>A killed referendum loses the deposit</h3><p>Approved, rejected, cancelled and timed out all refund. Killed does not, and the pool cannot recover it. Kills are rare and are meant for proposals that abuse the system.</p></article>
-    <article><h3>Nothing fires by itself</h3><p>A referendum ending writes a record on the chain, and a record cannot call a contract. Someone sends the transaction that brings the deposit back. Anyone can, including you, from this page.</p></article>
-    <article><h3>It has not been reviewed</h3><p>The contract is about 230 lines and holds other people's KSM. It passed 88 checks on a copy of Kusama Asset Hub, and on Paseo, Polkadot's test network, it placed a real decision deposit. An outside review is still to come, and <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">the code is public</a> for anyone to read.</p></article>
-    <article><h3>One pool, one referendum</h3><p>A pool cannot be moved to another referendum. If the referendum it was made for times out before the pool fills, everyone is repaid after the deadline.</p></article>
+  <div class="risks" style="margin-top:28px">
+    <article><h3>Understand the risk</h3><p>A killed referendum loses the deposit. Contract bugs can also put funds at risk. Fork tests pass and placement works on Paseo, but a public-network refund and independent review are still outstanding.</p></article>
+    <article><h3>Repayment needs a transaction</h3><p>Nothing runs automatically when a referendum ends. Anyone can use this page to reclaim and pay out. No watcher is running yet. Network fees are additional and are not refunded by the pool.</p></article>
   </div>
   <details>
+    <summary>Why share a decision deposit?</summary>
+    <p>Governance takes the deposit from one account. Kusama's Wish for Change track requires 666.67 KSM. Pooling lets several people or groups fund that account together, without handing custody to a sponsor. Each pool is fixed to one referendum, has no owner and cannot be upgraded.</p>
+    <p>If funding falls short, contributors can withdraw. After the deadline, anyone can close the pool and start payouts.</p>
+  </details>
+  <details>
+    <summary>Earlier discussions and proposals</summary>
+    <p>The idea has a history: <a href="https://forum.polkadot.network/t/opengov-exploring-collaborative-decision-deposits-seeking-your-feedback/3723">Moonbeam's 2023 discussion</a>, a <a href="https://forum.polkadot.network/t/creating-a-decision-deposit-referendum-track/5982">2024 decision deposit track proposal</a>, and <a href="https://github.com/polkadot-fellows/RFCs/pull/151">RFC 151 on crowdsourced deposits</a>. This experiment uses a contract on Asset Hub without changing governance.</p>
+  </details>
+  <details>
     <summary>Paying from a Polkadot account or a multisig</summary>
-    <p class="note">A group without an Ethereum-style wallet can pay in from any <span class="netname">Kusama Asset Hub</span> account, including a multisig, with a <code>revive.call</code> extrinsic in polkadot.js. Set <code>dest</code> to the pool contract above, <code>value</code> to the amount in planck (<span id="planckNote">1 KSM is 1,000,000,000,000</span>), and <code>data</code> to <code>0xd7bb99ba</code>. The payment is recorded against that account and repaid to it. To take it back while the pool is open, send the same call with <code>value</code> 0 and <code>data</code> <code>0x3ccfd60b</code>.</p>
+    <p class="note">Use <code>revive.call</code> on <span class="netname">Kusama Asset Hub</span>. Set <code>dest</code> to the pool contract, <code>value</code> to your contribution in planck (<span id="planckNote">1 KSM is 1,000,000,000,000</span>), and <code>data</code> to <code>0xd7bb99ba</code>. To withdraw while the pool is open, use <code>value</code> 0 and <code>data</code> <code>0x3ccfd60b</code>. Refunds return to the contributing account.</p>
   </details>
 </section>
 </main>
@@ -237,9 +224,9 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   const POOLS = [
     // WFC-01. Live on Kusama 2026-10-30. Funding closes 3 Nov 12:00 UTC; #676 times out about 18:45 UTC that day.
     { net: "kusama", address: "0x4d8b316355ee2d334ef3494be1fa3ef8c7114c87", referendum: 676, title: "An independent Kusama on a reduced JAM, keeping its validators", short: "WFC-01, Kusama #676",
-      note: 'Funding closes on 3 November at 12:00 UTC. #676 times out about six hours later if nobody has placed its deposit. Once the deposit is on, #676 decides for up to 14 days, and the KSM comes back when it ends, sooner if it passes. Before paying in, you can <a href="?net=paseo">watch the same proposal run on Paseo</a> with test money, and <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">read the code</a>.' },
+      note: 'Funding closes 3 November, 12:00 UTC, ahead of the referendum timeout that evening. The Wish for Change decision period is 14 days. <a href="?net=paseo">Try the same proposal with free test PAS</a>.' },
     { net: "paseo", address: "0x8f728b1edecd0786d26b9fd023039033e2f85187", referendum: 147, title: "An independent Kusama on a reduced JAM, keeping its validators", short: "The Wish for Change rehearsal, #147",
-      note: 'This mirrors <a href="https://kusama.subsquare.io/referenda/676" target="_blank" rel="noopener">Kusama referendum #676</a>: the same proposal, byte for byte, on the same Wish for Change track with the same enactment. Paseo asks 20,000 PAS as the deposit where Kusama asks 666.67 KSM, and times out a referendum with no deposit after 3 days where Kusama waits 14. Once the deposit is on, Paseo decides for 28 days where Kusama decides for 14, so the payback here comes later than it would on Kusama. The first payback on a real network is the 1 PAS proof pool on Paseo #145, due around 6 November. The real pool for #676 is <a href="./">open on Kusama</a>.' },
+      note: 'This mirrors <a href="https://kusama.subsquare.io/referenda/676" target="_blank" rel="noopener">Kusama referendum #676</a>: the same proposal, byte for byte, with the same origin and enactment. This pool needs 20,000 PAS, with a 500 PAS minimum. Paseo\'s decision period is 28 days, compared with Kusama\'s 14. Funding closes 2 November at 12:00 UTC. A public-network refund has not been proved yet. The 1 PAS proof pool on Paseo #145 is expected to end around 6 November. The real pool for #676 is <a href="?net=kusama">open on Kusama</a>.' },
     { net: "paseo", address: "0x023f8bf3acc31cee9990a7d9a198c53b2ac3f151", referendum: 146, title: "Practice pool, Paseo referendum #146", short: "The small practice pool, #146" },
   ];
   const SOURCE = "https://github.com/Birdbrain-wtf/decision-deposit";
@@ -376,7 +363,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     $("fill").style.width = (Number((s.st === "returning" ? s.tot : shown) * 10000n / s.dep) / 100) + "%";
     $("remaining").textContent = s.st === "open" && !full ? ksm(s.dep - s.tot) + " " + NET.symbol + " still needed." : s.st === "returning" ? ksm(s.tot) + " " + NET.symbol + " still to pay back." : "";
     $("next").textContent = {
-      open: full ? "The pool is full but the deposit is not on yet. Anyone can place it below." : closed ? "Funding closed before the pool filled. Anyone can close it and pay everyone back." : "The payment that fills the pool places the deposit on #" + s.ref + ".",
+      open: full ? "The pool is full but the deposit is not on yet. Anyone can place it below." : closed ? "Funding closed before the pool filled. Anyone can close it and pay everyone back." : "The payment that fills the pool tries to place the deposit on #" + s.ref + ".",
       placed: "The deposit is on #" + s.ref + ". When the referendum ends, anyone can bring it back and pay everyone.",
       returning: s.tot === 0n ? "Everyone has been paid back." : "The " + NET.symbol + " is back in the pool. Anyone can pay every group back now.",
     }[s.st];
@@ -405,7 +392,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   function renderActions() {
     const s = S, full = s.tot === s.dep, closed = s.now >= s.dl;
     $("connect").hidden = !!account;
-    $("walletline").textContent = account ? "Connected as " + short(account) + " on " + NET.name + (s.bal !== undefined ? ", holding " + ksm(s.bal) + " " + NET.symbol : "") + "." : "Connect an Ethereum-style wallet such as MetaMask. It will be switched to " + NET.name + ".";
+    $("walletline").textContent = account ? "Connected as " + short(account) + " on " + NET.name + (s.bal !== undefined ? ", holding " + ksm(s.bal) + " " + NET.symbol : "") + "." : "Connect an Ethereum account in Talisman or MetaMask. It will be switched to " + NET.name + ".";
     $("contributeBox").hidden = !(s.st === "open" && !full && !closed);
     const low = account && s.bal !== undefined && s.bal < s.min;
     $("faucetBox").hidden = !(NET_KEY === "paseo" && account && (low || faucetShown));
