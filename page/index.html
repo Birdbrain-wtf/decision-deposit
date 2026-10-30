@@ -55,6 +55,8 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums}
 .mono{font-family:ui-monospace,monospace;font-size:13px}
 .btn{display:inline-block;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:40px;padding:12px 24px;cursor:pointer;transition:background .45s var(--ease),color .45s var(--ease),box-shadow .45s var(--ease)}
 .btn:hover:not(:disabled){box-shadow:0 0 0 4px rgba(139,92,246,.12)}
+.faucet{border:1px solid var(--line);background:var(--soft);padding:18px;margin:18px 0}
+.faucet p{margin:0 0 12px;font-size:14px}
 .btn.ghost{background:#fff;color:var(--ink);border-color:var(--line)}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
@@ -157,6 +159,11 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       <h3>Take part</h3>
       <p class="note" id="walletline">Connect an Ethereum-style wallet such as MetaMask.</p>
       <div class="row"><button class="btn" id="connect">Connect wallet</button></div>
+
+      <div id="faucetBox" class="faucet" hidden>
+        <p id="faucetLine"></p>
+        <div class="row"><button class="btn ghost" id="faucetOpen">Get 5,000 test PAS</button></div>
+      </div>
 
       <div id="contributeBox" hidden>
         <label class="check"><input type="checkbox" id="ack"> <span>I understand that if governance <strong>kills</strong> this referendum the deposit is lost, and my share with it. Every other ending pays it back.</span></label>
@@ -319,7 +326,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   // ---------------------------------------------------------------- pool
   const listed = POOLS.find((p) => p.net === NET_KEY && (!q.get("pool") || (p.address || "").toLowerCase() === q.get("pool").toLowerCase()));
   const POOL = (q.get("pool") || (listed && listed.address) || "").toLowerCase();
-  let S = null, account = null, busy = false;
+  let S = null, account = null, busy = false, faucetShown = false;
 
   let loadSeq = 0;
   async function load() {
@@ -407,6 +414,12 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     $("connect").hidden = !!account;
     $("walletline").textContent = account ? "Connected as " + short(account) + " on " + NET.name + (s.bal !== undefined ? ", holding " + ksm(s.bal) + " " + NET.symbol : "") + "." : "Connect an Ethereum-style wallet such as MetaMask. It will be switched to " + NET.name + ".";
     $("contributeBox").hidden = !(s.st === "open" && !full && !closed);
+    const low = account && s.bal !== undefined && s.bal < s.min;
+    $("faucetBox").hidden = !(NET_KEY === "paseo" && account && (low || faucetShown));
+    $("faucetLine").textContent = low
+      ? "Your wallet holds less than the smallest payment. Paseo's faucet gives 5,000 test PAS to an address for free. It opens in a small window with your address filled in, and this page updates when the PAS arrives."
+      : "Waiting for the faucet. Your balance above updates when the PAS arrives.";
+    $("faucetOpen").hidden = faucetShown;
     $("contribute").disabled = busy || !account || !$("ack").checked;
     $("mine").hidden = !account || s.mine === 0n;
     $("mine").textContent = "You have " + ksm(s.mine) + " " + NET.symbol + " in this pool.";
@@ -470,6 +483,26 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   }
 
   $("connect").onclick = connect;
+  let faucetWin = null, faucetPoll = null;
+  $("faucetOpen").onclick = () => {
+    if (!account) return;
+    const url = "https://faucet.polkadot.io/?parachain=1000&address=" + encodeURIComponent(account);
+    faucetWin = window.open(url, "paseo-faucet", "popup,width=480,height=820");
+    if (!faucetWin) { window.open(url, "_blank", "noopener"); }
+    faucetShown = true; renderActions();
+    say("Tick the box in the faucet window and press “Get some PASs”. This page watches your balance.");
+    clearInterval(faucetPoll);
+    let n = 0;
+    faucetPoll = setInterval(async () => {
+      if (busy) return;
+      await load().catch(() => {});
+      if (S && S.bal >= S.min) {
+        clearInterval(faucetPoll); faucetShown = false;
+        try { faucetWin && faucetWin.close(); } catch {}
+        renderActions(); say("Your test PAS has arrived. You can pay in now.", "good");
+      } else if (++n > 100) { clearInterval(faucetPoll); }
+    }, 4000);
+  };
   $("ack").onchange = () => renderActions();
   $("rest").onclick = () => { if (S) $("amt").value = ksm(S.dep - S.tot, 18).replace(/,/g, ""); };
   $("contribute").onclick = () => {
