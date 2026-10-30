@@ -1,7 +1,7 @@
 pool 0x6621a62d9686a6fe0cba2ce4ad92cfba315154b3 for #676 on the fork
 
 # empty state
-PASS  with no pool listed, the page says no pool is open
+PASS  with no Kusama pool, #676 shows as pending and links to its Paseo rehearsal
 
 # Eve pays in and takes it back
 PASS  an unlisted pool carries the warning

@@ -311,7 +311,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   }
 
   // ---------------------------------------------------------------- pool
-  const listed = POOLS.find((p) => p.net === NET_KEY && (!q.get("pool") || p.address.toLowerCase() === q.get("pool").toLowerCase()));
+  const listed = POOLS.find((p) => p.net === NET_KEY && (!q.get("pool") || (p.address || "").toLowerCase() === q.get("pool").toLowerCase()));
   const POOL = (q.get("pool") || (listed && listed.address) || "").toLowerCase();
   let S = null, account = null, busy = false;
 
