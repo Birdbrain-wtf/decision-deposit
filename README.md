@@ -6,7 +6,7 @@ A Kusama referendum cannot be voted on until someone places its decision deposit
 
 There is no owner, no admin key and no upgrade path. Every parameter is set when the pool is deployed and can be read on the contract.
 
-Contribute page: https://birdbrain.wtf/deposit (Paseo rehearsal: https://birdbrain.wtf/deposit?net=paseo)
+Contribute page: https://birdbrain.wtf/tools/cdd (Paseo rehearsal: https://birdbrain.wtf/tools/cdd?net=paseo)
 
 **The first Kusama pool is live, for referendum #676, and the code needs reviewers.** Funding closes on 3 November 2026 at 12:00 UTC. #676 times out about six hours later if its deposit is not placed. Once the deposit is on, #676 decides for up to 14 days, and the KSM comes back when it ends.
 
