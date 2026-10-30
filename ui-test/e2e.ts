@@ -83,7 +83,7 @@ try {
   say("\n# empty state");
   await send("Page.navigate", { url: "http://localhost:8787/deposit" }, S);
   await until(`document.readyState === 'complete'`, "load");
-  check("with no pool listed, the page says no pool is open", await js(`!document.getElementById('nopool').hidden && document.getElementById('poolview').hidden`));
+  check("with no Kusama pool, #676 shows as pending and links to its Paseo rehearsal", await js(`!document.getElementById('pendingview').hidden && document.getElementById('poolview').hidden && document.getElementById('pMirror').href.includes('0x8f728b1edecd0786d26b9fd023039033e2f85187')`));
 
   say("\n# Eve pays in and takes it back");
   await as("eve");

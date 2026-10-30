@@ -6,7 +6,7 @@ A Kusama referendum cannot be voted on until someone places its decision deposit
 
 There is no owner, no admin key and no upgrade path. Every parameter is set when the pool is deployed and can be read on the contract.
 
-Contribute page: https://birdbrain.wtf/deposit (practice pool: https://birdbrain.wtf/deposit?net=paseo)
+Contribute page: https://birdbrain.wtf/deposit (Paseo rehearsal: https://birdbrain.wtf/deposit?net=paseo)
 
 ## Before you pay in
 
@@ -18,9 +18,12 @@ Contribute page: https://birdbrain.wtf/deposit (practice pool: https://birdbrain
 
 | Network | Pool | Referendum | Code |
 | --- | --- | --- | --- |
+| Paseo Asset Hub (test) | rehearsal of Kusama #676, 20,000 PAS, open until 2 November 2026 12:00 UTC | [#147](https://paseo.subsquare.io/referenda/147) | [`0x8f72…5187`](https://blockscout-testnet.polkadot.io/address/0x8f728b1edecd0786d26b9fd023039033e2f85187?tab=contract) |
 | Paseo Asset Hub (test) | practice, 200 PAS, open until 2 November 2026 02:00 UTC | [#146](https://paseo.subsquare.io/referenda/146) | [`0x023f…f151`](https://blockscout-testnet.polkadot.io/address/0x023f8bf3acc31cee9990a7d9a198c53b2ac3f151?tab=contract) |
 | Paseo Asset Hub (test) | proof run, 1 PAS, placed | [#145](https://paseo.subsquare.io/referenda/145) | [`0xc87b…ffb1`](https://blockscout-testnet.polkadot.io/address/0xc87bb5fff76a0ae3544150e9f75dd11e2a6dffb1?tab=contract) |
-| Kusama Asset Hub | none yet | | |
+| Kusama Asset Hub | pending: waits on the #147 rehearsal and an outside review | [#676](https://kusama.subsquare.io/referenda/676) | none yet |
+
+#147 mirrors Kusama #676: `paseo/mirror.ts` reads #676's proposal from Kusama Asset Hub, checks it hashes to #676's proposal hash, notes it on Paseo and submits it with the same origin (Wish for Change) and enactment. Proposal `0xe6abe7f11ad89116d0b1a9704db80e5ad793d39f3d351e7a412389c9a1ab8e97`, 2,731 bytes, on both chains. Paseo's Wish for Change deposit is 20,000 PAS (Kusama: 666.67 KSM), and Paseo times out a referendum with no deposit after 3 days (Kusama: 14).
 
 Each deployment's constructor arguments and transaction are in `deployments/paseo.json`. The source is verified on Blockscout with solc 0.8.30, optimiser on at 200 runs, EVM version cancun.
 
@@ -34,6 +37,7 @@ EVM amounts have 18 decimals. KSM has 12 on the chain and PAS has 10, so each po
 
 - `test.ts`: 88 checks on a chopsticks fork of Kusama Asset Hub, using Ethereum-signed transactions. It covers filling, auto-placing on the real #676, refusing an early reclaim, settling after cancel and after rejection, losing the deposit on a kill, abandoning a pool that never fills, someone else placing first, a contributor that refuses payment, and a plain Polkadot account paying through `Revive.call`. Log: `results/fork-test.txt`.
 - `ui-test/e2e.ts`: the contribute page in Chromium against the same fork. Log: `results/ui-e2e.txt`.
+- `paseo/mirror.ts`: copies a Kusama referendum to Paseo, byte for byte. Dry run by default, `--go` to submit.
 - `paseo/proof.ts`: the same contract on Paseo Asset Hub. Two wallets filled a 1 PAS pool, the filling payment placed the decision deposit on referendum #145 through XCM, and the chain shows the pool's own account as depositor. Log: `results/paseo-proof.txt`. The refund side runs when #145 ends.
 
 On the fork, balances were written straight into storage, Root's cancel and kill were put on the scheduler directly, and one rejection was written as the record the pallet writes.

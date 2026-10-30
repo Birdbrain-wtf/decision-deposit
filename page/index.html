@@ -81,6 +81,10 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 [hidden]{display:none!important}
 @media(max-width:820px){.grid,.risks{grid-template-columns:1fr;gap:28px}.steps{grid-template-columns:1fr}.steps div+div{border-left:0;padding-left:0;border-top:1px solid var(--line)}dl div{grid-template-columns:1fr}footer{display:block}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.state.pending{border-color:rgba(245,158,11,.7)}
+.checks{list-style:none;padding:0;margin:8px 0 0;font-size:14px}.checks li{border-top:1px solid var(--line);padding:9px 0 9px 26px;position:relative}
+.checks li:before{content:"";position:absolute;left:2px;top:15px;width:11px;height:11px;border:1px solid #9aa7b0;border-radius:50%}
+.checks li.done:before{background:rgba(16,185,129,.55);border-color:rgba(16,185,129,.8)}.checks li.now:before{background:rgba(245,158,11,.35);border-color:rgba(245,158,11,.8)}
 .history{padding-left:1.1em;margin:0 0 1em;max-width:42em}.history li{margin:.6em 0}
 </style>
 </head>
@@ -103,10 +107,34 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     <p class="muted">The first pool on Kusama is waiting on an outside review. When one opens, it appears here with its referendum, its total and every contribution.</p>
     <p id="tryPaseo" hidden><a href="?net=paseo">Try the practice pool on Paseo, Polkadot's test network</a>. It runs the same contract with test money.</p>
   </div>
+  <div class="grid" id="pendingview" hidden>
+    <div>
+      <div class="eyebrow muted" id="pRefline">Kusama referendum</div>
+      <h2 id="pTitle"></h2>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin:0"><span class="state pending">Pending</span><span class="note">No pool contract yet</span></div>
+        <div class="amount" style="margin-top:16px">0 <small>of <span id="pDeposit"></span> KSM</small></div>
+        <div class="bar" aria-hidden="true"><i></i></div>
+        <dl>
+          <div><dt>What happens next</dt><dd>The Kusama pool opens once the whole process has run on Paseo and someone outside Birdbrain has reviewed the contract. Until then nobody can pay in, and nothing here asks you to.</dd></div>
+          <div><dt>Times out</dt><dd id="pTimeout"></dd></div>
+          <div><dt>Proposal</dt><dd><span class="mono" id="pHash"></span></dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="card soft">
+      <h3>Watch it run on Paseo first</h3>
+      <p class="note">Paseo, Polkadot's test network, has the same referendum: the same proposal, byte for byte, on the same Wish for Change track. A pool for it runs the same contract with free test money, so every step can be seen before any KSM goes in.</p>
+      <div class="row"><a class="btn" id="pMirror">Open the Paseo rehearsal</a></div>
+      <h3 style="margin-top:30px">Before the Kusama pool opens</h3>
+      <ul class="checks" id="pChecks"></ul>
+    </div>
+  </div>
   <div class="grid" id="poolview" hidden>
     <div>
       <div class="eyebrow muted" id="refline">Referendum</div>
       <h2 id="reftitle">Loading the pool</h2>
+      <p class="note" id="mirrorNote" hidden></p>
       <div class="card">
         <div class="row" style="justify-content:space-between;margin:0"><span class="state" id="state">…</span><span class="note" id="updated"></span></div>
         <div class="amount" style="margin-top:16px"><span id="total">0</span> <small>of <span id="deposit">0</span> <span class="sym">KSM</span></small></div>
@@ -122,6 +150,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       <h3 style="margin-top:34px">Who has paid in</h3>
       <p class="note" id="nobody">Nobody yet.</p>
       <table id="contribs"><tbody></tbody></table>
+      <p class="note" id="others" hidden></p>
     </div>
 
     <div class="card soft" id="act">
@@ -199,7 +228,19 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   };
   // Pools Birdbrain lists. Anything else opened with ?pool= is shown with a warning.
   const POOLS = [
-    { net: "paseo", address: "0x023f8bf3acc31cee9990a7d9a198c53b2ac3f151", referendum: 146, title: "Practice pool, Paseo referendum #146" },
+    // WFC-01. Pending: no contract until the Paseo rehearsal and an outside review are done.
+    { net: "kusama", pending: true, referendum: 676, deposit: "666.67", timeout: "about 3 November 2026, if nobody places the deposit",
+      title: "An independent Kusama on a reduced JAM, keeping its validators", track: "Wish for Change",
+      proposal: "0xe6abe7f11ad89116d0b1a9704db80e5ad793d39f3d351e7a412389c9a1ab8e97",
+      mirror: "0x8f728b1edecd0786d26b9fd023039033e2f85187",
+      checks: [["done", "The contract passes 88 checks on a copy of Kusama Asset Hub"],
+               ["done", "On Paseo, a pool placed a real decision deposit"],
+               ["now", "The same referendum and pool run end to end on Paseo"],
+               ["", "Someone outside Birdbrain reviews the contract"],
+               ["", "The Kusama pool is created and listed here"]] },
+    { net: "paseo", address: "0x8f728b1edecd0786d26b9fd023039033e2f85187", referendum: 147, title: "An independent Kusama on a reduced JAM, keeping its validators", short: "The Wish for Change rehearsal, #147",
+      note: 'This mirrors <a href="https://kusama.subsquare.io/referenda/676" target="_blank" rel="noopener">Kusama referendum #676</a>: the same proposal, byte for byte, on the same Wish for Change track with the same enactment. Paseo asks 20,000 PAS as the deposit where Kusama asks 666.67 KSM, and times out a referendum with no deposit after 3 days where Kusama waits 14.' },
+    { net: "paseo", address: "0x023f8bf3acc31cee9990a7d9a198c53b2ac3f151", referendum: 146, title: "Practice pool, Paseo referendum #146", short: "The small practice pool, #146" },
   ];
   const SOURCE = "https://github.com/Birdbrain-wtf/decision-deposit";
   const q = new URLSearchParams(location.search);
@@ -311,6 +352,13 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     a.href = NET.subsquare + s.ref; a.target = "_blank"; a.rel = "noopener";
     a.textContent = (listed && listed.title) || "Referendum #" + s.ref;
     $("reftitle").append(a);
+    if (listed && listed.note) { $("mirrorNote").innerHTML = listed.note; $("mirrorNote").hidden = false; }
+    const others = POOLS.filter((p) => p.net === NET_KEY && p.address && p !== listed);
+    if (others.length) {
+      $("others").innerHTML = "Other pools on " + NET.name + ": ";
+      others.forEach((p, i) => { const l = document.createElement("a"); l.href = "?net=" + p.net + "&pool=" + p.address; l.textContent = p.short || p.title; if (i) $("others").append(" · "); $("others").append(l); });
+      $("others").hidden = false;
+    }
     $("state").textContent = { open: full ? "Full" : closed ? "Closed" : "Open", placed: "Deposit placed", returning: "Paying back" }[s.st];
     $("state").className = "state " + s.st;
     const shown = s.st === "open" ? s.tot : s.dep;
@@ -424,9 +472,22 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   document.querySelectorAll(".sym").forEach((e) => (e.textContent = NET.symbol));
   document.querySelectorAll(".netname").forEach((e) => (e.textContent = NET.name));
   if (NET.test) {
-    $("kicker").textContent = "Practice on Paseo";
-    $("trust").innerHTML = 'This is the practice pool on Paseo, Polkadot\'s test network. It runs the same contract as a Kusama pool, with PAS, test money that has no value. Get some free from <a href="https://faucet.polkadot.io/" target="_blank" rel="noopener">faucet.polkadot.io</a>: choose Paseo, then Asset Hub.';
+    $("kicker").textContent = "Rehearsal on Paseo";
+    $("trust").innerHTML = 'This pool is on Paseo, Polkadot\'s test network. It runs the same contract as a Kusama pool, with PAS, test money that has no value. Get some free from <a href="https://faucet.polkadot.io/" target="_blank" rel="noopener">faucet.polkadot.io</a>: choose Paseo, then Asset Hub.';
     $("planckNote").textContent = "1 PAS is 10,000,000,000";
+  }
+  if (listed && listed.pending) {
+    const t = document.createElement("a");
+    t.href = NET.subsquare + listed.referendum; t.target = "_blank"; t.rel = "noopener"; t.textContent = listed.title;
+    $("pRefline").textContent = "Kusama referendum #" + listed.referendum + " · " + listed.track;
+    $("pTitle").append(t);
+    $("pDeposit").textContent = listed.deposit;
+    $("pTimeout").textContent = listed.timeout;
+    $("pHash").textContent = listed.proposal;
+    $("pMirror").href = "?net=paseo&pool=" + listed.mirror;
+    for (const [k, text] of listed.checks) { const li = document.createElement("li"); li.className = k; li.textContent = text; $("pChecks").append(li); }
+    $("pendingview").hidden = false;
+    return;
   }
   if (!POOL) { $("nopool").hidden = false; $("tryPaseo").hidden = NET.test || !POOLS.some((p) => p.net === "paseo"); return; }
   if (!listed) $("trust").textContent = "This pool is not one Birdbrain lists. Anyone can create a contract and send you a link to it here. Check the address with the group that sent it before you pay in.";
