@@ -53,6 +53,7 @@ table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
 td{border-top:1px solid var(--line);padding:9px 0}
 td:last-child{text-align:right;font-variant-numeric:tabular-nums}
 .mono{font-family:ui-monospace,monospace;font-size:13px}
+.who b{font-weight:600;font-family:Inter,Arial,sans-serif;font-size:14px}.who .tick{color:#0a7d4f;font-family:Inter,Arial,sans-serif;font-size:12px;margin-left:6px}.who .unv{color:var(--muted);font-family:Inter,Arial,sans-serif;font-size:12px;margin-left:6px}.who .addr{display:block;color:var(--muted);font-size:12px}
 .btn{display:inline-block;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:40px;padding:12px 24px;cursor:pointer;transition:background .45s var(--ease),color .45s var(--ease),box-shadow .45s var(--ease)}
 .btn:hover:not(:disabled){box-shadow:0 0 0 4px rgba(139,92,246,.12)}
 .faucet{border:1px solid var(--line);background:var(--soft);padding:18px;margin:18px 0}
@@ -63,6 +64,11 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums}
 .field{display:flex;border:1px solid var(--line);border-radius:40px;overflow:hidden;background:#fff}
 .field input{border:0;padding:12px 18px;width:170px;background:transparent;outline:none}
 .field span{padding:12px 18px 12px 0;color:var(--muted)}
+.walletpick{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.walletpick button{display:flex;align-items:center;gap:12px;width:100%;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;color:var(--ink);cursor:pointer;text-align:left;transition:border-color .45s var(--ease),box-shadow .45s var(--ease)}
+.walletpick button:hover:not(:disabled){border-color:var(--ink);box-shadow:0 0 0 4px rgba(139,92,246,.12)}
+.walletpick button:disabled{opacity:.35;cursor:not-allowed}
+.walletpick img,.walletpick .noicon{width:28px;height:28px;border-radius:7px;flex:none;background:var(--soft)}
 .linkbtn{background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:4px;cursor:pointer;font-size:14px}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:18px 0 6px}
 .check input{margin-top:5px}
@@ -78,7 +84,27 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums}
 .risks p{font-size:15px;color:var(--muted)}
 details{border-top:1px solid var(--line);padding:16px 0}
 summary{cursor:pointer}
+#act .help{margin-top:24px}#act .help details:last-child{padding-bottom:0}
 code{font:13px ui-monospace,monospace;background:var(--soft);padding:1px 5px;border-radius:3px;word-break:break-all}
+.ask{border-top:1px solid var(--line);margin-top:28px;padding-top:22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chip{border:1px solid var(--line);background:#fff;border-radius:40px;padding:7px 14px;font:13px/1.4 Inter,Arial,sans-serif;color:var(--ink);cursor:pointer;text-align:left}
+.chip:hover{box-shadow:0 0 0 4px rgba(139,92,246,.12)}
+.askrow{display:flex;gap:10px;align-items:flex-end;margin-top:12px}
+.askrow textarea{flex:1;border:1px solid var(--line);border-radius:18px;padding:11px 16px;font:15px/1.5 Inter,Arial,sans-serif;resize:vertical;background:#fff;color:var(--ink)}
+.chip.done{background:var(--soft)}
+.chip:disabled{opacity:.5;cursor:default;box-shadow:none}
+.askitem{border-top:1px solid var(--line);padding:4px 0}
+.askitem:first-child{border-top:0}
+.askq{font-weight:600;padding:12px 0;list-style:none;display:flex;justify-content:space-between;gap:12px;scroll-margin-top:20px}
+.askq::-webkit-details-marker{display:none}
+.askq::after{content:"+";color:var(--muted);font-weight:400}
+.askitem[open] .askq::after{content:"\2212"}
+.askitem:not([open]) .askq{color:var(--muted);font-weight:500}
+.askclear{background:none;border:0;padding:0;font:13px Inter,Arial,sans-serif;color:var(--muted);text-decoration:underline;cursor:pointer;margin-top:6px}
+.aska{font-size:15px;border-left:2px solid var(--line);padding-left:14px;margin-bottom:12px}
+.aska p{margin:0 0 10px}.aska ol,.aska ul{margin:0 0 10px;padding-left:20px}
+.aska.waiting{color:var(--muted)}
 footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:25px;font-size:12px;color:var(--muted)}
 [hidden]{display:none!important}
 @media(max-width:820px){.grid,.risks{grid-template-columns:1fr;gap:28px}.steps{grid-template-columns:1fr}.steps div+div{border-left:0;padding-left:0;border-top:1px solid var(--line)}dl div{grid-template-columns:1fr}footer{display:block}}
@@ -101,13 +127,13 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   <h1>Collaborative decision deposits</h1>
   <p class="lead">Share the deposit that brings a referendum to a vote. Contribute together, then recover your share after it ends, unless governance kills it.</p>
   <div class="row network-nav" aria-label="Choose network"><a class="btn ghost" href="?net=kusama">Kusama · real KSM</a><a class="btn ghost" href="?net=paseo">Paseo · free test PAS</a></div>
-  <p class="banner" id="trust">Experimental contract. No independent review yet. A killed referendum loses the deposit. <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">Review the code</a> or try Paseo first.</p>
+  <p class="banner" id="trust">Experimental contract. It has had an independent review but no professional audit. A killed referendum loses the deposit. <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">Review the code</a> or try Paseo first.</p>
 </div>
 
 <section id="pool">
   <div id="nopool" hidden>
     <h2>No pool is open yet.</h2>
-    <p class="muted">The first pool on Kusama is waiting on an outside review. When one opens, it appears here with its referendum, its total and every contribution.</p>
+    <p class="muted">The contract has had an independent review, but no professional audit. When the first pool on Kusama opens, it appears here with its referendum, its total and every contribution.</p>
     <p id="tryPaseo" hidden><a href="?net=paseo">Try the practice pool on Paseo, Polkadot's test network</a>. It runs the same contract with test money.</p>
   </div>
   <div class="grid" id="pendingview" hidden>
@@ -119,7 +145,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
         <div class="amount" style="margin-top:16px">0 <small>of <span id="pDeposit"></span> KSM</small></div>
         <div class="bar" aria-hidden="true"><i></i></div>
         <dl>
-          <div><dt>What happens next</dt><dd>The Kusama pool opens once the whole process has run on Paseo and someone outside Birdbrain has reviewed the contract. Until then nobody can pay in, and nothing here asks you to.</dd></div>
+          <div><dt>What happens next</dt><dd>The Kusama pool opens once the whole process has run on Paseo. The contract has had an independent review but no professional audit. Until then nobody can pay in, and nothing here asks you to.</dd></div>
           <div><dt>Times out</dt><dd id="pTimeout"></dd></div>
           <div><dt>Proposal</dt><dd><span class="mono" id="pHash"></span></dd></div>
         </dl>
@@ -151,15 +177,30 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
         </dl>
       </div>
       <h3 style="margin-top:34px">Who has paid in</h3>
+      <p class="note">Names come from Kusama's People chain. <a href="#names" onclick="document.getElementById('names').open=true">Why some addresses show a name, and how to show yours</a>.</p>
       <p class="note" id="nobody">Nobody yet.</p>
       <table id="contribs"><tbody></tbody></table>
+      <h3 style="margin-top:34px">Every payment in and out</h3>
+      <p class="note" id="noHistory">Nothing yet.</p>
+      <table id="history"><tbody></tbody></table>
       <p class="note" id="others" hidden></p>
     </div>
 
     <div class="card soft" id="act">
       <h3>Take part</h3>
       <p class="note" id="walletline">Connect an Ethereum account in Talisman or MetaMask.</p>
-      <div class="row"><button class="btn" id="connect">Connect wallet</button></div>
+      <div class="row"><button class="btn" id="connect">Connect wallet</button><button class="linkbtn" id="changeWallet" hidden>Use a different wallet</button></div>
+      <div id="walletPick" hidden>
+        <p class="note" id="walletPickLine">You have more than one wallet here. Choose the one that holds your <span class="sym">KSM</span>. The refund goes back to the address you pay from.</p>
+        <div class="walletpick" id="walletList"></div>
+      </div>
+      <p class="note" style="color:var(--ink)"><strong>Pay in only with the Pay in button, <code>contribute()</code> or the <code>revive.call</code> below.</strong> KSM sent straight to the contract's account, as an ordinary transfer from Nova, polkadot.js or an exchange, <strong>is not recorded as a payment and will not be repaid.</strong></p>
+
+      <div id="topup" class="note" hidden>
+        <p id="topupLine"></p>
+        <p class="mono" id="topupAddr" style="word-break:break-all"></p>
+        <div class="row"><button class="linkbtn" id="topupCopy">Copy this address</button></div>
+      </div>
 
       <div id="faucetBox" class="faucet" hidden>
         <p id="faucetLine"></p>
@@ -167,7 +208,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       </div>
 
       <div id="contributeBox" hidden>
-        <label class="check"><input type="checkbox" id="ack"> <span>I understand that if governance <strong>kills</strong> this referendum the deposit is lost, and my share with it. Other outcomes allow the deposit to be reclaimed. This contract has not had an independent review.</span></label>
+        <label class="check"><input type="checkbox" id="ack"> <span>I understand that if governance <strong>kills</strong> this referendum the deposit is lost, and my share with it. Other outcomes allow the deposit to be reclaimed. This contract has had an independent review but no professional audit.</span></label>
         <div class="row">
           <div class="field"><input id="amt" inputmode="decimal" placeholder="0.0" aria-label="Amount"><span class="sym">KSM</span></div>
           <button class="btn" id="contribute" disabled>Pay in</button>
@@ -176,8 +217,47 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       </div>
 
       <div id="mine" class="note" hidden></div>
+      <p class="note" id="exitline"></p>
       <div class="row" id="moreActions"></div>
       <div id="msg" role="status" aria-live="polite"></div>
+
+      <div id="ask" class="ask">
+        <h3>Stuck? Ask Birdbrain</h3>
+        <p class="note">Wallets, networks, errors, refunds. Birdbrain answers from this page's published help, on its own machine, so a new question takes ten to twenty seconds. It will never ask for your recovery phrase or for KSM.</p>
+        <div class="chips">
+          <button class="chip" type="button">Talisman says NetworkError and the fee shows N/A</button>
+          <button class="chip" type="button">My KSM is in Nova. How do I get it here?</button>
+          <button class="chip" type="button">How do I set up a new Ethereum account in Talisman?</button>
+          <button class="chip" type="button">How do I get my KSM back?</button>
+        </div>
+        <div id="askThread"></div>
+        <button type="button" class="askclear" id="askClear" hidden>Clear these answers</button>
+        <form id="askForm" class="askrow">
+          <textarea id="askQ" rows="2" maxlength="1200" placeholder="Describe what you see, or paste the error" aria-label="Your question"></textarea>
+          <button class="btn" id="askSend" type="submit">Ask</button>
+        </form>
+        <p class="note" id="askStatus" role="status" aria-live="polite"></p>
+      </div>
+      <div class="help">
+      <details>
+        <summary>I have more than one wallet installed</summary>
+        <p class="note">Press Connect wallet and this page lists every wallet that announces itself to the browser, so you can choose. Use a different wallet takes you back to the list. If yours is missing, it has not announced itself: update it, or turn off the other wallets in your browser's extension settings and reload this page.</p>
+      </details>
+      <details>
+        <summary>Talisman shows "NetworkError" or the fee says N/A</summary>
+        <p class="note">Talisman is using a network address for <span class="netname">Kusama Asset Hub</span> that is not answering. Open Talisman, go to Settings, then Networks &amp; Tokens, then Networks. Switch the list to Ethereum and open <span class="netname">Kusama Asset Hub</span> (chain ID <span id="chainNote">420420418</span>). Add <code id="rpcNote">https://eth-rpc-kusama.polkadot.io</code> as an RPC and remove any entry that shows an error, because Talisman will not save while one is failing. Tick "Use exact gas estimates". Save, reload this page and try again.</p>
+      </details>
+      <details>
+        <summary>Paying from a Polkadot account or a multisig</summary>
+        <p class="note">Use <code>revive.call</code> on <span class="netname">Kusama Asset Hub</span>. Set <code>dest</code> to the pool contract, <code>value</code> to your contribution in planck (<span id="planckNote">1 KSM is 1,000,000,000,000</span>), and <code>data</code> to <code>0xd7bb99ba</code>. To withdraw while the pool is open, use <code>value</code> 0 and <code>data</code> <code>0x3ccfd60b</code>. Refunds return to the contributing account. Do not send a plain transfer to the contract's account instead: it is not recorded and will not be repaid. If the call fails with <code>AccountUnmapped</code>, your account is older than automatic registration: send <code>revive.batch_map_accounts</code> with your account first. It takes no deposit.</p>
+      </details>
+      <details id="names">
+        <summary>Why some addresses show a name, and how to show yours</summary>
+        <p class="note">Some addresses show a name. The page checks two chains. Kusama Asset Hub records which Polkadot account stands behind a 0x address, and Kusama's People chain holds that account's on-chain identity. "Verified" means a registrar has checked the identity. "Not verified" means the account set the name itself and nobody has checked it, so treat it as a claim.</p>
+        <p class="note">To show your name, set an identity on your Polkadot account and pay in from that account. Open polkadot.js apps on the Kusama People chain, go to Accounts, open your account's menu and choose "Set on-chain identity". You need a little KSM on the People chain for the deposit, which comes back if you clear the identity. To have it verified, ask a registrar for a judgement from the same menu. Each registrar shows its fee first. Then pay in with <code>revive.call</code>, as described under "Paying from a Polkadot account or a multisig".</p>
+        <p class="note">An Ethereum account from MetaMask or Talisman cannot have a name here. As far as we know, Kusama does not support identities for 0x addresses on their own: the People chain only accepts Polkadot-style signatures, so an Ethereum key cannot set one. The page still looks, in case that changes.</p>
+      </details>
+      </div>
     </div>
   </div>
 </section>
@@ -190,7 +270,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     <div><b>03 · RETURN</b>After the referendum ends, anyone can reclaim the deposit and send the payouts back to the contributing accounts.</div>
   </div>
   <div class="risks" style="margin-top:28px">
-    <article><h3>Understand the risk</h3><p>A killed referendum loses the deposit. Contract bugs can also put funds at risk. Fork tests pass and placement works on Paseo, but a public-network refund and independent review are still outstanding.</p></article>
+    <article><h3>Understand the risk</h3><p>A killed referendum loses the deposit. Contract bugs can also put funds at risk. Fork tests pass and placement works on Paseo, and the contract has had an independent review. A public-network refund and a professional audit are still outstanding.</p></article>
     <article><h3>Repayment needs a transaction</h3><p>Nothing runs automatically when a referendum ends. Anyone can use this page to reclaim and pay out. No watcher is running yet. Network fees are additional and are not refunded by the pool.</p></article>
   </div>
   <details>
@@ -202,23 +282,20 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     <summary>Earlier discussions and proposals</summary>
     <p>The idea has a history: <a href="https://forum.polkadot.network/t/opengov-exploring-collaborative-decision-deposits-seeking-your-feedback/3723">Moonbeam's 2023 discussion</a>, a <a href="https://forum.polkadot.network/t/creating-a-decision-deposit-referendum-track/5982">2024 decision deposit track proposal</a>, and <a href="https://github.com/polkadot-fellows/RFCs/pull/151">RFC 151 on crowdsourced deposits</a>. This experiment uses a contract on Asset Hub without changing governance.</p>
   </details>
-  <details>
-    <summary>Paying from a Polkadot account or a multisig</summary>
-    <p class="note">Use <code>revive.call</code> on <span class="netname">Kusama Asset Hub</span>. Set <code>dest</code> to the pool contract, <code>value</code> to your contribution in planck (<span id="planckNote">1 KSM is 1,000,000,000,000</span>), and <code>data</code> to <code>0xd7bb99ba</code>. To withdraw while the pool is open, use <code>value</code> 0 and <code>data</code> <code>0x3ccfd60b</code>. Refunds return to the contributing account.</p>
-  </details>
 </section>
 </main>
 <footer><span>Birdbrain is a Decent initiative that tests, learns and educates in public.</span><span id="source"><a href="https://github.com/Birdbrain-wtf/decision-deposit">Contract source, tests and test logs</a></span></footer>
 
+<script>/* storage-key hashers (twox64, blake2_128), built from lab/decision-deposit/ui/ident-hashes.ts */(()=>{function Bt(t){return t("return this")}var J=typeof globalThis<"u"?globalThis:typeof global<"u"?global:typeof self<"u"?self:typeof window<"u"?window:Bt(Function);function K(t,e){return typeof J[t]>"u"?e:J[t]}function Et(){return Number.NaN}var u=K("BigInt",Et);var Z=u(0),tt=u(1);var W=u(1e9),Xt=W*W,Ct=u(Number.MAX_SAFE_INTEGER);var m=u("11400714785074694791"),L=u("14029467366897019727"),et=u("1609587929392839161"),j=u("9650029242287828579"),nt=u("2870177450012600261"),k=u("0xffffffffffffffff"),Lt=u(7),Ut=u(11),kt=u(12),vt=u(16),Tt=u(18),Ht=u(23),It=u(27),Ot=u(29),S=u(31),St=u(32),jt=u(33),Nt=u(64),ot=u(256);function E(t,e){let n=t&k;return(n<<e|n>>Nt-e)&k}function z(t,e,n){let i=Array(n),r=0;for(let s=0;s<n;s++,r+=2)i[s]=u(t[e+r]|t[e+1+r]<<8);let c=Z;for(let s=n-1;s>=0;s--)c=(c<<vt)+i[s];return c}function $t(t,e){let n={seed:t,u8a:new Uint8Array(32),u8asize:0,v1:t+m+L,v2:t+L,v3:t,v4:t-m};if(e.length<32)return n.u8a.set(e),n.u8asize=e.length,n;let i=e.length-32,r=0;if(i>=0){let c=(s)=>m*E(s+L*z(e,r,4),S);do n.v1=c(n.v1),r+=8,n.v2=c(n.v2),r+=8,n.v3=c(n.v3),r+=8,n.v4=c(n.v4),r+=8;while(r<=i)}if(r<e.length)n.u8a.set(e.subarray(r,e.length)),n.u8asize=e.length-r;return n}function rt(t,e){let{seed:n,u8a:i,u8asize:r,v1:c,v2:s,v3:l,v4:a}=$t(u(e),t),h=0,f=k&u(t.length)+(t.length>=32?((((E(c,tt)+E(s,Lt)+E(l,kt)+E(a,Tt)^m*E(c*L,S))*m+j^m*E(s*L,S))*m+j^m*E(l*L,S))*m+j^m*E(a*L,S))*m+j:n+nt);while(h<=r-8)f=k&j+m*E(f^m*E(L*z(i,h,4),S),It),h+=8;if(h+4<=r)f=k&et+L*E(f^m*z(i,h,2),Ht),h+=4;while(h<r)f=k&m*E(f^nt*u(i[h++]),Ut);f=k&L*(f^f>>jt),f=k&et*(f^f>>Ot),f=k&(f^f>>St);let p=new Uint8Array(8);for(let d=7;d>=0;d--)p[d]=Number(f%ot),f=f/ot;return p}function it(t){return t instanceof Uint8Array||ArrayBuffer.isView(t)&&t.constructor.name==="Uint8Array"&&"BYTES_PER_ELEMENT"in t&&t.BYTES_PER_ELEMENT===1}var M=(t)=>t?`"${t}" `:"";function N(t,e=""){if(typeof t!=="number")throw TypeError(M(e)+"expected number, got "+typeof t);if(!Number.isSafeInteger(t)||t<0)throw RangeError(M(e)+"expected integer >= 0, got "+t);return t}function v(t,e,n=""){if(it(t)&&(e===void 0||t.length===e))return t;if(e!==void 0)N(e,"length");let i=it(t),r=e!==void 0?` of length ${e}`:"",c=i?`length=${t.length}`:`type=${typeof t}`,s=M(n)+"expected Uint8Array"+r+", got "+c;if(!i)throw TypeError(s);throw RangeError(s)}function V(t){return Uint8Array.from(v(t))}var Rt=(t,e)=>{if(t===null||typeof t!=="object"||Array.isArray(t))throw TypeError((e==="object"?"":`"${e}" `)+"expected object, got type="+typeof t)},st=(t,e)=>{Rt(t,e);let n=Object.getPrototypeOf(t);if(n!==Object.prototype&&n!==null)throw TypeError(`"${e}" expected plain object`);if(Object.hasOwn(t,"__proto__"))throw TypeError(`"${e}.__proto__" is not allowed`)};function F(t,e=!0){if(t.destroyed)throw Error("hash was destroyed");if(e&&t.finished)throw Error("digest() was already called")}function ct(t,e){v(t,void 0,"output");let n=e.outputLen;if(!(t.length>=n))throw RangeError('"output" expected length >= '+n)}function R(t){return new Uint32Array(t.buffer,t.byteOffset,Math.floor(t.byteLength/4))}function G(...t){for(let e=0;e<t.length;e++)t[e].fill(0)}var ft=(()=>new Uint8Array(new Uint32Array([287454020]).buffer)[0]===68)();function ht(t){return t<<24&4278190080|t<<8&16711680|t>>>8&65280|t>>>24&255}var U=ft?(t)=>t:(t)=>ht(t)>>>0;function Gt(t){for(let e=0;e<t.length;e++)t[e]=ht(t[e]);return t}var O=ft?(t)=>t:Gt;function P(t,e,n="opts"){if(st(t,"defaults"),e!==void 0)st(e,n);return Object.assign(Object.create(null),t,e)}function lt(t,e={}){if(typeof t!=="function")throw TypeError('"hashCons" expected function, got type='+typeof t);e=P({},e,"info");let n=(r,c)=>t(c).update(r).digest(),i=t(void 0);return n.outputLen=i.outputLen,n.blockLen=i.blockLen,n.canXOF=i.canXOF,n.create=(r)=>t(r),Object.assign(n,e),Object.freeze(n)}var ut=Uint8Array.from([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,14,10,4,8,9,15,13,6,1,12,0,2,11,7,5,3,11,8,12,0,5,2,15,13,10,14,3,6,7,1,9,4,7,9,3,1,13,12,11,14,2,6,5,10,4,0,15,8,9,0,5,7,2,4,10,15,14,1,11,12,6,8,3,13,2,12,6,10,0,11,8,3,4,13,7,5,15,14,1,9,12,5,1,15,14,13,4,10,0,7,6,3,9,2,8,11,13,11,7,14,12,1,3,9,5,0,15,4,8,6,2,10,6,15,14,9,11,3,0,8,12,2,13,7,1,4,10,5,10,2,8,4,7,6,1,5,15,11,9,14,3,12,13,0,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,14,10,4,8,9,15,13,6,1,12,0,2,11,7,5,3,11,8,12,0,5,2,15,13,10,14,3,6,7,1,9,4,7,9,3,1,13,12,11,14,2,6,5,10,4,0,15,8,9,0,5,7,2,4,10,15,14,1,11,12,6,8,3,13,2,12,6,10,0,11,8,3,4,13,7,5,15,14,1,9]);var at=(t)=>t/4294967296|0,pt=(t)=>t>>>0;var D=(t,e,n)=>t>>>n|e<<32-n,X=(t,e,n)=>t<<32-n|e>>>n,dt=(t,e,n)=>t<<64-n|e>>>n-32,xt=(t,e,n)=>t>>>n-32|e<<64-n,yt=(t,e)=>e,bt=(t,e)=>t;function C(t,e,n,i){let r=(e>>>0)+(i>>>0);return{h:t+n+(r/4294967296|0)|0,l:r|0}}var Y=(t,e,n)=>(t>>>0)+(e>>>0)+(n>>>0),q=(t,e,n,i)=>e+n+i+(t/4294967296|0)|0;var x=Uint32Array.from([4089235720,1779033703,2227873595,3144134277,4271175723,1013904242,1595750129,2773480762,2917565137,1359893119,725511199,2600822924,4215389547,528734635,327033209,1541459225]),o=new Uint32Array(32);function T(t,e,n,i,r,c){let s=r[c],l=r[c+1],a=o[2*t],h=o[2*t+1],f=o[2*e],p=o[2*e+1],d=o[2*n],w=o[2*n+1],g=o[2*i],_=o[2*i+1],I=Y(a,f,s);h=q(I,h,p,l),a=I|0;let A=_^h,B=g^a;_=yt(A,B),g=bt(A,B),{h:w,l:d}=C(w,d,_,g),A=p^w,B=f^d,p=D(A,B,24),f=X(A,B,24),o[2*t]=a,o[2*t+1]=h,o[2*e]=f,o[2*e+1]=p,o[2*n]=d,o[2*n+1]=w,o[2*i]=g,o[2*i+1]=_}function H(t,e,n,i,r,c){let s=r[c],l=r[c+1],a=o[2*t],h=o[2*t+1],f=o[2*e],p=o[2*e+1],d=o[2*n],w=o[2*n+1],g=o[2*i],_=o[2*i+1],I=Y(a,f,s);h=q(I,h,p,l),a=I|0;let A=_^h,B=g^a;_=D(A,B,16),g=X(A,B,16),{h:w,l:d}=C(w,d,_,g),A=p^w,B=f^d,p=dt(A,B,63),f=xt(A,B,63),o[2*t]=a,o[2*t+1]=h,o[2*e]=f,o[2*e+1]=p,o[2*n]=d,o[2*n+1]=w,o[2*i]=g,o[2*i+1]=_}function Mt(t,e={},n,i,r){if(N(n),t<=0||t>n)throw Error('"dkLen" must be 1..'+n+", got "+t);let{key:c,salt:s,personalization:l}=e;if(c!==void 0&&(c.length<1||c.length>n))throw Error('"key" expected to be undefined or of length=1..'+n);if(s!==void 0)v(s,i,"salt");if(l!==void 0)v(l,r,"personalization")}class wt{buffer;buffer32;finished=!1;destroyed=!1;length=0;pos=0;blockLen;outputLen;canXOF=!1;constructor(t,e){N(t),N(e),this.blockLen=t,this.outputLen=e,this.buffer=new Uint8Array(t),this.buffer32=R(this.buffer)}update(t){F(this),v(t);let{blockLen:e,buffer:n,buffer32:i}=this,{length:r,byteOffset:c,buffer:s}=t;for(let l=0;l<r;){if(this.pos===e)O(i),this.compress(i,0,!1),O(i),this.pos=0;let a=Math.min(e-this.pos,r-l),h=c+l;if(a===e&&!(h%4)&&l+a<r){let f=new Uint32Array(s,h,Math.floor((r-l)/4));O(f);for(let p=0;l+e<r;p+=i.length,l+=e)this.length+=e,this.compress(f,p,!1);O(f);continue}n.set(l===0&&a===r?t:t.subarray(l,l+a),this.pos),this.pos+=a,this.length+=a,l+=a}return this}digestInto(t){if(F(this),ct(t,this),t.byteOffset&3)throw RangeError('"output" expected 4-byte aligned byteOffset, got '+t.byteOffset);let{pos:e,buffer32:n}=this;this.finished=!0,this.buffer.fill(0,e),O(n),this.compress(n,0,!0),O(n);let i=this.get(),r=t===this.buffer?n:R(t),c=Math.floor(this.outputLen/4);for(let h=0;h<c;h++)r[h]=U(i[h]);let s=this.outputLen%4;if(!s)return;let l=c*4,a=i[c];for(let h=0;h<s;h++)t[l+h]=a>>>8*h}digest(){let{buffer:t,outputLen:e}=this;this.digestInto(t);let n=t.slice(0,e);return this.destroy(),n}_cloneInto(t){let{buffer:e,length:n,finished:i,destroyed:r,outputLen:c,pos:s}=this;return t||=new this.constructor({dkLen:c}),t.set(...this.get()),t.buffer.set(e),t.destroyed=r,t.finished=i,t.length=n,t.pos=s,t.outputLen=c,t}clone(){return this._cloneInto()}}class gt extends wt{v0l=x[0]|0;v0h=x[1]|0;v1l=x[2]|0;v1h=x[3]|0;v2l=x[4]|0;v2h=x[5]|0;v3l=x[6]|0;v3h=x[7]|0;v4l=x[8]|0;v4h=x[9]|0;v5l=x[10]|0;v5h=x[11]|0;v6l=x[12]|0;v6h=x[13]|0;v7l=x[14]|0;v7h=x[15]|0;constructor(t={}){t=P({},t);let e=t.dkLen===void 0?64:t.dkLen;super(128,e);Mt(e,t,64,16,16);let{key:n,personalization:i,salt:r}=t,c=0;if(n!==void 0)v(n,void 0,"key"),c=n.length;if(this.v0l^=this.outputLen|c<<8|65536|16777216,r!==void 0){v(r,void 0,"salt");let s=R(V(r));this.v4l^=U(s[0]),this.v4h^=U(s[1]),this.v5l^=U(s[2]),this.v5h^=U(s[3])}if(i!==void 0){v(i,void 0,"personalization");let s=R(V(i));this.v6l^=U(s[0]),this.v6h^=U(s[1]),this.v7l^=U(s[2]),this.v7h^=U(s[3])}if(n!==void 0){let s=new Uint8Array(this.blockLen);s.set(n),this.update(s),G(s)}}get(){let{v0l:t,v0h:e,v1l:n,v1h:i,v2l:r,v2h:c,v3l:s,v3h:l,v4l:a,v4h:h,v5l:f,v5h:p,v6l:d,v6h:w,v7l:g,v7h:_}=this;return[t,e,n,i,r,c,s,l,a,h,f,p,d,w,g,_]}set(t,e,n,i,r,c,s,l,a,h,f,p,d,w,g,_){this.v0l=t|0,this.v0h=e|0,this.v1l=n|0,this.v1h=i|0,this.v2l=r|0,this.v2h=c|0,this.v3l=s|0,this.v3h=l|0,this.v4l=a|0,this.v4h=h|0,this.v5l=f|0,this.v5h=p|0,this.v6l=d|0,this.v6h=w|0,this.v7l=g|0,this.v7h=_|0}compress(t,e,n){let{v0l:i,v0h:r,v1l:c,v1h:s,v2l:l,v2h:a,v3l:h,v3h:f,v4l:p,v4h:d,v5l:w,v5h:g,v6l:_,v6h:I,v7l:A,v7h:B}=this;o[0]=i,o[1]=r,o[2]=c,o[3]=s,o[4]=l,o[5]=a,o[6]=h,o[7]=f,o[8]=p,o[9]=d,o[10]=w,o[11]=g,o[12]=_,o[13]=I,o[14]=A,o[15]=B,o.set(x,16);let mt=pt(this.length),At=at(this.length);if(o[24]=x[8]^mt,o[25]=x[9]^At,n)o[28]=~o[28],o[29]=~o[29];let y=0,b=ut;for(let Q=0;Q<12;Q++)T(0,4,8,12,t,e+2*b[y++]),H(0,4,8,12,t,e+2*b[y++]),T(1,5,9,13,t,e+2*b[y++]),H(1,5,9,13,t,e+2*b[y++]),T(2,6,10,14,t,e+2*b[y++]),H(2,6,10,14,t,e+2*b[y++]),T(3,7,11,15,t,e+2*b[y++]),H(3,7,11,15,t,e+2*b[y++]),T(0,5,10,15,t,e+2*b[y++]),H(0,5,10,15,t,e+2*b[y++]),T(1,6,11,12,t,e+2*b[y++]),H(1,6,11,12,t,e+2*b[y++]),T(2,7,8,13,t,e+2*b[y++]),H(2,7,8,13,t,e+2*b[y++]),T(3,4,9,14,t,e+2*b[y++]),H(3,4,9,14,t,e+2*b[y++]);this.v0l^=o[0]^o[16],this.v0h^=o[1]^o[17],this.v1l^=o[2]^o[18],this.v1h^=o[3]^o[19],this.v2l^=o[4]^o[20],this.v2h^=o[5]^o[21],this.v3l^=o[6]^o[22],this.v3h^=o[7]^o[23],this.v4l^=o[8]^o[24],this.v4h^=o[9]^o[25],this.v5l^=o[10]^o[26],this.v5h^=o[11]^o[27],this.v6l^=o[12]^o[28],this.v6h^=o[13]^o[29],this.v7l^=o[14]^o[30],this.v7h^=o[15]^o[31],G(o)}destroy(){this.destroyed=!0,G(this.buffer32),this.set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)}}var _t=lt((t)=>new gt(t));globalThis.BBHash={twox64:(t)=>rt(t,0n).reverse(),blake2_128:(t)=>_t(t,{dkLen:16})};})();</script>
 <script>
 (() => {
   // Where a pool can live. EVM amounts are always 18 decimals (1 KSM or 1 PAS is 10^18 wei);
   // the chain's own planck is coarser, and each pool says by how much (weiPerPlanck).
   const NETS = {
-    kusama: { chainId: 420420418, name: "Kusama Asset Hub", symbol: "KSM", rpc: "https://eth-rpc-kusama.polkadot.io",
-              explorer: "https://blockscout-kusama.polkadot.io", subsquare: "https://kusama.subsquare.io/referenda/", test: false },
+    kusama: { chainId: 420420418, name: "Kusama Asset Hub", symbol: "KSM", rpc: "https://eth-rpc-kusama.polkadot.io", sub: "https://kusama-asset-hub-rpc.polkadot.io", people: "https://kusama-people-rpc.polkadot.io",
+              explorer: "https://blockscout-kusama.polkadot.io", subscan: "https://assethub-kusama.subscan.io", subsquare: "https://kusama.subsquare.io/referenda/", ss58: 2, test: false },
     paseo:  { chainId: 420420417, name: "Paseo Asset Hub", symbol: "PAS", rpc: "https://eth-rpc-testnet.polkadot.io",
-              explorer: "https://blockscout-testnet.polkadot.io", subsquare: "https://paseo.subsquare.io/referenda/", test: true },
+              explorer: "https://blockscout-testnet.polkadot.io", subsquare: "https://paseo.subsquare.io/referenda/", ss58: 0, test: true },
   };
   // Pools Birdbrain lists. Anything else opened with ?pool= is shown with a warning.
   const POOLS = [
@@ -259,6 +336,162 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     "0xab143c06": "Another action was in progress. Try again.",
   };
   const STATES = ["open", "placed", "returning"];
+  // Ask Birdbrain: the collective's own model, over the same endpoint as birdbrain.wtf,
+  // grounded in the published help guide for this page (room-agent corpus
+  // `decision-deposit-help`). Rate limits live in the endpoint.
+  function askMd(t) {
+    // A local model sometimes runs a numbered list onto one line ("... one. 2. When ..."): break it back into steps.
+    const esc = t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/([.!?:])[ \t]+(\d{1,2}[.)])[ \t]+(?=[A-Z])/g, "$1\n$2 ");
+    const inline = (x) => x.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/(^|[\s(])(https:\/\/[^\s)<]*[^\s)<.,;:!?])/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+    let out = "", list = null;
+    for (const line of esc.split("\n")) {
+      const m = line.match(/^\s*(\d+[.)]|[-*])\s+(.*)$/);
+      if (m) {
+        const kind = /\d/.test(m[1]) ? "ol" : "ul";
+        if (list !== kind) { if (list) out += "</" + list + ">"; out += "<" + kind + ">"; list = kind; }
+        out += "<li>" + inline(m[2]) + "</li>";
+      } else {
+        if (list) { out += "</" + list + ">"; list = null; }
+        if (line.trim()) out += "<p>" + inline(line) + "</p>";
+      }
+    }
+    return out + (list ? "</" + list + ">" : "");
+  }
+  const askHistory = [];
+  let asking = false;
+  function setBusy(b) {
+    $("askSend").disabled = b;
+    document.querySelectorAll("#ask .chip").forEach((c) => {
+      c.disabled = b;
+      c.classList.toggle("done", [...$("askThread").querySelectorAll(".askitem")].some((d) => d.dataset.q === c.textContent.trim() && !d.dataset.failed));
+    });
+  }
+  async function ask(question, starter) {
+    question = question.trim();
+    if (!question || asking) return;
+    // One answer open at a time: a question already answered is reopened, not asked again,
+    // and earlier answers fold to their question so the thread stays short.
+    const items = [...$("askThread").querySelectorAll(".askitem")];
+    const seen = items.find((d) => d.dataset.q === question && !d.dataset.failed);
+    for (const d of items) d.open = d === seen;
+    if (seen) { seen.querySelector(".askq").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+    asking = true; setBusy(true); $("askQ").value = "";
+    const item = document.createElement("details"); item.className = "askitem"; item.open = true; item.dataset.q = question;
+    const qd = document.createElement("summary"); qd.className = "askq"; qd.textContent = question;
+    const ad = document.createElement("div"); ad.className = "aska waiting"; ad.textContent = "Birdbrain is reading the help.";
+    item.append(qd, ad); $("askThread").append(item);
+    $("askClear").hidden = $("askThread").children.length < 2;
+    qd.scrollIntoView({ behavior: "smooth", block: "start" });
+    $("askStatus").textContent = "";
+    const started = Date.now();
+    const tick = setInterval(() => {
+      const s = Math.round((Date.now() - started) / 1000);
+      if (!ad.classList.contains("waiting")) return;
+      ad.textContent = s < 30 ? "Birdbrain is thinking. " + s + "s" : "Still thinking. If Birdbrain is answering someone else, it can take a minute.";
+    }, 1000);
+    // topic "decision-deposit" scopes Birdbrain to this page's help guide with a short prompt,
+    // and lets a repeated question (the starter buttons) come back from its answer cache.
+    let acc = "", done = false;
+    try {
+      const res = await fetch("/api/birdbrain/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+        body: JSON.stringify({ agent: "birdbrain", topic: "decision-deposit", question, history: starter ? [] : askHistory.slice(-4), stream: true }),
+      });
+      if (!res.ok || !res.body) {
+        let e = "http " + res.status;
+        try { e = (await res.json()).error || e; } catch {}
+        throw new Error(e);
+      }
+      const reader = res.body.getReader(), dec = new TextDecoder();
+      let buf = "";
+      while (!done) {
+        const r = await reader.read();
+        if (r.done) break;
+        buf += dec.decode(r.value, { stream: true });
+        const blocks = buf.split("\n\n"); buf = blocks.pop() || "";
+        for (const b of blocks) {
+          const ev = (b.match(/^event: (.*)$/m) || [])[1], dl = (b.match(/^data: (.*)$/m) || [])[1];
+          if (!ev || !dl) continue;
+          let d; try { d = JSON.parse(dl); } catch { continue; }
+          if (ev === "token") { acc += d.t; ad.className = "aska"; ad.innerHTML = askMd(acc); }
+          else if (ev === "done") { done = true; ad.className = "aska"; ad.innerHTML = askMd(d.answer); askHistory.push({ q: question, a: d.answer }); }
+          else if (ev === "error") { throw new Error(d.error || d.message || "Birdbrain could not answer."); }
+        }
+      }
+      if (!done) throw new Error("The connection ended before the answer finished. Please try again.");
+    } catch (e) {
+      ad.className = "aska waiting"; item.dataset.failed = "1";
+      ad.textContent = "Birdbrain could not answer just now (" + (e.message || e) + "). The help sections under the Ask box cover the common problems, or ask in #birdbrain:matrix.org.";
+    } finally {
+      clearInterval(tick); asking = false; setBusy(false);
+    }
+  }
+  const askQ = document.getElementById("askQ");
+  document.getElementById("askForm").addEventListener("submit", (e) => { e.preventDefault(); ask(askQ.value); });
+  askQ.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(askQ.value); } });
+  document.querySelectorAll("#ask .chip").forEach((c) => c.addEventListener("click", () => ask(c.textContent, true)));
+  document.getElementById("askClear").addEventListener("click", () => {
+    if (asking) return;
+    document.getElementById("askThread").replaceChildren(); askHistory.length = 0;
+    document.getElementById("askClear").hidden = true; setBusy(false);
+  });
+
+  // The pool's events, so the page can list every payment in and out, each linked to its transaction.
+  const EVENTS = {
+    "0xfa35a310d7113dddce1c275da946348e9aaebf9050b00b372033c4d84b0bd6eb": "Paid in",
+    "0x92ccf450a286a957af52509bc1c9939d1a6a481783e142e41e2499f0bb66ebc6": "Withdrew",
+    "0x7af4299edbf4c36007400ec60f7a6f2d117904b46deccf588d49ce5821c28596": "Deposit placed",
+    "0x1691ac32497e389eb13497d6e4bece80925e9c3db104abd3a010539fda95b439": "Deposit not placed",
+    "0xa7b5eb4eb10e54ed1cc5e519a5f79f4d09d41b333db36b9b4b5ef589e3b6f74c": "Deposit brought back",
+    "0xac41e18e033a36bfbff85f2d2376d0c85464e37f333dff21a50a12a700d209f3": "Pool closed",
+    "0x0516911bcc3a0a7412a44601057c0a0a1ec628bde049a84284bc428866534488": "Paid back",
+    "0xc26814c0dd49076fd6e655f41e644bd71eff47692a046c550c8d77b49fbce933": "Payback refused",
+  };
+  const blockTimes = {};
+  function histRow(topics, data, tx, t, link) {
+    const what = EVENTS[topics[0]];
+    if (!what) return null;
+    // Events with an indexed address carry it in topic 1 and the amount first in data;
+    // Placed and Reclaimed carry the referendum in topic 1 and the amount first in data.
+    const who = /Paid|Withdrew|refused/.test(what) ? addr(topics[1]) : null;
+    const amt = data && data.length >= 66 && !/not placed|closed/.test(what) ? word(data, 0) : null;
+    return { what, who, amt, tx, t, link };
+  }
+  // Asset Hub's Ethereum RPC only indexes Ethereum transactions, so a payment made with
+  // revive.call from a Polkadot account is missing from eth_getLogs. Birdbrain's box reads
+  // every block's events for the pool (lab/decision-deposit/indexer) and publishes them;
+  // the Polkadot-side ones are merged in here and link to Subscan.
+  async function substrateEvents() {
+    const base = (local && q.get("events")) || "/tools/cdd/events/";
+    const r = await fetch(base + POOL + ".json", { cache: "no-store" }).catch(() => null);
+    if (!r || !r.ok) return [];
+    const f = await r.json().catch(() => null);
+    if (!f || !Array.isArray(f.events)) return [];
+    return f.events.filter((e) => e.origin === "substrate").map((e) => ({ ...e, row:
+      histRow(e.topics, e.data, e.ext, e.time, NET.subscan ? NET.subscan + "/extrinsic/" + e.ext : null) })).filter((e) => e.row);
+  }
+  async function history() {
+    const [logs, sub] = await Promise.all([
+      rpc("eth_getLogs", [{ address: POOL, fromBlock: "0x0", toBlock: "latest" }]),
+      substrateEvents(),
+    ]);
+    const rows = [];
+    for (const l of logs) {
+      if (!(l.topics[0] in EVENTS)) continue;
+      if (!(l.blockNumber in blockTimes)) {
+        const b = await rpc("eth_getBlockByNumber", [l.blockNumber, false]).catch(() => null);
+        blockTimes[l.blockNumber] = b && b.timestamp ? Number(b.timestamp) * 1000 : null;
+      }
+      const r = histRow(l.topics, l.data, l.transactionHash, blockTimes[l.blockNumber], NET.explorer + "/tx/" + l.transactionHash);
+      rows.push({ ...r, n: Number(l.blockNumber), i: Number(l.logIndex) });
+    }
+    for (const e of sub) rows.push({ ...e.row, n: e.block, i: -1 });
+    rows.sort((a, b) => a.n - b.n || a.i - b.i);
+    return rows.reverse();
+  }
 
   const $ = (id) => document.getElementById(id);
   const hex = (n) => BigInt(n).toString(16).padStart(64, "0");
@@ -289,6 +522,84 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   const call = (pool, data, from) => rpc("eth_call", [{ to: pool, data, ...(from ? { from } : {}) }, "latest"]);
   const read = async (pool, name, args = "") => call(pool, "0x" + SEL[name] + args);
 
+  // ------------------------------------------------------- on-chain identities
+  // Two chains: Asset Hub says which Polkadot account stands behind a 0x address
+  // (Revive.OriginalAccount, written when the account was mapped), and Kusama's People
+  // chain holds that account's identity and any registrar judgement. A 0x address from
+  // MetaMask or Talisman has no Polkadot account behind it, so it is looked up under the
+  // fallback account Revive gives it (the address followed by twelve 0xee bytes), where
+  // nobody is known to have set an identity.
+  const IDS = new Map();
+  const PFX = { original: "735f040a5d490f1107ad9c56f5ca00d2c56ab6c1f203b345fe5879f819627723",
+    identityOf: "2aeddc77fe58c98d50bd37f1b90840f9cd7f37317cd20b61e9bd46fab8704714",
+    superOf: "2aeddc77fe58c98d50bd37f1b90840f943a953ac082e08b6527ce262dbd4abf2" };
+  const unhex = (h) => Uint8Array.from((h.replace(/^0x/, "").match(/../g) || []).map((b) => parseInt(b, 16)));
+  const tohex = (u) => Array.from(u, (b) => b.toString(16).padStart(2, "0")).join("");
+  async function subGet(url, key) {
+    const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method: "state_getStorage", params: ["0x" + key] }) });
+    const j = await r.json();
+    if (j.error) throw new Error(j.error.message);
+    return j.result ? unhex(j.result) : null;
+  }
+  function compact(u, o) {
+    const m = u[o] & 3;
+    if (m === 0) return [u[o] >> 2, 1];
+    if (m === 1) return [(u[o] | (u[o + 1] << 8)) >> 2, 2];
+    if (m === 2) return [(u[o] | (u[o + 1] << 8) | (u[o + 2] << 16) | (u[o + 3] * 16777216)) / 4, 4];
+    throw new Error("compact too big");
+  }
+  function data(u, o) {
+    const t = u[o];
+    if (t === 0) return ["", o + 1];
+    if (t <= 33) return [new TextDecoder().decode(u.slice(o + 1, o + t)), o + t];
+    return ["", o + 33];
+  }
+  function registration(u) {
+    let [n, w] = compact(u, 0), o = w, ok = false;
+    for (let i = 0; i < n; i++) {
+      const j = u[o + 4]; o += 5;
+      if (j === 1) o += 16;
+      if (j === 2 || j === 3) ok = true;
+    }
+    o += 16;
+    return { name: data(u, o)[0].trim(), verified: ok };
+  }
+  async function lookup(a) {
+    const h160 = a.replace(/^0x/, "").toLowerCase();
+    const orig = await subGet(NET.sub, PFX.original + h160);
+    const acct = orig ? tohex(orig) : h160 + "ee".repeat(12);
+    const au = unhex(acct);
+    let reg = await subGet(NET.people, PFX.identityOf + tohex(BBHash.twox64(au)) + acct);
+    if (reg) return registration(reg);
+    const sup = await subGet(NET.people, PFX.superOf + tohex(BBHash.blake2_128(au)) + acct);
+    if (!sup) return null;
+    const parent = tohex(sup.slice(0, 32)), subName = data(sup, 32)[0].trim();
+    reg = await subGet(NET.people, PFX.identityOf + tohex(BBHash.twox64(sup.slice(0, 32))) + parent);
+    if (!reg) return null;
+    const p = registration(reg);
+    return { name: p.name + (subName ? " / " + subName : ""), verified: p.verified };
+  }
+  async function identities(addrs) {
+    if (!NET.people || !window.BBHash) return;
+    const todo = [...new Set(addrs.filter(Boolean).map((a) => a.toLowerCase()))].filter((a) => !IDS.has(a) || Date.now() - IDS.get(a).at > 600000);
+    await Promise.all(todo.map(async (a) => {
+      try { const r = await lookup(a); IDS.set(a, { at: Date.now(), r: r && r.name ? r : null }); }
+      catch { /* a failed read shows the bare address and is tried again next refresh */ }
+    }));
+  }
+  function who(cell, a, you) {
+    cell.innerHTML = ""; cell.className = "mono who";
+    const r = (IDS.get(a.toLowerCase()) || {}).r;
+    if (!r) { cell.textContent = short(a) + (you ? "  (you)" : ""); return; }
+    const b = document.createElement("b"); b.textContent = r.name; cell.append(b);
+    const t = document.createElement("span");
+    t.className = r.verified ? "tick" : "unv";
+    t.textContent = r.verified ? "✓ verified" : "not verified";
+    t.title = r.verified ? "A registrar has checked this identity on Kusama's People chain." : "This name was set by the account itself and no registrar has checked it.";
+    cell.append(t);
+    const s = document.createElement("span"); s.className = "addr"; s.textContent = short(a) + (you ? "  (you)" : ""); cell.append(s);
+  }
+
   function noFunds() {
     const where = NET_KEY === "paseo" ? " Get free test " + NET.symbol + " from faucet.polkadot.io: choose Paseo, then Asset Hub, and paste your 0x address." : "";
     return "Your wallet does not hold enough " + NET.symbol + " on " + NET.name + " to pay this and the small network fee. Nothing was sent." + where;
@@ -306,7 +617,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   // ---------------------------------------------------------------- pool
   const listed = POOLS.find((p) => p.net === NET_KEY && (!q.get("pool") || (p.address || "").toLowerCase() === q.get("pool").toLowerCase()));
   const POOL = (q.get("pool") || (listed && listed.address) || "").toLowerCase();
-  let S = null, account = null, busy = false, faucetShown = false;
+  let S = null, account = null, busy = false, faucetShown = false, eth = null;
 
   let loadSeq = 0;
   async function load() {
@@ -321,19 +632,23 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       ["referendum", "deposit", "minContribution", "fundingDeadline", "state", "total", "contributorCount"].map((k) => read(POOL, k)));
     const count = Number(word(n, 0));
     const people = [];
+    // An address that withdraws and pays in again is listed twice by the contract; show it once.
+    // payout() walks the contract's list, so it needs `count`, never people.length.
     for (let i = 0; i < count; i++) {
       const a = addr(await read(POOL, "contributors", hex(i)));
+      if (people.some((p) => p.a === a)) continue;
       people.push({ a, amt: word(await read(POOL, "contributed", hex(BigInt(a))), 0) });
     }
     // The contract judges the deadline by the chain's clock, so the page does too.
     const head = await rpc("eth_getBlockByNumber", ["latest", false]).catch(() => null);
     const now = head && head.timestamp ? BigInt(head.timestamp) : BigInt(Math.floor(Date.now() / 1000));
     const next = { ref: Number(word(ref, 0)), dep: word(dep, 0), min: word(min, 0), dl: word(dl, 0), st: STATES[Number(word(st, 0))],
-          tot: word(tot, 0), people, now, mine: 0n };
+          tot: word(tot, 0), people, count, now, mine: 0n, hist: await history().catch(() => null) };
     if (account) {
       next.mine = word(await read(POOL, "contributed", hex(BigInt(account))), 0);
       next.bal = BigInt(await rpc("eth_getBalance", [account, "latest"]));
     }
+    await Promise.race([identities([...people.map((p) => p.a), ...((next.hist || []).map((h) => h.who))]), new Promise((r) => setTimeout(r, 4000))]);
     if (mine !== loadSeq) return;
     S = next;
     render();
@@ -376,8 +691,23 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     $("nobody").hidden = s.people.length > 0;
     for (const p of s.people) {
       const tr = tb.insertRow();
-      const c1 = tr.insertCell(); c1.className = "mono"; c1.textContent = short(p.a) + (account && p.a === account ? "  (you)" : "");
+      who(tr.insertCell(), p.a, account && p.a === account);
       tr.insertCell().textContent = p.amt === 0n ? (s.st === "open" ? "withdrawn" : "paid back") : ksm(p.amt) + " " + NET.symbol;
+    }
+    const hb = $("history").tBodies[0]; hb.innerHTML = "";
+    $("noHistory").textContent = s.hist ? "Nothing yet." : "The history could not be read just now. It will try again on the next refresh.";
+    $("noHistory").hidden = !!(s.hist && s.hist.length);
+    for (const h of s.hist || []) {
+      const tr = hb.insertRow();
+      tr.insertCell().textContent = h.t ? new Date(h.t).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "";
+      const c = tr.insertCell();
+      if (h.who) who(c, h.who, account && h.who === account); else c.className = "mono";
+      tr.insertCell().textContent = h.what + (h.amt != null ? " " + ksm(h.amt) + " " + NET.symbol : "");
+      const l = document.createElement(h.link ? "a" : "span");
+      if (h.link) { l.href = h.link; l.target = "_blank"; l.rel = "noopener"; }
+      l.className = "mono"; l.textContent = h.tx.startsWith("0x") ? short(h.tx) : "#" + h.tx;
+      if (!h.tx.startsWith("0x")) l.title = "Paid from a Polkadot account. Block " + h.tx.replace("-", ", extrinsic ");
+      tr.insertCell().append(l);
     }
     $("updated").textContent = "Read from the chain " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
     renderActions();
@@ -392,6 +722,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   function renderActions() {
     const s = S, full = s.tot === s.dep, closed = s.now >= s.dl;
     $("connect").hidden = !!account;
+    $("changeWallet").hidden = !(account && wallets.size > 1) || busy;
     $("walletline").textContent = account ? "Connected as " + short(account) + " on " + NET.name + (s.bal !== undefined ? ", holding " + ksm(s.bal) + " " + NET.symbol : "") + "." : "Connect an Ethereum account in Talisman or MetaMask. It will be switched to " + NET.name + ".";
     $("contributeBox").hidden = !(s.st === "open" && !full && !closed);
     const low = account && s.bal !== undefined && s.bal < s.min;
@@ -400,36 +731,153 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       ? "Your wallet holds less than the smallest payment. Paseo's faucet gives 5,000 test PAS to an address for free. It opens in a small window with your address filled in, and this page updates when the PAS arrives."
       : "Waiting for the faucet. Your balance above updates when the PAS arrives.";
     $("faucetOpen").hidden = faucetShown;
+    $("topup").hidden = !account;
+    if (account) {
+      $("topupAddr").textContent = polkadotAddress(account, NET.ss58);
+      $("topupLine").textContent = (low ? "This account holds less than the smallest payment. " : "") +
+        "Is your " + NET.symbol + " in Nova, polkadot.js or a Polkadot account in Talisman? Those wallets will not send to a 0x address. Send to this address instead. It is the same account written the Polkadot way, so whatever arrives there can be paid in from here. Send a little extra for network fees.";
+    }
     $("contribute").disabled = busy || !account || !$("ack").checked;
     $("mine").hidden = !account || s.mine === 0n;
     $("mine").textContent = "You have " + ksm(s.mine) + " " + NET.symbol + " in this pool.";
+    const sym = NET.symbol;
+    $("exitline").textContent = !account
+      ? "Getting your " + sym + " back: connect your wallet and this page shows whether you can."
+      : s.st === "open" ? (s.mine > 0n ? "You can take your " + sym + " back at any time until the deposit is placed." : "Nothing of yours is in this pool, so there is nothing to take back.")
+      : s.st === "placed" ? (s.mine > 0n ? "Your " + sym + " is locked in the deposit until referendum #" + s.ref + " ends. Then anyone can bring the deposit back, and you claim your share." : "Nothing of yours is in this pool.")
+      : (s.mine > 0n ? "The deposit is back. Press Claim my share to receive your " + sym + "." : "Nothing of yours is waiting in this pool.");
     $("moreActions").innerHTML = "";
     if (s.st === "open" && s.mine > 0n) button("Take my " + NET.symbol + " back", () => act("withdraw"), true);
     if (s.st === "open" && full && !closed) button("Place the deposit", () => act("place"));
     if (s.st === "open" && closed) button("Close the pool and pay everyone back", () => act("abandon"));
     if (s.st === "placed") button("Bring the deposit back", () => act("reclaim"));
-    if (s.st === "returning" && s.tot > 0n) button("Pay everyone back", () => act("payout", hex(0) + hex(s.people.length)));
+    if (s.st === "returning" && s.tot > 0n) button("Pay everyone back", () => act("payout", hex(0) + hex(s.count)));
     if (s.st === "returning" && s.mine > 0n) button("Claim my share", () => act("claim"), true);
+  }
+
+  // The Polkadot-format address behind an Ethereum account: its 20 bytes, then twelve 0xEE,
+  // as SS58. KSM sent there from Nova or polkadot.js is the same balance the 0x address spends.
+  function blake2b512(input) {
+    const IV = [0x6a09e667f3bcc908n, 0xbb67ae8584caa73bn, 0x3c6ef372fe94f82bn, 0xa54ff53a5f1d36f1n,
+                0x510e527fade682d1n, 0x9b05688c2b3e6c1fn, 0x1f83d9abfb41bd6bn, 0x5be0cd19137e2179n];
+    const SIG = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],[14,10,4,8,9,15,13,6,1,12,0,2,11,7,5,3],
+      [11,8,12,0,5,2,15,13,10,14,3,6,7,1,9,4],[7,9,3,1,13,12,11,14,2,6,5,10,4,0,15,8],
+      [9,0,5,7,2,4,10,15,14,1,11,12,6,8,3,13],[2,12,6,10,0,11,8,3,4,13,7,5,15,14,1,9],
+      [12,5,1,15,14,13,4,10,0,7,6,3,9,2,8,11],[13,11,7,14,12,1,3,9,5,0,15,4,8,6,2,10],
+      [6,15,14,9,11,3,0,8,12,2,13,7,1,4,10,5],[10,2,8,4,7,6,1,5,15,11,9,14,3,12,13,0]];
+    const M64 = (1n << 64n) - 1n, rot = (x, n) => ((x >> BigInt(n)) | (x << BigInt(64 - n))) & M64;
+    const h = IV.slice(); h[0] ^= 0x01010040n;
+    const blocks = Math.max(1, Math.ceil(input.length / 128));
+    for (let b = 0; b < blocks; b++) {
+      const chunk = new Uint8Array(128); chunk.set(input.subarray(b * 128, b * 128 + 128));
+      const m = []; for (let i = 0; i < 16; i++) { let w = 0n; for (let j = 7; j >= 0; j--) w = (w << 8n) | BigInt(chunk[i * 8 + j]); m.push(w); }
+      const last = b === blocks - 1, t = BigInt(last ? input.length : (b + 1) * 128);
+      const v = h.concat(IV); v[12] ^= t; if (last) v[14] ^= M64;
+      const G = (a, bb, c, d, x, y) => {
+        v[a] = (v[a] + v[bb] + x) & M64; v[d] = rot(v[d] ^ v[a], 32); v[c] = (v[c] + v[d]) & M64; v[bb] = rot(v[bb] ^ v[c], 24);
+        v[a] = (v[a] + v[bb] + y) & M64; v[d] = rot(v[d] ^ v[a], 16); v[c] = (v[c] + v[d]) & M64; v[bb] = rot(v[bb] ^ v[c], 63);
+      };
+      for (let r = 0; r < 12; r++) { const s = SIG[r % 10];
+        G(0,4,8,12,m[s[0]],m[s[1]]); G(1,5,9,13,m[s[2]],m[s[3]]); G(2,6,10,14,m[s[4]],m[s[5]]); G(3,7,11,15,m[s[6]],m[s[7]]);
+        G(0,5,10,15,m[s[8]],m[s[9]]); G(1,6,11,12,m[s[10]],m[s[11]]); G(2,7,8,13,m[s[12]],m[s[13]]); G(3,4,9,14,m[s[14]],m[s[15]]); }
+      for (let i = 0; i < 8; i++) h[i] ^= v[i] ^ v[i + 8];
+    }
+    const out = new Uint8Array(64); for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) out[i * 8 + j] = Number((h[i] >> BigInt(8 * j)) & 0xffn);
+    return out;
+  }
+  function polkadotAddress(eth, prefix) {
+    const id = new Uint8Array(32).fill(0xee);
+    for (let i = 0; i < 20; i++) id[i] = parseInt(eth.slice(2 + i * 2, 4 + i * 2), 16);
+    const pre = prefix < 64 ? [prefix] : [((prefix & 0xfc) >> 2) | 0x40, (prefix >> 8) | ((prefix & 3) << 6)];
+    const body = new Uint8Array([...pre, ...id]);
+    const sum = blake2b512(new Uint8Array([...new TextEncoder().encode("SS58PRE"), ...body]));
+    const bytes = [...body, sum[0], sum[1]];
+    const A = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let n = 0n; for (const x of bytes) n = n * 256n + BigInt(x);
+    let s = ""; while (n > 0n) { s = A[Number(n % 58n)] + s; n /= 58n; }
+    for (const x of bytes) { if (x) break; s = "1" + s; }
+    return s;
   }
 
   function say(text, kind) { $("msg").textContent = text; $("msg").className = kind || ""; }
 
   // ---------------------------------------------------------------- wallet
+  $("topupCopy").onclick = async () => {
+    try { await navigator.clipboard.writeText($("topupAddr").textContent); $("topupCopy").textContent = "Copied"; }
+    catch { $("topupCopy").textContent = "Select the address above and copy it"; }
+    setTimeout(() => { $("topupCopy").textContent = "Copy this address"; }, 2500);
+  };
+
+  // Each wallet announces itself (EIP-6963). window.ethereum is one slot that only one
+  // wallet can hold, so it is the fallback for a wallet that does not announce.
+  const wallets = new Map();
+  window.addEventListener("eip6963:announceProvider", (e) => {
+    const d = e.detail, id = d && d.info && d.info.uuid;
+    if (!id || !d.provider || typeof d.provider.request !== "function") return;
+    wallets.set(String(id), { name: String(d.info.name || "Wallet"), icon: String(d.info.icon || ""), provider: d.provider });
+    if (!$("walletPick").hidden) showWallets();
+  });
+  window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+  function showWallets() {
+    const box = $("walletList"); box.textContent = "";
+    for (const w of wallets.values()) {
+      const b = document.createElement("button");
+      b.type = "button"; b.disabled = busy;
+      // The name and icon come from the extension: text only, and an image only from a data: URL.
+      if (/^data:image\//.test(w.icon)) { const i = document.createElement("img"); i.src = w.icon; i.alt = ""; b.append(i); }
+      else { const i = document.createElement("span"); i.className = "noicon"; b.append(i); }
+      b.append(document.createTextNode(w.name));
+      b.onclick = () => useWallet(w.provider);
+      box.append(b);
+    }
+    $("walletPick").hidden = false;
+  }
+
   async function connect() {
-    const eth = window.ethereum;
-    if (!eth) return say("No Ethereum-style wallet found in this browser. Install MetaMask, or pay in from a Polkadot account (see below).", "bad");
+    if (busy) return;
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+    if (!wallets.size) await new Promise((r) => setTimeout(r, 200));
+    if (wallets.size > 1) { say(""); return showWallets(); }
+    const only = wallets.size ? [...wallets.values()][0].provider : window.ethereum;
+    if (!only) return say("No Ethereum-style wallet found in this browser. Install MetaMask, or pay in from a Polkadot account (see below).", "bad");
+    await useWallet(only);
+  }
+
+  // A wallet popup can sit unanswered forever, so this never holds `busy`. The latest
+  // choice wins: an answer from a wallet the person has since moved on from is ignored.
+  const watched = new WeakSet();
+  let choice = 0;
+  async function useWallet(p) {
+    if (busy) return;
+    const mine = ++choice;
     try {
-      [account] = (await eth.request({ method: "eth_requestAccounts" })).map((a) => a.toLowerCase());
-      try { await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN.chainId }] }); }
+      const [first] = await p.request({ method: "eth_requestAccounts" });
+      if (mine !== choice) return;
+      try { await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN.chainId }] }); }
       catch (e) {
-        if (e.code === 4902 || /unrecognized|not added/i.test(e.message || "")) await eth.request({ method: "wallet_addEthereumChain", params: [CHAIN] });
+        if (e.code === 4902 || /unrecognized|not added/i.test(e.message || "")) await p.request({ method: "wallet_addEthereumChain", params: [CHAIN] });
         else throw e;
       }
-      eth.on?.("accountsChanged", (a) => { account = (a[0] || "").toLowerCase() || null; load(); });
+      if (mine !== choice) return;
+      if (!watched.has(p)) {
+        watched.add(p);
+        p.on?.("accountsChanged", (a) => { if (eth !== p) return; account = (a[0] || "").toLowerCase() || null; load(); });
+      }
+      eth = p; account = String(first).toLowerCase();
+      $("walletPick").hidden = true;
       say("");
       await load();
-    } catch (e) { account = null; say(revertMessage(e), "bad"); }
+    } catch (e) { if (mine === choice) { eth = null; account = null; say(revertMessage(e), "bad"); } }
   }
+
+  $("changeWallet").onclick = () => {
+    if (busy) return;
+    choice++; eth = null; account = null; say("");
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+    showWallets();
+    load().catch(() => {});
+  };
 
   async function act(name, args = "", value = 0n) {
     if (busy) return;
@@ -442,10 +890,10 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       const bal = BigInt(await rpc("eth_getBalance", [account, "latest"]));
       if (bal <= value) throw new Error("insufficient funds");
       await rpc("eth_call", [tx, "latest"]);
-      const chain = await window.ethereum.request({ method: "eth_chainId" });
+      const chain = await eth.request({ method: "eth_chainId" });
       if (parseInt(chain, 16) !== CHAIN_ID) throw new Error("Your wallet is not on " + NET.name + ". Reconnect to switch it.");
       say("Confirm it in your wallet…");
-      const hash = await window.ethereum.request({ method: "eth_sendTransaction", params: [tx] });
+      const hash = await eth.request({ method: "eth_sendTransaction", params: [tx] });
       say("Sent. Waiting for the next block…");
       let receipt = null;
       for (let i = 0; i < 60 && !receipt; i++) { receipt = await rpc("eth_getTransactionReceipt", [hash]); if (!receipt) await new Promise((r) => setTimeout(r, 2000)); }
@@ -495,6 +943,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 
   document.querySelectorAll(".sym").forEach((e) => (e.textContent = NET.symbol));
   document.querySelectorAll(".netname").forEach((e) => (e.textContent = NET.name));
+  $("chainNote").textContent = String(NET.chainId); $("rpcNote").textContent = NET.rpc;
   if (NET.test) {
     $("kicker").textContent = "Rehearsal on Paseo";
     $("trust").innerHTML = 'This pool is on Paseo, Polkadot\'s test network. It runs the same contract as a Kusama pool, with PAS, test money that has no value. Get some free from <a href="https://faucet.polkadot.io/" target="_blank" rel="noopener">faucet.polkadot.io</a>: choose Paseo, then Asset Hub.';

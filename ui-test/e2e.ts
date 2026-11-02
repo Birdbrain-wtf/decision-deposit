@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import type { Hex } from "viem";
 
 const HERE = new URL(".", import.meta.url).pathname;
-const PAGE = process.env.PAGE ?? HERE + "../page/index.html";
+const PAGE = process.env.PAGE ?? new URL("../page/index.html", import.meta.url).pathname;
 const DEPOSIT = 666_666_666_660_000n;
 const api = await connect();
 const w = wallets();
@@ -43,16 +43,37 @@ const send = (method: string, params: any = {}, sessionId?: string) => new Promi
 const target = (await send("Target.getTargets")).targetInfos.find((t: any) => t.type === "page");
 const { sessionId: S } = await send("Target.attachToTarget", { targetId: target.targetId, flatten: true });
 await send("Page.enable", {}, S); await send("Runtime.enable", {}, S);
+// The hash picks the wallets: "#<addr>" fills only window.ethereum and announces nothing;
+// "#<mode>:<a>:<b>" sets up wallet A in window.ethereum and announces wallets (EIP-6963).
+// Providers are frozen because a real wallet's may be, so the page cannot write on them.
 await send("Page.addScriptToEvaluateOnNewDocument", { source: `
-  window.ethereum = { on() {}, async request({ method, params }) {
-    const acct = location.hash.slice(1);
-    if (method === "eth_requestAccounts" || method === "eth_accounts") return [acct];
-    if (method.startsWith("wallet_")) return null;
-    const r = await fetch("http://127.0.0.1:8545", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
-    const j = await r.json();
-    if (j.error) throw Object.assign(new Error(j.error.message), { code: j.error.code, data: j.error.data });
-    return j.result;
-  } };` }, S);
+  (() => {
+    window.__calls = [];
+    const parts = location.hash.slice(1).split(":");
+    const make = (acct, label, reject) => Object.freeze({ on() {}, async request({ method, params }) {
+      window.__calls.push(label + ":" + method);
+      if (method === "eth_requestAccounts" && reject.left > 0) { reject.left--; throw Object.assign(new Error("User rejected the request."), { code: 4001 }); }
+      if (method === "eth_requestAccounts" && reject.hang) return new Promise(() => {});
+      if (method === "eth_requestAccounts" || method === "eth_accounts") return [acct];
+      if (method.startsWith("wallet_")) return null;
+      const r = await fetch("http://127.0.0.1:8545", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
+      const j = await r.json();
+      if (j.error) throw Object.assign(new Error(j.error.message), { code: j.error.code, data: j.error.data });
+      return j.result;
+    } });
+    if (parts.length === 1) { window.ethereum = make(parts[0], "slot", { left: 0 }); return; }
+    const [mode, a, b] = parts;
+    const A = make(a, "A", { left: mode === "reject" ? 1 : 0, hang: mode === "hang" }), B = make(b, "B", { left: 0 });
+    window.ethereum = A;
+    const icon = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="28" height="28" fill="#8b5cf6"/></svg>');
+    const list = mode === "one" ? [["B", "Wallet B", B, icon]]
+      : mode === "evil" ? [["A", '<img src=x onerror="window.__pwned=1">', A, "https://evil.invalid/x.png"], ["B", "Wallet B", B, icon]]
+      : [["A", "Wallet A", A, icon], ["B", "Wallet B", B, icon]];
+    const announce = () => { for (const [uuid, name, provider, ic] of list)
+      window.dispatchEvent(new CustomEvent("eip6963:announceProvider", { detail: Object.freeze({ info: Object.freeze({ uuid, name, icon: ic, rdns: "test." + uuid }), provider }) })); };
+    window.addEventListener("eip6963:requestProvider", announce);
+    announce();
+  })();` }, S);
 
 const js = async (expr: string) => (await send("Runtime.evaluate", { expression: expr, awaitPromise: true, returnByValue: true }, S)).result.value;
 async function until(expr: string, what: string, ms = 60000) {
@@ -76,14 +97,24 @@ async function as(who: keyof typeof w) {
   await js(`document.getElementById('connect').click()`);
   await until(`document.getElementById('walletline').textContent.startsWith('Connected')`, "wallet to connect");
 }
+async function setup(hash: string) {
+  await send("Page.navigate", { url: URL0 + "#" + hash }, S);
+  await sleep(300); await send("Page.reload", {}, S);
+  await until(`!document.getElementById('poolview').hidden && document.getElementById('state').textContent !== '…'`, "pool to load");
+}
+const pickerNames = () => js(`[...document.querySelectorAll('#walletList button')].map(b => b.textContent)`) as Promise<string[]>;
+const pick = (label: string) => js(`[...document.querySelectorAll('#walletList button')].find(b => b.textContent === ${JSON.stringify(label)}).click()`);
+const calls = () => js(`window.__calls`) as Promise<string[]>;
+const connected = (addr: string) => until(`document.getElementById('walletline').textContent.startsWith('Connected as ${addr.slice(0, 6)}')`, "wallet to connect as " + addr);
 const contributed = async (x: Hex) => (await read(api, pool, "contributed", [x])) as bigint;
 const ksmWei = (k: bigint) => k * KSM * WEI_PER_PLANCK;
 
 try {
-  say("\n# empty state");
+  say("\n# opening the page with no address");
   await send("Page.navigate", { url: "http://localhost:8787/deposit" }, S);
   await until(`document.readyState === 'complete'`, "load");
-  check("with no Kusama pool, #676 shows as pending and links to its Paseo rehearsal", await js(`!document.getElementById('pendingview').hidden && document.getElementById('poolview').hidden && document.getElementById('pMirror').href.includes('0x8f728b1edecd0786d26b9fd023039033e2f85187')`));
+  await until(`!document.getElementById('poolview').hidden && document.getElementById('state').textContent !== '…'`, "the listed pool to load from the live network");
+  check("with no address, the page opens on the listed Kusama pool for #676, without the unlisted warning", (await text("refline")).includes("#676") && !(await text("trust")).includes("not one Birdbrain lists"));
 
   say("\n# Eve pays in and takes it back");
   await as("eve");
@@ -101,6 +132,61 @@ try {
   await clickText("Take my KSM back");
   await msgIs("on its way back");
   check("Eve's withdrawal clears her share on the chain", (await contributed(w.eve.address)) === 0n);
+
+  say("\n# more than one wallet installed");
+  const A = w.bob.address.toLowerCase(), B = w.eve.address.toLowerCase();
+  await setup(`two:${A}:${B}`);
+  await js(`document.getElementById('connect').click()`);
+  await until(`!document.getElementById('walletPick').hidden`, "the wallet list");
+  check("two wallets: Connect shows both and asks neither for accounts yet", JSON.stringify(await pickerNames()) === '["Wallet A","Wallet B"]' && !(await calls()).some((c) => c.endsWith("eth_requestAccounts")));
+  await shot("wallet-picker-mobile", 390); await shot("wallet-picker-desktop");
+  await pick("Wallet B");
+  await connected(B);
+  check("choosing the wallet that does not hold window.ethereum connects that wallet, and A is never asked", (await text("walletline")).includes(B.slice(0, 6)) && !(await calls()).some((c) => c.startsWith("A:")));
+  check("the list closes and offers a change of wallet", await js(`document.getElementById('walletPick').hidden && !document.getElementById('changeWallet').hidden`));
+  await js(`document.getElementById('ack').click(); document.getElementById('amt').value = '20'; document.getElementById('contribute').click()`);
+  await msgIs("Paid in");
+  check("the payment goes through the chosen wallet: B's address pays, A's does not", (await contributed(w.eve.address)) === ksmWei(20n) && (await contributed(w.bob.address)) === 0n);
+  check("the wallet in window.ethereum saw no transaction", (await calls()).includes("B:eth_sendTransaction") && !(await calls()).some((c) => c.startsWith("A:") || c.startsWith("slot:")));
+  await clickText("Take my KSM back");
+  await msgIs("on its way back");
+  check("taking it back also goes through the chosen wallet", (await contributed(w.eve.address)) === 0n && (await calls()).filter((c) => c === "B:eth_sendTransaction").length === 2);
+  await js(`document.getElementById('changeWallet').click()`);
+  await until(`document.getElementById('walletline').textContent.startsWith('Connect an Ethereum')`, "the page to show no wallet connected");
+  check("Use a different wallet disconnects and reopens the list", !(await js(`document.getElementById('walletPick').hidden`)));
+  await pick("Wallet A");
+  await connected(A);
+  check("the second wallet can then be chosen", (await calls()).includes("A:eth_requestAccounts"));
+
+  await setup(`one:${A}:${B}`);
+  await js(`document.getElementById('connect').click()`);
+  await connected(B);
+  check("one announced wallet connects straight away, without a list", await js(`document.getElementById('walletPick').hidden && document.getElementById('changeWallet').hidden`));
+
+  await setup(`reject:${A}:${B}`);
+  await js(`document.getElementById('connect').click()`);
+  await until(`!document.getElementById('walletPick').hidden`, "the wallet list");
+  await pick("Wallet A");
+  await until(`document.getElementById('msg').className === 'bad'`, "the refusal message");
+  check("refusing in one wallet keeps the list open", !(await js(`document.getElementById('walletPick').hidden`)));
+  await pick("Wallet B");
+  await connected(B);
+  check("and the other wallet can still be chosen", (await calls()).includes("B:eth_requestAccounts"));
+
+  await setup(`hang:${A}:${B}`);
+  await js(`document.getElementById('connect').click()`);
+  await until(`!document.getElementById('walletPick').hidden`, "the wallet list");
+  await pick("Wallet A");
+  await sleep(300);
+  await pick("Wallet B");
+  await connected(B);
+  check("a wallet popup left unanswered does not block choosing another", (await calls()).includes("A:eth_requestAccounts"));
+
+  await setup(`evil:${A}:${B}`);
+  await js(`document.getElementById('connect').click()`);
+  await until(`!document.getElementById('walletPick').hidden`, "the wallet list");
+  await sleep(300);
+  check("a wallet's name shows as text and its icon only from a data: URL", !(await js(`window.__pwned === 1`)) && (await js(`document.querySelector('#walletList button').textContent.startsWith('<img')`)) && (await js(`document.querySelectorAll('#walletList img').length`)) === 1);
 
   say("\n# Alice, Bob, then Carol fills it");
   await as("alice");
@@ -135,6 +221,8 @@ try {
   await clickText("Bring the deposit back");
   await msgIs("deposit is back in the pool");
   check("the page moves to Paying back", (await text("state")) === "Paying back");
+  const listed = Number(await read(api, pool, "contributorCount", []));
+  check("Eve paid in twice and withdrew twice, so the contract lists more addresses than the page shows", listed > (await js(`document.querySelectorAll('#contribs tbody tr').length`)), `${listed} entries`);
   await clickText("Pay everyone back");
   await msgIs("Everyone who could be paid");
   check("the page says everyone has been paid back", (await text("next")) === "Everyone has been paid back.");

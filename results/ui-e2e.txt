@@ -1,7 +1,7 @@
 pool 0x6621a62d9686a6fe0cba2ce4ad92cfba315154b3 for #676 on the fork
 
-# empty state
-PASS  with no Kusama pool, #676 shows as pending and links to its Paseo rehearsal
+# opening the page with no address
+PASS  with no address, the page opens on the listed Kusama pool for #676, without the unlisted warning
 
 # Eve pays in and takes it back
 PASS  an unlisted pool carries the warning
@@ -10,6 +10,21 @@ PASS  Pay in is disabled until the kill risk is acknowledged
 PASS  Eve's 20 KSM is recorded on the chain
 PASS  the page shows 20 KSM in and Eve marked as you
 PASS  Eve's withdrawal clears her share on the chain
+
+# more than one wallet installed
+PASS  two wallets: Connect shows both and asks neither for accounts yet
+PASS  choosing the wallet that does not hold window.ethereum connects that wallet, and A is never asked
+PASS  the list closes and offers a change of wallet
+PASS  the payment goes through the chosen wallet: B's address pays, A's does not
+PASS  the wallet in window.ethereum saw no transaction
+PASS  taking it back also goes through the chosen wallet
+PASS  Use a different wallet disconnects and reopens the list
+PASS  the second wallet can then be chosen
+PASS  one announced wallet connects straight away, without a list
+PASS  refusing in one wallet keeps the list open
+PASS  and the other wallet can still be chosen
+PASS  a wallet popup left unanswered does not block choosing another
+PASS  a wallet's name shows as text and its icon only from a data: URL
 
 # Alice, Bob, then Carol fills it
 PASS  5 KSM is refused on the page before anything is sent
@@ -23,9 +38,10 @@ PASS  on the chain #676 is deciding with the pool's account as depositor
 PASS  bringing it back while #676 runs is stopped before the wallet, in plain words
 root cancel: Ok
 PASS  the page moves to Paying back
+PASS  Eve paid in twice and withdrew twice, so the contract lists more addresses than the page shows  (5 entries)
 PASS  the page says everyone has been paid back
 PASS  alice got exactly what they paid in back  (300 KSM)
 PASS  bob got exactly what they paid in back  (300 KSM)
 PASS  carol got exactly what they paid in back  (66.66666666 KSM)
 
-19 passed, 0 failed
+33 passed, 0 failed
