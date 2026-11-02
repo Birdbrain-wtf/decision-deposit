@@ -1,0 +1,12 @@
+[Unit]
+Description=Pool #676 backstop: one hour after funding closes, then hourly retries
+
+[Timer]
+OnCalendar=2026-11-03 13:00:00 UTC
+OnCalendar=2026-11-03 14:00:00 UTC
+OnCalendar=2026-11-03 15:00:00 UTC
+OnCalendar=2026-11-03 18:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

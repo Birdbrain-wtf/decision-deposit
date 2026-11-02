@@ -271,7 +271,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   </div>
   <div class="risks" style="margin-top:28px">
     <article><h3>Understand the risk</h3><p>A killed referendum loses the deposit. Contract bugs can also put funds at risk. Fork tests pass and placement works on Paseo, and the contract has had an independent review. A public-network refund and a professional audit are still outstanding.</p></article>
-    <article><h3>Repayment needs a transaction</h3><p>Nothing runs automatically when a referendum ends. Anyone can use this page to reclaim and pay out. No watcher is running yet. Network fees are additional and are not refunded by the pool.</p></article>
+    <article><h3>Repayment needs a transaction</h3><p>Nothing runs automatically. Anyone can use this page to close an unfilled pool after its deadline, or bring the deposit back after a referendum ends, and then pay everyone back. If nobody does, Birdbrain will. Contributors do not have to do anything. Network fees for your own payments are additional and are not refunded by the pool.</p></article>
   </div>
   <details>
     <summary>Why share a decision deposit?</summary>
@@ -678,9 +678,9 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     $("fill").style.width = (Number((s.st === "returning" ? s.tot : shown) * 10000n / s.dep) / 100) + "%";
     $("remaining").textContent = s.st === "open" && !full ? ksm(s.dep - s.tot) + " " + NET.symbol + " still needed." : s.st === "returning" ? ksm(s.tot) + " " + NET.symbol + " still to pay back." : "";
     $("next").textContent = {
-      open: full ? "The pool is full but the deposit is not on yet. Anyone can place it below." : closed ? "Funding closed before the pool filled. Anyone can close it and pay everyone back." : "The payment that fills the pool tries to place the deposit on #" + s.ref + ".",
-      placed: "The deposit is on #" + s.ref + ". When the referendum ends, anyone can bring it back and pay everyone.",
-      returning: s.tot === 0n ? "Everyone has been paid back." : "The " + NET.symbol + " is back in the pool. Anyone can pay every group back now.",
+      open: full ? "The pool is full but the deposit is not on yet. Anyone can place it below." : closed ? "Funding closed before the pool filled. Anyone can close it and pay everyone back. If nobody does, Birdbrain will." : "The payment that fills the pool tries to place the deposit on #" + s.ref + ".",
+      placed: "The deposit is on #" + s.ref + ". When the referendum ends, anyone can bring it back and pay everyone. If nobody does, Birdbrain will.",
+      returning: s.tot === 0n ? "Everyone has been paid back." : "The " + NET.symbol + " is back in the pool. Anyone can pay every group back now. If nobody does, Birdbrain will.",
     }[s.st];
     $("deadline").textContent = new Date(Number(s.dl) * 1000).toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" });
     $("min").textContent = ksm(s.min) + " " + NET.symbol + " (the last payment can be smaller, to fill the pool)";

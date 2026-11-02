@@ -1,0 +1,10 @@
+[Unit]
+Description=Close unfilled decision deposit pools and pay contributors back if nobody else has
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/cdd-settle
+ExecStart=/usr/local/bin/bun settle.ts kusama 0x4d8b316355ee2d334ef3494be1fa3ef8c7114c87 /opt/cdd-settle/kusama-fees.key
+StandardOutput=append:/var/log/cdd-settle.log
+StandardError=append:/var/log/cdd-settle.log
