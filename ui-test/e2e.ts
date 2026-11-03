@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import type { Hex } from "viem";
 
 const HERE = new URL(".", import.meta.url).pathname;
-const PAGE = process.env.PAGE ?? new URL("../page/index.html", import.meta.url).pathname;
+const PAGE = process.env.PAGE ?? "/home/workspace/birdbrain/deposit/index.html";
 const DEPOSIT = 666_666_666_660_000n;
 const api = await connect();
 const w = wallets();
@@ -220,12 +220,13 @@ try {
   await as("dave");
   await clickText("Bring the deposit back");
   await msgIs("deposit is back in the pool");
-  check("the page moves to Paying back", (await text("state")) === "Paying back");
+  check("the page moves to Refunding", (await text("state")) === "Refunding");
   const listed = Number(await read(api, pool, "contributorCount", []));
   check("Eve paid in twice and withdrew twice, so the contract lists more addresses than the page shows", listed > (await js(`document.querySelectorAll('#contribs tbody tr').length`)), `${listed} entries`);
-  await clickText("Pay everyone back");
+  await clickText("Refund everyone");
   await msgIs("Everyone who could be paid");
-  check("the page says everyone has been paid back", (await text("next")) === "Everyone has been paid back.");
+  check("the page says everyone has been refunded", (await text("next")) === "Everyone has been refunded.");
+  check("the page moves to Refunded", (await text("state")) === "Refunded");
   const paid = { alice: 300n * KSM, bob: 300n * KSM, carol: DEPOSIT - 600n * KSM };
   for (const k of ["alice", "bob", "carol"] as const) {
     const delta = (await freeOf(api, nativeOf(api, w[k].address))) - before.get(k)!;
