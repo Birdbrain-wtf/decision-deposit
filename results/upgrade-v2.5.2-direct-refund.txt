@@ -1,0 +1,47 @@
+fork head 23369146 spec 2005001
+[before] spec 2005001 state 1 refundMessage 0x0504060100185c02a4020000 decodes-to referenda.refundDecisionDeposit weigh {"ok":true,"refTime":"78099000","proofSize":"4401"}
+PASS  pool is Placed on the fork
+PASS  fork starts on the live runtime, 2005001
+reclaim while live: {"ok":false,"error":"NothingCameBack"}
+PASS  reclaim refused while #676 is live
+authorising 0x3b56929c9c2edd7c409b9771204cbbc87c386182d6b3dc78858f0fa9dd2d3835
+authorize_upgrade via Root: Ok
+PASS  upgrade authorised by Root
+dry run {"ok":{"ok":[]}}
+submitted 0x4f5f475e75f1b487592ba4087ce05f74e7fa76668fcf260f0bf49891b48d7057
+apply block extrinsics timestamp.set parachainSystem.setValidationData system.applyAuthorizedUpgrade
+apply_authorized_upgrade events: system.UpgradeAuthorized system.UpgradeAuthorized system.UpgradeAuthorized system.UpgradeAuthorized parachainSystem.ValidationFunctionStored
+PASS  apply_authorized_upgrade stored the new code
+pendingValidationCode bytes 2297875
+2026-11-03 21:44:03        API/INIT: Runtime version updated to spec=2005002, tx=15
+ block +1 spec 2005002 events system.UpgradeAuthorized system.UpgradeAuthorized system.UpgradeAuthorized system.UpgradeAuthorized
+PASS  chain runs spec 2005002 through the real upgrade path
+LastRuntimeUpgrade {"specVersion":"2,005,002","specName":"statemine"}
+[after-upgrade] spec 2005002 state 1 refundMessage 0x0504060100185c02a4020000 decodes-to referenda.refundDecisionDeposit weigh {"ok":true,"refTime":"78099000","proofSize":"4401"}
+PASS  weighMessage(refundMessage()) succeeds after the upgrade
+PASS  refund message bytes unchanged
+weight before→after 78099000 → 78099000
+PASS  reclaim still refused cleanly while live (NothingCameBack)
+cancel #676 via Root: Ok
+PASS  #676 ended by Root cancel
+#676 status Cancelled
+direct refund_decision_deposit: Ok
+PASS  someone else claimed the refund directly on governance
+entries 9 addresses 9 owed KSM 666.66666666
+reclaim: Ok polkadotXcm.Attempted revive.ContractEmitted
+PASS  reclaim by a stranger succeeds
+PASS  pool moves to Returning
+payout: Ok
+PASS  payout(0, count) succeeds
+PASS  0xFFf5fb7366b1dBB7401C8A48A6f233435524E724 repaid 200 KSM to the planck
+PASS  0xaF0f41eC9B9A0952B3CA39Fc38BF47Ff46FA2139 repaid 10 KSM to the planck
+PASS  0xF2d89646065F8AB1b9c99A14209996D4C2Ef5903 repaid 7.5 KSM to the planck
+PASS  0x360C9A43fc489F1180485B6C5F1197b9D5C6747E repaid 140 KSM to the planck
+PASS  0x06f7Bd3a232517137Cf5651Af98d4d4dECc63af1 repaid 45 KSM to the planck
+PASS  0xd777872b4e0E2E6547C2C378c0d30b749c72367A repaid 32 KSM to the planck
+PASS  0xe981DfCC72d64B85FAf2D49F6d1fa51ED0C5D2e9 repaid 75 KSM to the planck
+PASS  0x3A3a1d1aE60F91c49cfAbEAA63f8134e38CB1788 repaid 39.5 KSM to the planck
+PASS  0x552d073D5f6e4100D522FdEFC86F985f550dCdE0 repaid 117.66666666 KSM to the planck
+PASS  pool balance 0
+PASS  pool total 0
+RESULT fails=0

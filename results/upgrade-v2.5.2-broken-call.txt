@@ -1,0 +1,34 @@
+fork head 23369146 spec 2005001
+[before] spec 2005001 state 1 refundMessage 0x0504060100185c02a4020000 decodes-to referenda.refundDecisionDeposit weigh {"ok":true,"refTime":"78099000","proofSize":"4401"}
+PASS  pool is Placed on the fork
+PASS  fork starts on the live runtime, 2005001
+reclaim while live: {"ok":false,"error":"NothingCameBack"}
+PASS  reclaim refused while #676 is live
+authorising 0x3b56929c9c2edd7c409b9771204cbbc87c386182d6b3dc78858f0fa9dd2d3835
+authorize_upgrade via Root: Ok
+PASS  upgrade authorised by Root
+dry run {"ok":{"ok":[]}}
+submitted 0x4f5f475e75f1b487592ba4087ce05f74e7fa76668fcf260f0bf49891b48d7057
+apply block extrinsics timestamp.set parachainSystem.setValidationData system.applyAuthorizedUpgrade
+apply_authorized_upgrade events: system.UpgradeAuthorized system.UpgradeAuthorized system.UpgradeAuthorized system.UpgradeAuthorized parachainSystem.ValidationFunctionStored
+PASS  apply_authorized_upgrade stored the new code
+pendingValidationCode bytes 2297875
+2026-11-03 21:46:20        API/INIT: Runtime version updated to spec=2005002, tx=15
+ block +1 spec 2005002 events system.UpgradeAuthorized system.UpgradeAuthorized system.UpgradeAuthorized system.UpgradeAuthorized
+PASS  chain runs spec 2005002 through the real upgrade path
+LastRuntimeUpgrade {"specVersion":"2,005,002","specName":"statemine"}
+[after-upgrade] spec 2005002 state 1 refundMessage 0x0504060100185c02a4020000 decodes-to referenda.refundDecisionDeposit weigh {"ok":true,"refTime":"78099000","proofSize":"4401"}
+PASS  weighMessage(refundMessage()) succeeds after the upgrade
+PASS  refund message bytes unchanged
+weight before→after 78099000 → 78099000
+PASS  reclaim still refused cleanly while live (NothingCameBack)
+cancel #676 via Root: Ok
+PASS  #676 ended by Root cancel
+#676 status Cancelled
+direct refund_decision_deposit: Ok
+occurrences of the immutable 2: 2
+patched refundMessage 0x0504060100185c63a4020000 weigh {"ok":false,"error":"Error"}
+balance 666666666660000000000 needed 666666666660000000000 money back: true
+reclaim with a broken refund call: {"ok":false,"error":"Error"}
+PASS  CONTROL: reclaim reverts when the refund call no longer decodes, even with the money back
+RESULT fails=0
