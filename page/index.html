@@ -286,7 +286,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   </div>
   <div class="risks" style="margin-top:28px">
     <article><h3>Understand the risk</h3><p>A killed referendum loses the deposit. Contract bugs can also put funds at risk. Fork tests pass, placement works on Paseo and the contract has had an independent review. Pool 1 for #676 closed short on Kusama and refunded all 8 addresses. Refunding a deposit after a referendum ends has not been proved on a public network yet, and there has been no professional audit.</p></article>
-    <article><h3>A refund needs a transaction</h3><p>Nothing runs automatically. Anyone can use this page to close an unfilled pool after its deadline, or bring the deposit back after a referendum ends, and then refund everyone. If nobody does, Birdbrain will. Contributors do not have to do anything. Network fees for your own payments are additional and are not refunded by the pool.</p></article>
+    <article><h3>A refund needs a transaction</h3><p>The chain does not do this by itself. Anyone can use this page to close an unfilled pool after its deadline, or bring the deposit back after a referendum ends, and then refund everyone. If nobody does, a job on Birdbrain's machine checks every hour and does it. If governance kills the referendum, the deposit is lost and there is nothing to refund. Contributors do not have to do anything. Network fees for your own payments are additional and are not refunded by the pool.</p></article>
   </div>
   <details>
     <summary>Why share a decision deposit?</summary>
@@ -316,9 +316,9 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   // this list so the newest is what a referendum opens on. Anything else opened with ?pool=
   // is shown with a warning.
   const POOLS = [
-    // #676 times out at relay block 35,945,916, about 21:30 UTC on 3 November.
+    // Pool 2 filled and placed #676's deposit on 3 November at 15:58 UTC.
     { net: "kusama", address: "0xfcd8058e46b8ac6f02f1cc71e2912c5ffdc095ce", referendum: 676, n: 2, tabTitle: "Wish for Change", title: "An independent Kusama on a reduced JAM, keeping its validators", short: "WFC-01, Kusama #676",
-      note: 'Pool 2 for #676. Funding closes 3 November at 20:30 UTC, ahead of the referendum timeout at about 21:30 UTC. It runs the same code as Pool 1, <a href="https://forum.polkadot.network/t/19187/8" target="_blank" rel="noopener">and you can check that yourself</a>. The Wish for Change decision period is 14 days. <a href="?net=paseo">Try the same proposal with free test PAS</a>.' },
+      note: 'Pool 2 for #676. It filled on 3 November at 15:58 UTC, and the payment that filled it placed the deposit, so #676 is now deciding. It runs the same code as Pool 1, <a href="https://forum.polkadot.network/t/19187/8" target="_blank" rel="noopener">and you can check that yourself</a>. The Wish for Change decision period is 14 days, to about 17 November. <a href="?net=paseo">Try the same proposal with free test PAS</a>.' },
     { net: "kusama", address: "0x4d8b316355ee2d334ef3494be1fa3ef8c7114c87", referendum: 676, n: 1, tabTitle: "Wish for Change", title: "An independent Kusama on a reduced JAM, keeping its validators", short: "WFC-01, Kusama #676",
       note: 'Pool 1 for #676. Funding closed on 3 November at 12:00 UTC with 626.5 of 666.67 KSM, so the deposit was not placed. All 626.5 KSM went back to the 8 addresses that paid it in. <a href="https://forum.polkadot.network/t/19187" target="_blank" rel="noopener">The forum thread has the details</a>.' },
     { net: "paseo", address: "0x8f728b1edecd0786d26b9fd023039033e2f85187", referendum: 147, n: 1, tabTitle: "Wish for Change rehearsal", title: "An independent Kusama on a reduced JAM, keeping its validators", short: "The Wish for Change rehearsal, #147",
@@ -759,8 +759,11 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       placed: "The deposit is on #" + s.ref + ". When the referendum ends, anyone can bring it back and refund everyone. If nobody does, Birdbrain will.",
       returning: s.tot === 0n ? "Everyone has been refunded." : "The " + NET.symbol + " is back in the pool. Anyone can refund every group now. If nobody does, Birdbrain will.",
     }[s.st];
-    $("deadline").textContent = new Date(Number(s.dl) * 1000).toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
-    $("deadlineLabel").textContent = closed || s.st !== "open" ? "Funding closed" : "Funding closes";
+    // A pool that filled closed when it filled, not at its deadline. The deadline is only a fallback while the history loads.
+    const placedAt = (s.hist || []).find((h) => h.what === "Deposit placed" && h.t);
+    const whenFormat = { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" };
+    $("deadline").textContent = new Date(placedAt ? placedAt.t : Number(s.dl) * 1000).toLocaleString("en-GB", whenFormat);
+    $("deadlineLabel").textContent = placedAt ? "Filled and placed" : s.st === "open" && !closed ? "Funding closes" : s.st === "placed" ? "Funding was open until" : "Funding closed";
     $("min").textContent = ksm(s.min) + " " + NET.symbol + " (the last payment can be smaller, to fill the pool)";
     $("address").textContent = POOL;
     $("explorerLink").href = NET.explorer + "/address/" + POOL + "?tab=contract";

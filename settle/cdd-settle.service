@@ -1,9 +1,10 @@
 [Unit]
-Description=Close unfilled decision deposit pools and pay contributors back if nobody else has
+Description=Settle a decision deposit pool if nobody else has: close it or reclaim the deposit, then refund everyone
 After=network-online.target
 
 [Service]
 Type=oneshot
+StateDirectory=cdd-settle
 WorkingDirectory=/opt/cdd-settle
 ExecStart=/usr/local/bin/bun settle.ts kusama 0xfcd8058e46b8ac6f02f1cc71e2912c5ffdc095ce /opt/cdd-settle/kusama-fees.key
 StandardOutput=append:/var/log/cdd-settle.log

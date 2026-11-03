@@ -1,9 +1,16 @@
 import { expect, test } from "bun:test";
-import { decide } from "./settle";
+import { decide, referendumFrom, referendumKey } from "./settle";
 const base = { state: 0, total: 435n, deposit: 667n, deadline: 100n, count: 8n, now: 101n };
 test("open before the deadline waits", () => expect(decide({ ...base, now: 99n })).toBe("wait"));
 test("open and short after the deadline closes", () => expect(decide(base)).toBe("abandon"));
 test("full after the deadline is never closed", () => expect(decide({ ...base, total: 667n })).toBe("full-not-placed"));
-test("placed does nothing", () => expect(decide({ ...base, state: 1 })).toBe("nothing"));
+test("placed and still running waits", () => expect(decide({ ...base, state: 1, referendum: "ongoing" })).toBe("wait"));
+test("placed and ended reclaims", () => expect(decide({ ...base, state: 1, referendum: "ended" })).toBe("reclaim"));
+test("placed and killed sends nothing", () => expect(decide({ ...base, state: 1, referendum: "killed" })).toBe("killed"));
+test("placed and unreadable sends nothing", () => expect(decide({ ...base, state: 1, referendum: "unknown" })).toBe("unknown-referendum"));
+test("an amount already refused is not retried", () => expect(decide({ ...base, state: 2, refused: 435n })).toBe("refused"));
+test("a changed amount is paid out again", () => expect(decide({ ...base, state: 2, refused: 400n })).toBe("payout"));
+test("the storage key for #676 matches the chain's", () => expect(referendumKey(676)).toBe("0x0f6738a0ee80c8e74cd2c7417c1e25569613e9bbc07e304aa9a1af9b85898e5a3b9da1a8ce59ca5ada57e9b804c6cb54a4020000"));
+test("the variants read in the pallet's order", () => expect(["0x00", "0x01", "0x02", "0x03", "0x04", "0x05", "0x06", null].map(referendumFrom)).toEqual(["ongoing", "ended", "ended", "ended", "ended", "killed", "unknown", "unknown"]));
 test("returning with money owed pays out", () => expect(decide({ ...base, state: 2 })).toBe("payout"));
 test("returning and settled does nothing", () => expect(decide({ ...base, state: 2, total: 0n })).toBe("nothing"));

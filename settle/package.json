@@ -1,1 +1,1 @@
-{ "name": "cdd-settle", "private": true, "dependencies": { "viem": "^2" } }
+{ "name": "cdd-settle", "private": true, "dependencies": { "viem": "^2", "@noble/hashes": "^1.8.0" } }

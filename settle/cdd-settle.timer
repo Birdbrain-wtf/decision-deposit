@@ -1,11 +1,9 @@
 [Unit]
-Description=Pool 2 for #676 backstop: one hour after funding closes at 20:30 UTC, then retries
+Description=Decision deposit backstop: hourly, so a pool is settled within about an hour of being due
 
 [Timer]
-OnCalendar=2026-11-03 21:30:00 UTC
-OnCalendar=2026-11-03 22:30:00 UTC
-OnCalendar=2026-11-03 23:30:00 UTC
-OnCalendar=2026-11-04 09:00:00 UTC
+OnCalendar=hourly
+RandomizedDelaySec=300
 Persistent=true
 
 [Install]
