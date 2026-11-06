@@ -1,0 +1,63 @@
+fork of Polkadot Asset Hub at #22788966, spec 2005002
+PASS  Root decision deposit on chain is 100000.00000000 DOT  (100000.00000000 DOT)
+
+# 1. One factory, anyone opens a pool
+factory 0x6621a62d9686a6fe0cba2ce4ad92cfba315154b3
+PASS  factory fixes the chain settings
+Root referendum #1968 submitted, no decision deposit
+PASS  Carol, a stranger to the factory, opens a pool through it
+pool 0x0E0612fc4341eafd0462a97Cd0f3652E1Bc3F8C0, account 1KPUYBzWNYMK4dT732b3RxppgEtgfKxfAsPXvRnkDCuYFmr
+PASS  PoolOpened names the referendum, opener, deposit and sweep address
+PASS  poolsFor(referendum) lists it
+PASS  pool inherits the chain settings from the factory
+PASS  pool builds the place message the chain encodes  (0x0504060100183e01b0070000)
+
+# 2. A Root deposit (100000.00000000 DOT) from three payers, with a withdraw and repay
+PASS  sweep while open is refused
+PASS  Alice pays, withdraws and pays again
+PASS  Alice is listed once (version 1 listed her twice)
+PASS  Carol's top-up fills the pool and places the deposit in the same transaction  (Contributed Placed)
+PASS  that transaction put the Root referendum into its decision phase
+PASS  the deposit is held by the pool's own account
+PASS  pool is Placed, the whole deposit reserved on its account
+PASS  three contributors
+
+# 3. DOT sent by plain transfer is no longer stranded
+PASS  Ferdie sends 5 KSM to the pool's account by plain transfer (no contract code runs)
+PASS  sweep while placed is refused
+PASS  reclaim while the referendum is live is refused
+root cancel: Ok
+PASS  after the ending, a stranger reclaims
+PASS  excess() shows the stray 5 KSM  (5.00000000 DOT)
+PASS  payout runs
+PASS  alice got exactly 1000.00000000 DOT back  (1000.00000000 DOT)
+PASS  bob got exactly 2000.00000000 DOT back  (2000.00000000 DOT)
+PASS  carol got exactly 97000.00000000 DOT back  (97000.00000000 DOT)
+PASS  anyone sweeps; the 5 KSM goes to the sweep address fixed at opening  (5.00000000 DOT)
+PASS  a second sweep finds nothing
+PASS  pool is empty  (0)
+
+# 4. Sweep never touches a share still owed (a payer that refuses payment)
+PASS  a contract that refuses payment pays 100 KSM in
+PASS  the pool filled and placed
+root cancel: referenda.NotOngoing
+PASS  the referendum has ended  (Cancelled)
+PASS  the refuser's 100 KSM stays owed
+PASS  sweep sends only the 2 KSM nobody is owed  (2.00000000 DOT)
+PASS  the refuser's 100 KSM is still in the pool
+
+# 5. reclaim survives a refund message the chain cannot weigh (Zealynx)
+root cancel: Ok
+PASS  version 1: placed, refunded directly, reclaim still reverts  (Error)
+root cancel: Ok
+PASS  version 2: placed, refunded directly, reclaim settles
+
+# 6. A wrong deposit can never place, and everyone is repaid after the close
+PASS  a pool opened with the WFC deposit for a Root referendum fills but cannot place  (Contributed AutoPlaceFailed)
+PASS  the fallback place is refused too
+PASS  the Root referendum still has no decision deposit
+PASS  after the close, Alice is repaid in full  (20000.00000000 DOT)
+PASS  the factory holds no money
+PASS  the factory lists every pool it opened  (3)
+
+41/41 passed

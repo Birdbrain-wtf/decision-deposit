@@ -1,0 +1,9 @@
+# Chopsticks fork of Polkadot Asset Hub for the version 2 pool tests (CHAIN=polkadot bun test-v2.ts).
+# Pinned 6 Nov 2026, spec 2005002 (the live runtime that day). Referenda is pallet 62, Revive 90.
+endpoint:
+  - wss://polkadot-asset-hub-rpc.polkadot.io
+  - wss://sys.ibp.network/asset-hub-polkadot
+block: 22788966
+mock-signature-host: true
+runtime-log-level: 3
+port: 8012

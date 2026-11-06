@@ -1,6 +1,6 @@
 // Version 2: deploy the factory once per chain, then open pools through it.
 //
-//   bun deploy-v2.ts <net> factory [--mainnet]
+//   bun deploy-v2.ts <net> factory [--mainnet]          (kusama and polkadot need --mainnet)
 //   bun deploy-v2.ts <net> open <referendum> <min> <sweepTo 0x…> <label> [--mainnet]
 //
 // `open` reads the deposit and funding close from the live referendum (ref-terms.ts),
@@ -16,8 +16,8 @@ import { termsFor } from "./ref-terms";
 
 const [net, cmd, ...a] = process.argv.slice(2) as [Net, string, ...string[]];
 const N = NETWORKS[net];
-if (!N) throw new Error("network: kusama | paseo");
-if (net === "kusama" && !a.includes("--mainnet")) throw new Error("Kusama is real money: add --mainnet");
+if (!N) throw new Error("network: kusama | polkadot | paseo");
+if (net !== "paseo" && !a.includes("--mainnet")) throw new Error(N.name + " is real money: add --mainnet");
 const KEYS = (process.env.KEYS ?? "keys") + "/";
 const RECORD = new URL(`./deployments/${net}-v2.json`, import.meta.url).pathname;
 const chain = defineChain({ id: N.chainId, name: N.name, nativeCurrency: { name: N.symbol, symbol: N.symbol, decimals: 18 }, rpcUrls: { default: { http: [N.eth] } } });

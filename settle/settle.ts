@@ -4,8 +4,8 @@
 // plain transfer) to the pool's sweepTo. Safe to run repeatedly, and it does nothing when
 // someone else got there first. Anyone can do the same from the page.
 //
-//   bun settle.ts <kusama|paseo> <pool> <key file> [--dry-run]
-//   bun settle.ts <kusama|paseo> all <key file> [--dry-run]
+//   bun settle.ts <kusama|polkadot|paseo> <pool> <key file> [--dry-run]
+//   bun settle.ts <kusama|polkadot|paseo> all <key file> [--dry-run]
 //
 // `all` settles the pools named below (the version 1 pools, and our own Paseo test pool with
 // a wrong deposit, which fails the check on purpose) plus every pool the indexer has found
@@ -26,6 +26,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 const NETS = {
   kusama: { id: 420420418, rpc: "https://eth-rpc-kusama.polkadot.io", sub: "https://kusama-asset-hub-rpc.polkadot.io", symbol: "KSM",
     named: ["0x4d8b316355ee2d334ef3494be1fa3ef8c7114c87", "0xfcd8058e46b8ac6f02f1cc71e2912c5ffdc095ce"] as string[] },
+  polkadot: { id: 420420419, rpc: "https://eth-rpc.polkadot.io", sub: "https://polkadot-asset-hub-rpc.polkadot.io", symbol: "DOT",
+    named: [] as string[] },
   paseo: { id: 420420417, rpc: "https://eth-rpc-testnet.polkadot.io", sub: "https://asset-hub-paseo-rpc.n.dwellir.com", symbol: "PAS",
     named: ["0x184d34bde215cd345d48df7dfc89df9832317b4a"] as string[] },
 } as const;
@@ -89,7 +91,7 @@ if (import.meta.main) {
   const [netName, which, keyFile] = process.argv.slice(2) as [keyof typeof NETS, string, string];
   const dry = process.argv.includes("--dry-run");
   const net = NETS[netName];
-  if (!net || !which || !keyFile) throw new Error("usage: bun settle.ts <kusama|paseo> <pool|all> <key file> [--dry-run]");
+  if (!net || !which || !keyFile) throw new Error("usage: bun settle.ts <kusama|polkadot|paseo> <pool|all> <key file> [--dry-run]");
   const chain = defineChain({ id: net.id, name: netName, nativeCurrency: { name: net.symbol, symbol: net.symbol, decimals: 18 }, rpcUrls: { default: { http: [process.env.CDD_ETH_RPC || net.rpc] } } });
   const stateDir = process.env.STATE_DIRECTORY || "/var/lib/cdd-settle";
   const pub = createPublicClient({ chain, transport: http(undefined, { timeout: 60_000 }) });

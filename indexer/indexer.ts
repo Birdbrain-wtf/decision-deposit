@@ -36,6 +36,13 @@ const ALL: Record<string, Cfg> = {
       { address: "0x4d8b316355ee2d334ef3494be1fa3ef8c7114c87", from: 23200570 },
       { address: "0xfcd8058e46b8ac6f02f1cc71e2912c5ffdc095ce", from: 23354884 },
     ],
+    factories: [{ address: "0x222022cbc8fef11df6b3b7b906774a6923c72f3c", from: 23484507 }],
+  },
+  polkadot: {
+    ws: "wss://polkadot-asset-hub-rpc.polkadot.io",
+    http: "https://polkadot-asset-hub-rpc.polkadot.io",
+    subsquare: "https://polkadot-api.subsquare.io/gov2/referendums/", symbol: "DOT", decimals: 10,
+    pools: [],
     factories: [],
   },
   paseo: {

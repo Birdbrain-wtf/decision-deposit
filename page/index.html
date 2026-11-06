@@ -121,6 +121,17 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 @media(max-width:820px){.grid,.risks{grid-template-columns:1fr;gap:28px}.steps{grid-template-columns:1fr}.steps div+div{border-left:0;padding-left:0;border-top:1px solid var(--line)}dl div{grid-template-columns:1fr}footer{display:block}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 .state.pending{border-color:rgba(245,158,11,.7)}
+.state.preview{border-color:rgba(245,158,11,.9);background:#fffbeb}
+.netswitch{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;margin:26px 0 18px}
+.seg{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:40px;padding:4px;background:#fff}
+.seg .eyebrow{padding:0 10px 0 12px}
+.seg a,.testlink{text-decoration:none;border-radius:40px;padding:8px 18px;transition:background .45s var(--ease),color .45s var(--ease)}
+.seg a small,.testlink small{color:var(--muted);margin-left:6px;font-size:12px}
+.seg a[aria-current]{background:var(--ink);color:#fff}.seg a[aria-current] small{color:#c9d1d6}
+.seg a.soon{color:var(--muted)}
+.testlink{border:1px dashed rgba(245,158,11,.9)}
+.testlink[aria-current]{background:#fffbeb}
+.teststrip{background:#fffbeb;border-bottom:1px solid rgba(245,158,11,.6);padding:10px 5vw;font-size:14px}
 .checks{list-style:none;padding:0;margin:8px 0 0;font-size:14px}.checks li{border-top:1px solid var(--line);padding:9px 0 9px 26px;position:relative}
 .checks li:before{content:"";position:absolute;left:2px;top:15px;width:11px;height:11px;border:1px solid #9aa7b0;border-radius:50%}
 .checks li.done:before{background:rgba(16,185,129,.55);border-color:rgba(16,185,129,.8)}.checks li.now:before{background:rgba(245,158,11,.35);border-color:rgba(245,158,11,.8)}
@@ -131,6 +142,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 </style>
 </head>
 <body>
+<div class="teststrip" id="teststrip" hidden><strong>Testing area.</strong> This is Paseo, Polkadot's test network. PAS has no value. Back to <a href="?net=kusama">Kusama</a> or <a href="?net=polkadot">Polkadot</a>.</div>
 <header>
   <a class="brand" href="https://birdbrain.wtf"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3L30 28H2Z M16 3L12 22L30 28 M2 28L12 22" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>birdbrain</a>
   <span class="meta">Shared decision deposit<br>Testing in the open</span>
@@ -140,10 +152,19 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   <div class="eyebrow muted" id="kicker">Kusama governance</div>
   <h1>Collaborative decision deposits</h1>
   <p class="lead">Share the deposit that brings a referendum to a vote. Contribute together, then recover your share after it ends, unless governance kills it.</p>
-  <div class="row network-nav" aria-label="Choose network"><a class="btn ghost" href="?net=kusama">Kusama · real KSM</a><a class="btn ghost" href="?net=paseo">Paseo · free test PAS</a></div>
+  <nav class="netswitch" aria-label="Choose network">
+    <div class="seg" role="group" aria-label="Live networks, real money"><span class="eyebrow muted">Live</span><a href="?net=kusama" data-net="kusama">Kusama<small>KSM</small></a><a href="?net=polkadot" data-net="polkadot">Polkadot<small>DOT</small></a></div>
+    <a class="testlink" href="?net=paseo" data-net="paseo">Testing area: Paseo<small>free test PAS</small></a>
+  </nav>
   <p class="banner" id="trust">Experimental contract. It has had an independent review but no professional audit. A killed referendum loses the deposit. <a href="https://github.com/Birdbrain-wtf/decision-deposit" target="_blank" rel="noopener">Review the code</a> or try Paseo first.</p>
 </div>
 
+<section id="needs" hidden>
+  <h2>Referenda waiting for a deposit</h2>
+  <p class="note" id="needsLine"></p>
+  <table id="needsTable"><tbody></tbody></table>
+  <p class="note" id="needsUpdated"></p>
+</section>
 <section id="pool">
   <nav class="chooser" id="chooser" aria-label="Choose a referendum and pool" hidden>
     <div class="chooser-row" id="refRow" hidden><span class="eyebrow muted">Referendum</span><div class="tabs" id="refTabs"></div></div>
@@ -151,7 +172,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   </nav>
   <div id="nopool" hidden>
     <h2>No pool is open yet.</h2>
-    <p class="muted">The contract has had an independent review, but no professional audit. When the first pool on Kusama opens, it appears here with its referendum, its total and every contribution.</p>
+    <p class="muted">The contract has had an independent review, but no professional audit. When the first pool on <span class="short">Kusama</span> opens, it appears here with its referendum, its total and every contribution.</p>
     <p id="tryPaseo" hidden><a href="?net=paseo">Try the practice pool on Paseo, Polkadot's test network</a>. It runs the same contract with test money.</p>
   </div>
   <div class="grid" id="pendingview" hidden>
@@ -183,7 +204,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       <h2 id="reftitle">Loading the pool</h2>
       <p class="note" id="mirrorNote" hidden></p>
       <div class="card">
-        <div class="row" style="justify-content:space-between;margin:0"><span class="badges"><span class="state closed" id="stateClosed" hidden>Closed</span><span class="state" id="state">…</span></span><span class="note" id="updated"></span></div>
+        <div class="row" style="justify-content:space-between;margin:0"><span class="badges"><span class="state preview" id="previewBadge" hidden title="Version 2 has not had an independent review">Version 2 preview</span> <span class="state closed" id="stateClosed" hidden>Closed</span><span class="state" id="state">…</span></span><span class="note" id="updated"></span></div>
         <div class="amount" style="margin-top:16px"><span id="total">0</span> <small>of <span id="deposit">0</span> <span class="sym">KSM</span></small></div>
         <div class="bar" aria-hidden="true"><i id="fill"></i></div>
         <div class="note" id="remaining"></div>
@@ -197,7 +218,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
         </dl>
       </div>
       <h3 style="margin-top:34px">Who has paid in</h3>
-      <p class="note">Names come from Kusama's People chain. <a href="#names" onclick="document.getElementById('names').open=true">Why some addresses show a name, and how to show yours</a>.</p>
+      <p class="note">Names come from <span class="short">Kusama</span>'s People chain. <a href="#names" onclick="document.getElementById('names').open=true">Why some addresses show a name, and how to show yours</a>.</p>
       <p class="note" id="nobody">Nobody yet.</p>
       <table id="contribs"><tbody></tbody></table>
       <h3 style="margin-top:34px">Every payment in and out</h3>
@@ -282,15 +303,10 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   </div>
 </section>
 
-<section id="needs" hidden>
-  <h2>Referenda waiting for a deposit</h2>
-  <p class="note" id="needsLine"></p>
-  <table id="needsTable"><tbody></tbody></table>
-  <p class="note" id="needsUpdated"></p>
-</section>
 <section id="openPool" hidden>
   <div class="grid">
     <div>
+      <p class="eyebrow" id="openPreview" hidden><span class="state preview">Version 2 preview</span> Real money, a contract with no independent review yet</p>
       <h2>Open a pool for a referendum</h2>
       <p>Any referendum, on any track, Root included. The page reads the referendum's track, its deposit and its timeout from the chain, so you choose only the smallest payment and where stray money goes.</p>
       <p class="note">Funding closes an hour after the referendum's estimated timeout. The timeout can only be estimated, from block numbers, and closing early is what cost Pool 1 for #676 its last 40 KSM. The page stops taking payments as soon as the referendum stops being ongoing.</p>
@@ -298,8 +314,8 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     </div>
     <div class="card soft">
       <div id="openNoFactory" hidden>
-        <h3>Not on Kusama yet</h3>
-        <p class="note">Pools for any referendum come with version 2 of the contract, which runs on Paseo only for now. It opens on Kusama once it has had an outside review and the refunds on Paseo have been seen through. <a href="?net=paseo">Open a pool on Paseo with free test PAS</a>.</p>
+        <h3>Not on <span class="short">Kusama</span> yet</h3>
+        <p class="note">Pools for any referendum come with version 2 of the contract, which needs a factory contract on each network. There is none on <span class="short">Kusama</span> yet. <a href="?net=paseo">Open a pool on Paseo with free test PAS</a>.</p>
       </div>
       <div id="openForm">
         <label class="eyebrow muted" for="openRef">Referendum</label>
@@ -358,10 +374,13 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   const NETS = {
     kusama: { chainId: 420420418, name: "Kusama Asset Hub", symbol: "KSM", rpc: "https://eth-rpc-kusama.polkadot.io", sub: "https://kusama-asset-hub-rpc.polkadot.io", people: "https://kusama-people-rpc.polkadot.io",
               explorer: "https://blockscout-kusama.polkadot.io", subscan: "https://assethub-kusama.subscan.io", subsquare: "https://kusama.subsquare.io/referenda/", ss58: 2, test: false,
-              factory: null },
+              factory: { address: "0x222022cbc8fef11df6b3b7b906774a6923c72f3c", from: 23484507 }, short: "Kusama" },
+    polkadot: { chainId: 420420419, name: "Polkadot Asset Hub", symbol: "DOT", rpc: "https://eth-rpc.polkadot.io", sub: "https://polkadot-asset-hub-rpc.polkadot.io", people: "https://polkadot-people-rpc.polkadot.io",
+              explorer: "https://blockscout.polkadot.io", subscan: "https://assethub-polkadot.subscan.io", subsquare: "https://polkadot.subsquare.io/referenda/", ss58: 0, test: false,
+              factory: null, short: "Polkadot" },
     paseo:  { chainId: 420420417, name: "Paseo Asset Hub", symbol: "PAS", rpc: "https://eth-rpc-testnet.polkadot.io", sub: "https://asset-hub-paseo-rpc.n.dwellir.com",
               explorer: "https://blockscout-testnet.polkadot.io", subsquare: "https://paseo.subsquare.io/referenda/", ss58: 0, test: true,
-              factory: { address: "0x5cd50558f126f2b83d040cc38a7002984097173d", from: 15398884 } },
+              factory: { address: "0x5cd50558f126f2b83d040cc38a7002984097173d", from: 15398884 }, short: "Paseo" },
   };
   // Version 1 pools, each deployed on its own and written in by hand. A referendum can have
   // several; `n` numbers them. Version 2 pools are not written here: anyone opens one through
@@ -690,7 +709,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     const t = document.createElement("span");
     t.className = r.verified ? "tick" : "unv";
     t.textContent = r.verified ? "✓ verified" : "not verified";
-    t.title = r.verified ? "A registrar has checked this identity on Kusama's People chain." : "This name was set by the account itself and no registrar has checked it.";
+    t.title = r.verified ? "A registrar has checked this identity on " + NET.short + "'s People chain." : "This name was set by the account itself and no registrar has checked it.";
     cell.append(t);
     const s = document.createElement("span"); s.className = "addr"; s.textContent = short(a) + (you ? "  (you)" : ""); cell.append(s);
   }
@@ -717,7 +736,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 
   const pretty = (t) => (t || "").replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
   const planckUnits = (p) => ksm(BigInt(p) * WEI_PER_PLANCK_OF[NET_KEY]);
-  const WEI_PER_PLANCK_OF = { kusama: 1000000n, paseo: 100000000n };
+  const WEI_PER_PLANCK_OF = { kusama: 1000000n, polkadot: 100000000n, paseo: 100000000n };
 
   // Version 2 pools opened through this network's factory. Birdbrain's indexer publishes them
   // with a check against the referendum. If it is not answering, the factory's own events are
@@ -759,7 +778,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       const title = (r && r.title) || "Referendum #" + p.referendum;
       found.push({ ...p, net: NET_KEY, version: 2, factory: true, check, hidden: !check.ok, n: check.ok ? (n[p.referendum] = (n[p.referendum] || 0) + 1) : null,
         title, tabTitle: r && r.title ? (r.title.length > 34 ? r.title.slice(0, 32).trim() + "…" : r.title) : r && r.trackName ? pretty(r.trackName) : "",
-        short: (NET.test ? "Paseo" : "Kusama") + " #" + p.referendum });
+        short: NET.short + " #" + p.referendum });
     }
     POOLS.splice(0, POOLS.length, ...HAND, ...found);
     discovered = true;
@@ -875,7 +894,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   function render() {
     const s = S, full = s.tot === s.dep, closed = s.now >= s.dl;
     $("poolview").hidden = false;
-    $("refline").textContent = (NET.test ? "Paseo" : "Kusama") + " referendum #" + s.ref;
+    $("refline").textContent = NET.short + " referendum #" + s.ref;
     $("reftitle").innerHTML = "";
     const a = document.createElement("a");
     a.href = NET.subsquare + s.ref; a.target = "_blank"; a.rel = "noopener";
@@ -1186,7 +1205,8 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     $("needs").hidden = false;
     $("needsLine").textContent = rows.length
       ? rows.length + " ongoing referend" + (rows.length === 1 ? "um" : "a") + " on " + NET.name + (rows.length === 1 ? " has" : " have") + " no decision deposit yet. Without one, a referendum times out."
-        + (NET.factory ? " Anyone can open a pool for any of them." : " Pools for any referendum come with version 2, which is on Paseo only for now.")
+        + (!NET.factory ? " Pools for any referendum come with version 2, which has no factory on " + NET.short + " yet."
+          : NET.test ? " Anyone can open a pool for any of them." : " Anyone can open a pool for any of them with version 2, a preview that has not had an independent review. It takes real " + NET.symbol + ".")
       : "Every ongoing referendum on " + NET.name + " has its decision deposit.";
     const tb = $("needsTable").tBodies[0]; tb.innerHTML = "";
     for (const r of rows) {
@@ -1211,7 +1231,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   }
 
   // ------------------------------------------------------- opening a pool
-  const DEC_OF = { kusama: 12, paseo: 10 };
+  const DEC_OF = { kusama: 12, polkadot: 10, paseo: 10 };
   function toPlanck(str) {
     const d = DEC_OF[NET_KEY], t = String(str).trim().replace(/,/g, "");
     if (!new RegExp("^\\d+(\\.\\d{1," + d + "})?$").test(t)) return null;
@@ -1348,9 +1368,14 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 
   document.querySelectorAll(".sym").forEach((e) => (e.textContent = NET.symbol));
   document.querySelectorAll(".netname").forEach((e) => (e.textContent = NET.name));
+  document.querySelectorAll(".short").forEach((e) => (e.textContent = NET.short));
+  document.querySelectorAll(".netswitch [data-net]").forEach((a) => { if (a.dataset.net === NET_KEY) a.setAttribute("aria-current", "page"); });
+  $("kicker").textContent = NET.short + " governance";
+  $("teststrip").hidden = !NET.test;
+  $("openPreview").hidden = NET.test || !NET.factory;
   $("chainNote").textContent = String(NET.chainId); $("rpcNote").textContent = NET.rpc;
   if (NET.test) {
-    $("kicker").textContent = "Rehearsal on Paseo";
+    $("kicker").textContent = "Testing area · Paseo";
     $("trust").innerHTML = 'This pool is on Paseo, Polkadot\'s test network. It runs the same contract as a Kusama pool, with PAS, test money that has no value. Get some free from <a href="https://faucet.polkadot.io/" target="_blank" rel="noopener">faucet.polkadot.io</a>: choose Paseo, then Asset Hub.';
     $("planckNote").textContent = "1 PAS is 10,000,000,000";
   }
@@ -1358,6 +1383,12 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     if (!POOL) return;
     if (!listed) { $("trust").textContent = "This pool is not one Birdbrain lists. Anyone can create a contract and send you a link to it here. Check the address with the group that sent it before you pay in."; return; }
     if (listed.hidden) { $("trust").textContent = "Birdbrain does not list this pool: " + listed.check.reasons.join("; ") + ". It was opened through the factory, so its code is the published code, and anyone in it can still take their money back or be repaid. The page does not take payments into it."; return; }
+    $("previewBadge").hidden = !(listed.version === 2 && !NET.test);
+    if (listed.version === 2 && !NET.test) {
+      $("trust").innerHTML = "Version 2 preview, with real " + NET.symbol + ". This pool was opened through the factory, so its code is the published code, but version 2 has not had an independent review yet. A killed referendum loses the deposit. " + '<a href="' + SOURCE + '/tree/main/contracts/v2" target="_blank" rel="noopener">Review the code</a> or <a href="?net=paseo">try it on Paseo</a> first.';
+      $("ackReview").textContent = "Version 2 of this contract is a preview and has not had an independent review yet.";
+      return;
+    }
     if (listed.version === 2) {
       $("trust").innerHTML = "Version 2 of the contract, opened through the factory" + (NET.test ? " on Paseo, Polkadot's test network, with PAS, test money that has no value" : "") + '. It has not had an independent review yet. A killed referendum loses the deposit. <a href="' + SOURCE + '/tree/main/contracts/v2" target="_blank" rel="noopener">Review the code</a>.';
       $("ackReview").textContent = "Version 2 of this contract has not had an independent review yet.";
@@ -1369,7 +1400,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     if (listed && listed.pending) {
       const t = document.createElement("a");
       t.href = NET.subsquare + listed.referendum; t.target = "_blank"; t.rel = "noopener"; t.textContent = listed.title;
-      $("pRefline").textContent = "Kusama referendum #" + listed.referendum + " · " + listed.track;
+      $("pRefline").textContent = NET.short + " referendum #" + listed.referendum + " · " + listed.track;
       $("pTitle").append(t);
       $("pDeposit").textContent = listed.deposit;
       $("pTimeout").textContent = listed.timeout;
@@ -1380,7 +1411,10 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       return;
     }
     drawChooser(); renderNeeds(); renderOpen();
-    if (!POOL) { $("nopool").hidden = false; $("tryPaseo").hidden = NET.test; }
+    if (!POOL) {
+      $("nopool").hidden = false; $("tryPaseo").hidden = NET.test;
+      if (!NET.test) $("trust").innerHTML = "No pool is open on " + NET.short + ". A new pool uses version 2 of the contract, a preview that has not had an independent review" + (NET.factory ? "" : ", and has no factory on " + NET.short + " yet") + '. A killed referendum loses the deposit. <a href="' + SOURCE + '" target="_blank" rel="noopener">Review the code</a> or <a href="?net=paseo">try Paseo first</a>.';
+    }
     else {
       trustLine();
       readTabs().catch(() => {});

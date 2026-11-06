@@ -6,6 +6,12 @@ export const NETWORKS = {
     explorer: "https://blockscout-kusama.polkadot.io", subsquare: "https://kusama.subsquare.io/referenda/",
     referendaPallet: 92, place: 1, refund: 2, weiPerPlanck: 1_000_000n, planckPerUnit: 1_000_000_000_000n,
   },
+  polkadot: {
+    name: "Polkadot Asset Hub", symbol: "DOT", chainId: 420420419,
+    eth: "https://eth-rpc.polkadot.io", ws: "wss://polkadot-asset-hub-rpc.polkadot.io",
+    explorer: "https://blockscout.polkadot.io", subsquare: "https://polkadot.subsquare.io/referenda/",
+    referendaPallet: 62, place: 1, refund: 2, weiPerPlanck: 100_000_000n, planckPerUnit: 10_000_000_000n,
+  },
   paseo: {
     name: "Paseo Asset Hub", symbol: "PAS", chainId: 420420417,
     eth: "https://eth-rpc-testnet.polkadot.io", ws: "wss://asset-hub-paseo-rpc.n.dwellir.com",

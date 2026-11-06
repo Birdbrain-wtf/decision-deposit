@@ -1,6 +1,6 @@
 // What a pool for a referendum should be opened with, read live from the chain.
 //
-//   bun ref-terms.ts <kusama|paseo> <referendum> [ws url]
+//   bun ref-terms.ts <kusama|polkadot|paseo> <referendum> [ws url]
 //
 // The referendum's track, its decision deposit, and the funding close: the referendum's
 // own timeout (submitted + UndecidingTimeout, in relay blocks) turned into a time, plus an
@@ -49,7 +49,7 @@ export async function termsFor(api: ApiPromise, net: Net, ref: number) {
 
 if (import.meta.main) {
   const [net, refArg, wsArg] = process.argv.slice(2) as [Net, string, string?];
-  if (!NETWORKS[net] || !refArg) { console.log("usage: bun ref-terms.ts <kusama|paseo> <referendum> [ws]"); process.exit(1); }
+  if (!NETWORKS[net] || !refArg) { console.log("usage: bun ref-terms.ts <kusama|polkadot|paseo> <referendum> [ws]"); process.exit(1); }
   const api = await ApiPromise.create({ provider: new WsProvider(wsArg ?? NETWORKS[net].ws), noInitWarn: true });
   try {
     const t = await termsFor(api, net, Number(refArg));

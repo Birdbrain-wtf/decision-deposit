@@ -21,8 +21,10 @@ import {
 import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 import { readFileSync } from "fs";
 
-export const KSM = 1_000_000_000_000n; // planck per KSM
-export const WEI_PER_PLANCK = 1_000_000n;
+// CHAIN=polkadot runs the same helpers against a fork of Polkadot Asset Hub (DOT, 10 decimals).
+export const CHAIN = (process.env.CHAIN ?? "kusama") as "kusama" | "polkadot";
+export const KSM = CHAIN === "polkadot" ? 10_000_000_000n : 1_000_000_000_000n; // planck per unit (KSM or DOT)
+export const WEI_PER_PLANCK = CHAIN === "polkadot" ? 100_000_000n : 1_000_000n;
 export const KSM_WEI = KSM * WEI_PER_PLANCK; // wei per KSM in the EVM
 
 const artefact = JSON.parse(readFileSync(new URL("./build/DecisionDepositPool.json", import.meta.url), "utf8"));
@@ -44,7 +46,7 @@ export function wallets() {
 
 /** A Substrate key, for the governance actions that are not EVM (submitting a referendum). */
 export function substrateKey(uri: string): KeyringPair {
-  return new Keyring({ type: "sr25519", ss58Format: 2 }).addFromUri(uri);
+  return new Keyring({ type: "sr25519", ss58Format: CHAIN === "polkadot" ? 0 : 2 }).addFromUri(uri);
 }
 
 /** The native account behind an Ethereum address: the 20 bytes then twelve 0xEE. */
@@ -145,7 +147,7 @@ export async function dryRun(api: ApiPromise, from: Hex, to: Hex | null, data: H
   return { ok: true as const, gas: ok.ethGas.toBigInt(), data: ok.data.toHex() as Hex };
 }
 
-const CHAIN_ID = 420420418; // Kusama Asset Hub
+const CHAIN_ID = CHAIN === "polkadot" ? 420420419 : 420420418; // Polkadot / Kusama Asset Hub
 
 /** Sign and submit an Ethereum transaction the way a wallet + Asset Hub's eth RPC would. */
 export async function ethSend(api: ApiPromise, wallet: Wallet, to: Hex | null, data: Hex, valueWei = 0n) {

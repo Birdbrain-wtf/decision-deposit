@@ -1,4 +1,5 @@
 pool 0x6621a62d9686a6fe0cba2ce4ad92cfba315154b3 for #676 on the fork
+eth shim on 127.0.0.1:8545
 
 # opening the page with no address
 PASS  with no address, the page opens on the listed Kusama pool for #676, without the unlisted warning
@@ -37,11 +38,12 @@ PASS  on the chain #676 is deciding with the pool's account as depositor
 # Dave, with no stake, brings it back
 PASS  bringing it back while #676 runs is stopped before the wallet, in plain words
 root cancel: Ok
-PASS  the page moves to Paying back
+PASS  the page moves to Refunding
 PASS  Eve paid in twice and withdrew twice, so the contract lists more addresses than the page shows  (5 entries)
-PASS  the page says everyone has been paid back
+PASS  the page says everyone has been refunded
+PASS  the page moves to Refunded
 PASS  alice got exactly what they paid in back  (300 KSM)
 PASS  bob got exactly what they paid in back  (300 KSM)
 PASS  carol got exactly what they paid in back  (66.66666666 KSM)
 
-33 passed, 0 failed
+34 passed, 0 failed

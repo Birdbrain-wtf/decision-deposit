@@ -1,6 +1,6 @@
 // Publish version 2's source on the network's Blockscout. Same compiler input as compile-v2.ts.
-//   bun verify-v2.ts <paseo|kusama> factory            the factory from deployments/<net>-v2.json
-//   bun verify-v2.ts <paseo|kusama> pool <address>     a pool it opened (constructor args read from its PoolOpened event)
+//   bun verify-v2.ts <kusama|polkadot|paseo> factory            the factory from deployments/<net>-v2.json
+//   bun verify-v2.ts <kusama|polkadot|paseo> pool <address>     a pool it opened (constructor args read from its PoolOpened event)
 import { readFileSync, writeFileSync } from "fs";
 import { execFileSync } from "child_process";
 import { encodeAbiParameters, parseAbiParameters } from "viem";
