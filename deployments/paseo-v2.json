@@ -1,0 +1,53 @@
+{
+  "network": "paseo",
+  "version": 2,
+  "factory": {
+    "address": "0x5cd50558f126f2b83d040cc38a7002984097173d",
+    "deployTx": "0x3cdd9482b36845a8159224b51ba4bc463d1f3fab7d39ec46f3e5361d09fcd2da",
+    "block": 15398884,
+    "compiler": "solc 0.8.30+commit.73712a01.Emscripten.clang",
+    "constructorArgs": "000000000000000000000000000000000000000000000000000000000000003e000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000005f5e100",
+    "at": "2026-11-06T12:05:09.928Z"
+  },
+  "pools": [
+    {
+      "label": "v2-filled",
+      "address": "0x7540a8240b242460e4dd59dD5f9e51E4cc53c292",
+      "referendum": 156,
+      "track": "30 small_tipper",
+      "depositPlanck": "10000000000",
+      "minPlanck": "2500000000",
+      "fundingDeadline": "1794229506",
+      "sweepTo": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+      "openTx": "0xb5026c3ea66390dde1f5459f523b6f3d1ba715fe37b9e6437d3cffcfc083bf11",
+      "block": 15398920,
+      "at": "2026-11-06T12:06:22.950Z"
+    },
+    {
+      "label": "v2-unfilled",
+      "address": "0xd95cd6197e9086B66194EF94221f3191341b29F7",
+      "referendum": 157,
+      "track": "30 small_tipper",
+      "depositPlanck": "10000000000",
+      "minPlanck": "2500000000",
+      "fundingDeadline": "1794229530",
+      "sweepTo": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+      "openTx": "0x3a01fb966bc7ca484309a62336507c7b9ccc3b4963c6356f226f9ce00958c984",
+      "block": 15398923,
+      "at": "2026-11-06T12:06:28.608Z"
+    },
+    {
+      "label": "v2-wrong-deposit",
+      "address": "0x184d34BdE215Cd345D48df7dFC89Df9832317b4a",
+      "referendum": 157,
+      "depositPlanck": "5000000000",
+      "minPlanck": "2500000000",
+      "fundingDeadline": "1794229530",
+      "sweepTo": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+      "openTx": "0xe806388c2860c61577a17d5765356fab7fe325795a5954d6e1aa02e88ec312ee",
+      "block": 15398953,
+      "at": "2026-11-06T12:10:10.151Z",
+      "note": "deliberately wrong deposit"
+    }
+  ]
+}

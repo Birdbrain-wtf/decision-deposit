@@ -1,0 +1,10 @@
+# Chopsticks fork of Kusama Asset Hub for the decision-deposit pool tests.
+# v2 fork: pinned after the v2.5.2 runtime (spec 2005002) so the factory runs on the live code.
+endpoint:
+  - wss://rpc-asset-hub-kusama.luckyfriday.io
+  - wss://sys.ibp.network/asset-hub-kusama
+  - wss://kusama-asset-hub-rpc.polkadot.io
+block: 23474830
+mock-signature-host: true
+runtime-log-level: 3
+port: 8011

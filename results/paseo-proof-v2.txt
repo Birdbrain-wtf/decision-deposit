@@ -1,0 +1,79 @@
+NOTE (added 6 Nov, after the run): the setup section below read receipts and state from Paseo's best
+block, and part of it was reorganised away. On the final chain Bob's filling payment to pool A stood but
+its placement ran out of gas (AutoPlaceFailed), and Bob's payment to pool B reverted out of gas. Its
+PASS lines for pool A's placement and pool B are wrong. The resume section re-checks everything from
+finalized blocks.
+
+==== setup 2026-11-06T12:07:14.249Z · factory 0x5cd50558f126f2b83d040cc38a7002984097173d
+pool A 0x7540a8240b242460e4dd59dD5f9e51E4cc53c292 for #156 · pool B 0xd95cd6197e9086B66194EF94221f3191341b29F7 for #157
+PASS  factory fixes Paseo's Referenda pallet (62), place 1, refund 2
+PASS  factory fixes Paseo's weiPerPlanck (1e8)
+PASS  factory lists pool A under #156
+PASS  pool A's deposit is the track's 1 PAS, read from the chain
+PASS  pool A's sweepTo is fixed at opening
+
+# Pool A: Alice pays, withdraws, pays again; Bob fills it and places
+  contribute 0.5000 PAS from 0xE6a697 → success, block 15398947, events [Contributed], tx 0x2838c37f2997b7065a6da0635e7fef914557f24c574b8467018e7c50b95da41c
+  withdraw from 0xE6a697 → success, block 15398938, events [Withdrawn], tx 0x08f9586d90877c3a85c2acd4aa68533c60911ab3a8397da15f56985314808cde
+  contribute 0.5000 PAS from 0xE6a697 → success, block 15398952, events [Contributed], tx 0xf5de74de0a6ed927987e449663ba4b7265249a3e47cbccd83c998d8828c9b536
+PASS  Alice is listed once after withdrawing and paying again
+PASS  a payment under the minimum is refused
+  contribute 0.5000 PAS from 0xEA08Fb → success, block 15398953, events [Contributed, Placed], tx 0x88c5e943938b5d6aae5f4056ca061eabb9d86eb73b6302b228b8b2445f86da9d
+PASS  Bob's filling payment placed the deposit in the same transaction
+PASS  pool A is Placed (state 1)
+PASS  #156's decision deposit is held by pool A's own account (5EiSfdD3LCc6GUAn23gWfaPR6M9VfQb1ZANAydUTHDNGK1ti)  (5EiSfdD3LCc6GUAn23gWfaPR6M9VfQb1ZANAydUTHDNGK1ti, 1 PAS)
+PASS  #156 is deciding
+PASS  reclaim while the referendum is live is refused
+
+# Stray PAS sent to pool A by a plain transfer
+PASS  sweep is refused before payouts open
+PASS  excess() reads 0 before payouts open
+
+# Pool B: left short, so it refunds after its close
+  contribute 0.2500 PAS from 0xE6a697 → success, block 15398960, events [Contributed], tx 0x84688e3ca229213c5aeb8c0ed5bfd430e1662967efaf8e2bd9291246bbf26f71
+  contribute 0.2500 PAS from 0xEA08Fb → success, block 15398962, events [Contributed], tx 0x70ccc101b31f39a0e6841c6c1307576da07042d60ec270691db644fd58ea997e
+PASS  pool B holds 0.5 of 1 PAS and is Open
+PASS  abandon before the close is refused
+
+# Pool C: opened through the factory with the wrong deposit (0.5 PAS for a 1 PAS track)
+  open from 0x78733c → success, block 15398953, events [PoolOpened], tx 0xe806388c2860c61577a17d5765356fab7fe325795a5954d6e1aa02e88ec312ee
+  pool C 0x184d34BdE215Cd345D48df7dFC89Df9832317b4a
+  contribute 0.5000 PAS from 0xE6a697 → success, block 15398966, events [Contributed, AutoPlaceFailed], tx 0xe6a24e178d11c20ab98ffe211e13ec132493255674d3c2c1668bc174a207aae2
+PASS  pool C fills but the placement fails, and the payment stands
+PASS  pool C stays Open and still holds the 0.5 PAS
+PASS  place() by hand is refused too
+PASS  #157 still has no decision deposit
+
+setup: 20 passed, 0 failed
+
+==== resume 2026-11-06T12:15:21.098Z · factory 0x5cd50558f126f2b83d040cc38a7002984097173d
+# What the final chain holds after the first run (logs read from finalized blocks)
+  pool A events: Contributed, Withdrawn, AutoPlaceFailed, Contributed, Contributed
+PASS  pool A: Bob's filling payment stands though its placement ran out of gas
+PASS  pool A: Alice is listed once after withdrawing and paying again (Alice, Bob)
+PASS  #156 has no decision deposit yet
+
+# Pool A: the fallback. Anyone sends place() on a full, open pool
+  place from 0x78733c → success (final), block 15399122, events [Placed], tx 0x6ce2bf97b3b5ff6a74aeb64f8270f682e4c7ad8502c6685aaf8063cba83fbaa5
+PASS  place() placed the deposit
+PASS  pool A's balance fell by exactly the deposit (the 0.3 PAS stray stays)  (0.3000 PAS)
+PASS  #156's decision deposit is held by pool A's own account (5EiSfdD3LCc6GUAn23gWfaPR6M9VfQb1ZANAydUTHDNGK1ti)  (1 PAS)
+PASS  #156 is deciding
+PASS  reclaim while the referendum is live is refused
+PASS  sweep is refused before payouts open
+PASS  excess() reads 0 before payouts open
+
+# Pool B: Bob's payment ran out of gas on the final chain; he pays again with gas set
+  contribute 0.2500 PAS from 0xEA08Fb → success (final), block 15399137, events [Contributed], tx 0x067e2bd38ca96922bc6b96cb960a9e10e55b99632d4486880885744c0daff627
+PASS  pool B holds 0.5 of 1 PAS from two addresses and is Open
+PASS  abandon before the close is refused
+
+# Pool C (wrong deposit), read from the final chain
+  pool C events: AutoPlaceFailed, Contributed
+PASS  pool C filled, the placement failed, and the payment stands
+PASS  pool C stays Open
+PASS  place() by hand is refused on pool C
+PASS  #157 still has no decision deposit
+PASS  factory lists both pools for #157
+
+resume: 17 passed, 0 failed

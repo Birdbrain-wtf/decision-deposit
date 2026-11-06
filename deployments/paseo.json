@@ -72,6 +72,22 @@
       },
       "block": 15106658,
       "at": "2026-10-30T14:52:52.234Z"
+    },
+    {
+      "index": 156,
+      "track": 30,
+      "origin": "SmallTipper",
+      "text": "Birdbrain test: decision deposit pool v2, filled pool. Not a real proposal. birdbrain.wtf/tools/cdd",
+      "block": 15398887,
+      "at": "2026-11-06T12:05:39.726Z"
+    },
+    {
+      "index": 157,
+      "track": 30,
+      "origin": "SmallTipper",
+      "text": "Birdbrain test: decision deposit pool v2, unfilled pool. Not a real proposal. birdbrain.wtf/tools/cdd",
+      "block": 15398900,
+      "at": "2026-11-06T12:06:12.209Z"
     }
   ]
 }

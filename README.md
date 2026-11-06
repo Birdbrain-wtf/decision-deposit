@@ -45,6 +45,23 @@ EVM amounts have 18 decimals. KSM has 12 on the chain and PAS has 10, so each po
 
 On the fork, balances were written straight into storage, Root's cancel and kill were put on the scheduler directly, and one rejection was written as the record the pallet writes.
 
+## Version 2 (on Paseo, not on Kusama)
+
+`contracts/v2/` adds a factory, so anyone can open a pool for any referendum on any track. The factory fixes the chain settings (Referenda pallet, place and refund call indices, `weiPerPlanck`) and holds no money. Whoever opens a pool picks the referendum, the deposit, the smallest payment, the funding close and one `sweepTo` address. Changes from version 1: `reclaim` weighs and sends the refund message inside a `try`, `sweep` returns KSM sent by plain transfer to `sweepTo`, and someone who withdraws and pays in again is listed once.
+
+A contract cannot read governance storage, so the factory cannot check a deposit. A pool opened with the wrong one fills, fails to place and repays everyone after the close. `ref-terms.ts` reads a referendum live and prints its deposit and a funding close an hour after its timeout.
+
+- `test-v2.ts`: 41 checks on a fork of Kusama Asset Hub, including a Root pool of 3,333.33 KSM. Log: `results/fork-test-v2.txt`.
+- `paseo/proof-v2.ts`: the factory on Paseo Asset Hub, pools for #156 and #157. Log: `results/paseo-proof-v2.txt`. Deployment: `deployments/paseo-v2.json`.
+
+```
+bun compile-v2.ts                               # build/v2/
+./fork/restart-v2.sh && bun test-v2.ts          # fork suite
+bun ref-terms.ts kusama <referendum>           # deposit and funding close
+```
+
+Neither version has had a professional audit.
+
 ## Run it
 
 ```
