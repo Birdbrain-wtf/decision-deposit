@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { decide, referendumFrom, referendumKey } from "./settle";
+import { decide, poolsToSettle, referendumFrom, referendumKey } from "./settle";
 const base = { state: 0, total: 435n, deposit: 667n, deadline: 100n, count: 8n, now: 101n };
 test("open before the deadline waits", () => expect(decide({ ...base, now: 99n })).toBe("wait"));
 test("open and short after the deadline closes", () => expect(decide(base)).toBe("abandon"));
@@ -14,3 +14,9 @@ test("the storage key for #676 matches the chain's", () => expect(referendumKey(
 test("the variants read in the pallet's order", () => expect(["0x00", "0x01", "0x02", "0x03", "0x04", "0x05", "0x06", null].map(referendumFrom)).toEqual(["ongoing", "ended", "ended", "ended", "ended", "killed", "unknown", "unknown"]));
 test("returning with money owed pays out", () => expect(decide({ ...base, state: 2 })).toBe("payout"));
 test("returning and settled does nothing", () => expect(decide({ ...base, state: 2, total: 0n })).toBe("nothing"));
+test("returning and settled with stray KSM sweeps", () => expect(decide({ ...base, state: 2, total: 0n, excess: 3n })).toBe("sweep"));
+test("sweep waits until everyone who can be repaid has been", () => expect(decide({ ...base, state: 2, excess: 3n })).toBe("payout"));
+test("a refused share does not stop the sweep", () => expect(decide({ ...base, state: 2, refused: 435n, excess: 3n })).toBe("sweep"));
+test("version 1 has no excess and settles to nothing", () => expect(decide({ ...base, state: 2, total: 0n, excess: undefined })).toBe("nothing"));
+test("all settles version 1 by name and only checked version 2 pools", () => expect(poolsToSettle(["0xA"], { pools: [
+  { address: "0xB", check: { ok: true } }, { address: "0xC", check: { ok: false } }, { address: "0xD" }, { address: "0xa", check: { ok: true } }] })).toEqual(["0xa", "0xb"]));

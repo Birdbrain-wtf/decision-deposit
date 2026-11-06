@@ -224,7 +224,7 @@ try {
   const listed = Number(await read(api, pool, "contributorCount", []));
   check("Eve paid in twice and withdrew twice, so the contract lists more addresses than the page shows", listed > (await js(`document.querySelectorAll('#contribs tbody tr').length`)), `${listed} entries`);
   await clickText("Refund everyone");
-  await msgIs("Everyone who could be paid");
+  await msgIs("Everyone who could be refunded");
   check("the page says everyone has been refunded", (await text("next")) === "Everyone has been refunded.");
   check("the page moves to Refunded", (await text("state")) === "Refunded");
   const paid = { alice: 300n * KSM, bob: 300n * KSM, carol: DEPOSIT - 600n * KSM };

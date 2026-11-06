@@ -60,6 +60,8 @@ bun compile-v2.ts                               # build/v2/
 bun ref-terms.ts kusama <referendum>           # deposit and funding close
 ```
 
+The page (`page/index.html`, live at birdbrain.wtf/tools/cdd) finds version 2 pools through the factory and lists one only if its deposit matches its referendum's track deposit. It lists ongoing referenda with no deposit, opens a pool from a referendum number (track, deposit and close are read from the chain), stops taking payments once a referendum is no longer ongoing, and sends each payment with enough gas to place the deposit if it fills the pool. `indexer/indexer.ts` follows each factory and writes `<net>-pools.json` and `<net>-referenda.json`. `settle/settle.ts <net> all <key>` settles every checked pool and sends stray KSM on with `sweep`. The key only pays fees.
+
 Neither version has had a professional audit.
 
 ## Run it

@@ -125,6 +125,9 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 .checks li:before{content:"";position:absolute;left:2px;top:15px;width:11px;height:11px;border:1px solid #9aa7b0;border-radius:50%}
 .checks li.done:before{background:rgba(16,185,129,.55);border-color:rgba(16,185,129,.8)}.checks li.now:before{background:rgba(245,158,11,.35);border-color:rgba(245,158,11,.8)}
 .history{padding-left:1.1em;margin:0 0 1em;max-width:42em}.history li{margin:.6em 0}
+#needsTable td{vertical-align:top;padding-right:14px}#needsTable td:last-child{padding-right:0;white-space:nowrap}
+#needsTable .t{display:block;color:var(--muted);font-size:13px}
+#openMsg.bad{color:#9b2c2c}#openMsg.good{color:#1f6b52}
 </style>
 </head>
 <body>
@@ -188,6 +191,8 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
           <div><dt>What happens next</dt><dd id="next"></dd></div>
           <div><dt id="deadlineLabel">Funding closes</dt><dd id="deadline"></dd></div>
           <div><dt>Smallest payment</dt><dd id="min"></dd></div>
+          <div id="sweepRow" hidden><dt>Stray money goes to</dt><dd><span class="mono" id="sweepTo"></span><br><span class="note">Only money nobody is owed, such as <span class="sym">KSM</span> sent to the pool by a plain transfer, and only after everyone has been repaid. Fixed when the pool was opened.</span></dd></div>
+          <div id="openedRow" hidden><dt>Opened by</dt><dd id="openedBy"></dd></div>
           <div><dt>Pool contract</dt><dd><span class="mono" id="address"></span><br><a id="explorerLink" class="note" target="_blank" rel="noopener">Its verified code on Blockscout</a> · <a id="sourceLink" class="note" target="_blank" rel="noopener">source and tests</a></dd></div>
         </dl>
       </div>
@@ -223,7 +228,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       </div>
 
       <div id="contributeBox" hidden>
-        <label class="check"><input type="checkbox" id="ack"> <span>I understand that if governance <strong>kills</strong> this referendum the deposit is lost, and my share with it. Other outcomes allow the deposit to be reclaimed. This contract has had an independent review but no professional audit.</span></label>
+        <label class="check"><input type="checkbox" id="ack"> <span>I understand that if governance <strong>kills</strong> this referendum the deposit is lost, and my share with it. Other outcomes allow the deposit to be reclaimed. <span id="ackReview">This contract has had an independent review but no professional audit.</span></span></label>
         <div class="row">
           <div class="field"><input id="amt" inputmode="decimal" placeholder="0.0" aria-label="Amount"><span class="sym">KSM</span></div>
           <button class="btn" id="contribute" disabled>Pay in</button>
@@ -277,6 +282,50 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   </div>
 </section>
 
+<section id="needs" hidden>
+  <h2>Referenda waiting for a deposit</h2>
+  <p class="note" id="needsLine"></p>
+  <table id="needsTable"><tbody></tbody></table>
+  <p class="note" id="needsUpdated"></p>
+</section>
+<section id="openPool" hidden>
+  <div class="grid">
+    <div>
+      <h2>Open a pool for a referendum</h2>
+      <p>Any referendum, on any track, Root included. The page reads the referendum's track, its deposit and its timeout from the chain, so you choose only the smallest payment and where stray money goes.</p>
+      <p class="note">Funding closes an hour after the referendum's estimated timeout. The timeout can only be estimated, from block numbers, and closing early is what cost Pool 1 for #676 its last 40 KSM. The page stops taking payments as soon as the referendum stops being ongoing.</p>
+      <p class="note">Opening a pool costs a small network fee and puts no money in. It has no owner: not you, not Birdbrain. Birdbrain lists it here once its deposit matches the referendum's track, usually within a few minutes.</p>
+    </div>
+    <div class="card soft">
+      <div id="openNoFactory" hidden>
+        <h3>Not on Kusama yet</h3>
+        <p class="note">Pools for any referendum come with version 2 of the contract, which runs on Paseo only for now. It opens on Kusama once it has had an outside review and the refunds on Paseo have been seen through. <a href="?net=paseo">Open a pool on Paseo with free test PAS</a>.</p>
+      </div>
+      <div id="openForm">
+        <label class="eyebrow muted" for="openRef">Referendum</label>
+        <div class="row" style="margin-top:6px"><div class="field"><span style="padding:12px 0 12px 18px">#</span><input id="openRef" inputmode="numeric" placeholder="number" aria-label="Referendum number" style="width:120px"></div></div>
+        <dl id="openTerms" hidden>
+          <div><dt>Referendum</dt><dd id="oTitle"></dd></div>
+          <div><dt>Track</dt><dd id="oTrack"></dd></div>
+          <div><dt>Deposit</dt><dd id="oDeposit"></dd></div>
+          <div><dt>Times out about</dt><dd id="oTimeout"></dd></div>
+          <div><dt>Funding closes</dt><dd id="oClose"></dd></div>
+          <div><dt>Pools already open</dt><dd id="oPools"></dd></div>
+        </dl>
+        <div id="openMore" hidden>
+          <label class="eyebrow muted" for="openMin" style="display:block;margin-top:18px">Smallest payment</label>
+          <div class="row" style="margin-top:6px"><div class="field"><input id="openMin" inputmode="decimal" aria-label="Smallest payment"><span class="sym">KSM</span></div></div>
+          <p class="note">The last payment can be smaller, so the pool can always fill.</p>
+          <label class="eyebrow muted" for="openSweep" style="display:block;margin-top:12px">Stray money goes to</label>
+          <div class="row" style="margin-top:6px"><div class="field" style="width:100%"><input id="openSweep" placeholder="0x…" aria-label="Address for stray money" style="width:100%" spellcheck="false"></div></div>
+          <p class="note">Only money nobody is owed ever goes here, such as <span class="sym">KSM</span> sent to the pool by a plain transfer. It is fixed when the pool opens. Your own address is filled in once your wallet is connected.</p>
+          <div class="row"><button class="btn" id="openConnect">Connect wallet</button><button class="btn" id="openGo" hidden disabled>Open the pool</button></div>
+        </div>
+        <div id="openMsg" class="note" role="status" aria-live="polite" style="min-height:24px;margin-top:14px"></div>
+      </div>
+    </div>
+  </div>
+</section>
 <section class="explain">
   <h2>From contributions to a vote.</h2>
   <div class="steps">
@@ -308,13 +357,18 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   // the chain's own planck is coarser, and each pool says by how much (weiPerPlanck).
   const NETS = {
     kusama: { chainId: 420420418, name: "Kusama Asset Hub", symbol: "KSM", rpc: "https://eth-rpc-kusama.polkadot.io", sub: "https://kusama-asset-hub-rpc.polkadot.io", people: "https://kusama-people-rpc.polkadot.io",
-              explorer: "https://blockscout-kusama.polkadot.io", subscan: "https://assethub-kusama.subscan.io", subsquare: "https://kusama.subsquare.io/referenda/", ss58: 2, test: false },
-    paseo:  { chainId: 420420417, name: "Paseo Asset Hub", symbol: "PAS", rpc: "https://eth-rpc-testnet.polkadot.io",
-              explorer: "https://blockscout-testnet.polkadot.io", subsquare: "https://paseo.subsquare.io/referenda/", ss58: 0, test: true },
+              explorer: "https://blockscout-kusama.polkadot.io", subscan: "https://assethub-kusama.subscan.io", subsquare: "https://kusama.subsquare.io/referenda/", ss58: 2, test: false,
+              factory: null },
+    paseo:  { chainId: 420420417, name: "Paseo Asset Hub", symbol: "PAS", rpc: "https://eth-rpc-testnet.polkadot.io", sub: "https://asset-hub-paseo-rpc.n.dwellir.com",
+              explorer: "https://blockscout-testnet.polkadot.io", subsquare: "https://paseo.subsquare.io/referenda/", ss58: 0, test: true,
+              factory: { address: "0x5cd50558f126f2b83d040cc38a7002984097173d", from: 15398884 } },
   };
-  // Pools Birdbrain lists. A referendum can have several; `n` numbers them, newest first in
-  // this list so the newest is what a referendum opens on. Anything else opened with ?pool=
-  // is shown with a warning.
+  // Version 1 pools, each deployed on its own and written in by hand. A referendum can have
+  // several; `n` numbers them. Version 2 pools are not written here: anyone opens one through
+  // the network's factory, and the page finds it from the factory's PoolOpened events (read
+  // by Birdbrain's indexer, or straight from the chain if that is not answering) and lists it
+  // once its deposit matches its referendum's track. Anything else opened with ?pool= is
+  // shown with a warning.
   const POOLS = [
     // Pool 2 filled and placed #676's deposit on 3 November at 15:58 UTC.
     { net: "kusama", address: "0xfcd8058e46b8ac6f02f1cc71e2912c5ffdc095ce", referendum: 676, n: 2, tabTitle: "Wish for Change", title: "An independent Kusama on a reduced JAM, keeping its validators", short: "WFC-01, Kusama #676",
@@ -343,7 +397,10 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     state: "c19d93fb", total: "2ddbd13a", contributorCount: "ecfd8928", contributors: "3cb5d100",
     contributed: "995c5e9d", weiPerPlanck: "22ac2d41", contribute: "d7bb99ba", withdraw: "3ccfd60b", place: "93cca918",
     reclaim: "80e9071b", abandon: "88318834", payout: "5aa6cf97", claim: "4e71d92d",
+    sweepTo: "7ea219a5", sweep: "35faa416", excess: "1ae2379c", open: "aa50c134",
   };
+  const POOL_OPENED = "0xf9185e346a9291eb4ba573c465e6592f5f8871a230452aac4d39b6dc13b7c3db";
+  const AUTO_PLACE_FAILED = "0x1691ac32497e389eb13497d6e4bece80925e9c3db104abd3a010539fda95b439";
   const ERRORS = {
     "0x749b5939": "That amount is not accepted. It must be at least the smallest payment, no more than what is left, and in whole planck.",
     "0xb1d130d6": "The deposit did not go on. The referendum may not be open for a deposit, or someone else placed it first. Nothing left the pool.",
@@ -468,6 +525,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     "0xac41e18e033a36bfbff85f2d2376d0c85464e37f333dff21a50a12a700d209f3": "Pool closed",
     "0x0516911bcc3a0a7412a44601057c0a0a1ec628bde049a84284bc428866534488": "Refunded",
     "0xc26814c0dd49076fd6e655f41e644bd71eff47692a046c550c8d77b49fbce933": "Refund refused",
+    "0xc36b5179cb9c303b200074996eab2b3473eac370fdd7eba3bec636fe35109696": "Stray payment sent on",
   };
   const blockTimes = {};
   function histRow(topics, data, tx, t, link) {
@@ -475,7 +533,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     if (!what) return null;
     // Events with an indexed address carry it in topic 1 and the amount first in data;
     // Placed and Reclaimed carry the referendum in topic 1 and the amount first in data.
-    const who = /Paid|Withdrew|Refund/.test(what) ? addr(topics[1]) : null;
+    const who = /Paid|Withdrew|Refund|Stray/.test(what) ? addr(topics[1]) : null;
     const amt = data && data.length >= 66 && !/not placed|closed/.test(what) ? word(data, 0) : null;
     return { what, who, amt, tx, t, link };
   }
@@ -483,9 +541,14 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   // revive.call from a Polkadot account is missing from eth_getLogs. Birdbrain's box reads
   // every block's events for the pool (lab/decision-deposit/indexer) and publishes them;
   // the Polkadot-side ones are merged in here and link to Subscan.
+  const EVENTS_BASE = (local && q.get("events")) || "/tools/cdd/events/";
+  async function indexed(name) {
+    const r = await fetch(EVENTS_BASE + name + ".json", { cache: "no-store" }).catch(() => null);
+    if (!r || !r.ok) return null;
+    return r.json().catch(() => null);
+  }
   async function substrateEvents() {
-    const base = (local && q.get("events")) || "/tools/cdd/events/";
-    const r = await fetch(base + POOL + ".json", { cache: "no-store" }).catch(() => null);
+    const r = await fetch(EVENTS_BASE + POOL + ".json", { cache: "no-store" }).catch(() => null);
     if (!r || !r.ok) return [];
     const f = await r.json().catch(() => null);
     if (!f || !Array.isArray(f.events)) return [];
@@ -606,6 +669,19 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       catch { /* a failed read shows the bare address and is tried again next refresh */ }
     }));
   }
+  // Referenda.ReferendumInfoFor, read live. Its value starts with the variant of the
+  // referendum's state, which is all the page needs to know whether a deposit can still go on.
+  const REF_INFO = "0f6738a0ee80c8e74cd2c7417c1e25569613e9bbc07e304aa9a1af9b85898e5a";
+  const REF_STATES = ["ongoing", "approved", "rejected", "cancelled", "timed out", "killed"];
+  async function refStatus(n) {
+    if (!NET.sub || !window.BBHash) return "unknown";
+    const le = new Uint8Array(new Uint32Array([n]).buffer);
+    try {
+      const v = await subGet(NET.sub, REF_INFO + tohex(BBHash.blake2_128(le)) + tohex(le));
+      return v ? REF_STATES[v[0]] || "unknown" : "missing";
+    } catch { return "unknown"; }
+  }
+
   function who(cell, a, you) {
     cell.innerHTML = ""; cell.className = "mono who";
     const r = (IDS.get(a.toLowerCase()) || {}).r;
@@ -635,9 +711,69 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
 
   // ---------------------------------------------------------------- pool
   const REF_Q = Number(q.get("ref")) || 0;
-  const listed = POOLS.find((p) => p.net === NET_KEY && (q.get("pool") ? (p.address || "").toLowerCase() === q.get("pool").toLowerCase() : !REF_Q || p.referendum === REF_Q));
-  const POOL = (q.get("pool") || (listed && listed.address) || "").toLowerCase();
+  const HAND = POOLS.splice(0).filter((p) => p.net === NET_KEY).map((p) => ({ ...p, address: p.address.toLowerCase(), version: 1 }));
+  let listed = null, POOL = "", REFS = null, REFS_AT = null, discovered = false;
   let S = null, account = null, busy = false, faucetShown = false, eth = null;
+
+  const pretty = (t) => (t || "").replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
+  const planckUnits = (p) => ksm(BigInt(p) * WEI_PER_PLANCK_OF[NET_KEY]);
+  const WEI_PER_PLANCK_OF = { kusama: 1000000n, paseo: 100000000n };
+
+  // Version 2 pools opened through this network's factory. Birdbrain's indexer publishes them
+  // with a check against the referendum. If it is not answering, the factory's own events are
+  // read here and checked against the indexer's referendum list, or left unlisted without one.
+  async function factoryPools() {
+    if (!NET.factory) return [];
+    const f = await indexed(NET_KEY + "-pools");
+    const want = (q.get("pool") || "").toLowerCase();
+    let pools = f && Array.isArray(f.pools) ? f.pools.map((p) => ({ ...p, address: p.address.toLowerCase() })) : null;
+    // A pool opened in the last few minutes is not in Birdbrain's list yet: look it up on the chain.
+    if (pools && (!want || pools.some((p) => p.address === want))) return pools;
+    const logs = await rpc("eth_getLogs", [{ address: NET.factory.address, fromBlock: "0x" + NET.factory.from.toString(16), toBlock: "latest",
+      topics: pools ? [POOL_OPENED, null, "0x" + want.slice(2).padStart(64, "0")] : [POOL_OPENED] }]).catch(() => []);
+    return (pools || []).concat(logs.map((l) => ({ address: addr(l.topics[2]), referendum: Number(BigInt(l.topics[1])), by: addr(l.topics[3]),
+      depositPlanck: word(l.data, 0).toString(), minPlanck: word(l.data, 1).toString(), fundingDeadline: Number(word(l.data, 2)),
+      sweepTo: addr("0x" + l.data.slice(2 + 192, 2 + 256)), block: Number(l.blockNumber) })));
+  }
+  // The same check the indexer makes: the deposit must be the referendum's track deposit,
+  // because the contract cannot read governance and a wrong one can fill but never place.
+  function checkPool(p) {
+    if (p.check) return p.check;
+    const r = REFS && REFS.get(p.referendum);
+    if (!REFS) return { ok: false, reasons: ["Birdbrain has not checked it against its referendum yet"] };
+    if (!r) return { ok: false, reasons: ["#" + p.referendum + " is not an ongoing referendum on " + NET.name] };
+    if (r.status !== "ongoing") return { ok: false, reasons: ["#" + p.referendum + " had ended (" + r.status + ") before Birdbrain checked the pool"] };
+    if (BigInt(p.depositPlanck) !== BigInt(r.depositPlanck))
+      return { ok: false, reasons: ["its deposit is " + planckUnits(p.depositPlanck) + " " + NET.symbol + " but the " + pretty(r.trackName).toLowerCase() + " track needs " + planckUnits(r.depositPlanck) + ", so it can fill but never place"] };
+    return { ok: true, reasons: [] };
+  }
+  async function discover() {
+    const [refs, opened] = await Promise.all([indexed(NET_KEY + "-referenda"), factoryPools().catch(() => [])]);
+    if (refs && Array.isArray(refs.referenda)) { REFS = new Map(refs.referenda.map((r) => [r.index, r])); REFS_AT = refs.updated; }
+    const n = {};
+    for (const p of HAND) n[p.referendum] = Math.max(n[p.referendum] || 0, p.n || 1);
+    const found = [];
+    for (const p of [...opened].sort((a, b) => a.block - b.block)) {
+      if (HAND.some((x) => x.address === p.address)) continue;
+      const r = REFS && REFS.get(p.referendum), check = checkPool(p);
+      const title = (r && r.title) || "Referendum #" + p.referendum;
+      found.push({ ...p, net: NET_KEY, version: 2, factory: true, check, hidden: !check.ok, n: check.ok ? (n[p.referendum] = (n[p.referendum] || 0) + 1) : null,
+        title, tabTitle: r && r.title ? (r.title.length > 34 ? r.title.slice(0, 32).trim() + "…" : r.title) : r && r.trackName ? pretty(r.trackName) : "",
+        short: (NET.test ? "Paseo" : "Kusama") + " #" + p.referendum });
+    }
+    POOLS.splice(0, POOLS.length, ...HAND, ...found);
+    discovered = true;
+  }
+  // Which pool to show: ?pool= if given, else the newest pool for ?ref=, else the newest pool
+  // of the most recent referendum listed here.
+  function pick() {
+    const shown = POOLS.filter((p) => !p.hidden);
+    const want = (q.get("pool") || "").toLowerCase();
+    if (want) { POOL = want; listed = POOLS.find((p) => p.address === want) || null; return; }
+    const refs = shown.filter((p) => !REF_Q || p.referendum === REF_Q).sort((a, b) => b.referendum - a.referendum || (b.n || 0) - (a.n || 0));
+    listed = refs[0] || null; POOL = listed ? listed.address : "";
+  }
+  const isListed = () => !!(listed && !listed.hidden);
 
   let loadSeq = 0;
   async function load() {
@@ -662,8 +798,14 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     // The contract judges the deadline by the chain's clock, so the page does too.
     const head = await rpc("eth_getBlockByNumber", ["latest", false]).catch(() => null);
     const now = head && head.timestamp ? BigInt(head.timestamp) : BigInt(Math.floor(Date.now() / 1000));
-    const next = { ref: Number(word(ref, 0)), dep: word(dep, 0), min: word(min, 0), dl: word(dl, 0), st: STATES[Number(word(st, 0))],
-          tot: word(tot, 0), people, count, now, mine: 0n, hist: await history().catch(() => null) };
+    // Version 2 has sweepTo(); version 1 reverts on it.
+    const sw = await read(POOL, "sweepTo").catch(() => null);
+    const st0 = STATES[Number(word(st, 0))], refN = Number(word(ref, 0));
+    const next = { ref: refN, dep: word(dep, 0), min: word(min, 0), dl: word(dl, 0), st: st0,
+          tot: word(tot, 0), people, count, now, mine: 0n, hist: await history().catch(() => null),
+          version: sw && sw.length >= 66 ? 2 : 1, sweepTo: sw && sw.length >= 66 ? addr(sw) : null, excess: 0n,
+          refSt: st0 === "open" ? await refStatus(refN) : null, refInfo: REFS ? REFS.get(refN) || null : null };
+    if (next.version === 2 && st0 === "returning") next.excess = word(await read(POOL, "excess"), 0);
     if (account) {
       next.mine = word(await read(POOL, "contributed", hex(BigInt(account))), 0);
       next.bal = BigInt(await rpc("eth_getBalance", [account, "latest"]));
@@ -700,8 +842,8 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     return a;
   }
   function drawChooser() {
-    const mine = POOLS.filter((p) => p.net === NET_KEY);
-    const refs = [...new Set(mine.map((p) => p.referendum))];
+    const mine = POOLS.filter((p) => p.net === NET_KEY && !p.hidden);
+    const refs = [...new Set(mine.map((p) => p.referendum))].sort((a, b) => b - a);
     const current = listed ? listed.referendum : null;
     $("refRow").hidden = refs.length < 2;
     $("refTabs").replaceChildren(...refs.map((r) => {
@@ -710,9 +852,9 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     }));
     const siblings = mine.filter((p) => p.referendum === current).sort((a, b) => a.n - b.n);
     $("poolRow").hidden = siblings.length < 2;
-    $("poolTabs").replaceChildren(...siblings.map((p) => tab(poolHref({ pool: p.address }), "Pool " + p.n, p === listed, tabStatus[p.address])));
+    $("poolTabs").replaceChildren(...siblings.map((p) => tab(poolHref({ pool: p.address }), "Pool " + p.n, listed && p.address === listed.address, tabStatus[p.address])));
     $("chooser").hidden = $("refRow").hidden && $("poolRow").hidden;
-    const open = siblings.find((p) => p !== listed && tabStatus[p.address] && tabStatus[p.address].cls === "open" && tabStatus[p.address].label === "Open");
+    const open = siblings.find((p) => (!listed || p.address !== listed.address) && tabStatus[p.address] && tabStatus[p.address].cls === "open" && tabStatus[p.address].label === "Open");
     const here = tabStatus[POOL];
     $("useOther").hidden = !(open && here && here.label !== "Open");
     if (open) {
@@ -721,7 +863,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     }
   }
   async function readTabs() {
-    const siblings = POOLS.filter((p) => listed && p.net === NET_KEY && p.referendum === listed.referendum && p.address !== POOL);
+    const siblings = POOLS.filter((p) => listed && !p.hidden && p.net === NET_KEY && p.referendum === listed.referendum && p.address !== POOL);
     await Promise.all(siblings.map(async (p) => {
       const [st, tot, dep, dl] = await Promise.all(["state", "total", "deposit", "fundingDeadline"].map((k) => read(p.address, k)));
       const head = await rpc("eth_getBlockByNumber", ["latest", false]);
@@ -740,6 +882,17 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     a.textContent = (listed && listed.title) || "Referendum #" + s.ref;
     $("reftitle").append(a);
     if (listed && listed.note) { $("mirrorNote").innerHTML = listed.note; $("mirrorNote").hidden = false; }
+    $("sweepRow").hidden = !s.sweepTo;
+    if (s.sweepTo) $("sweepTo").textContent = s.sweepTo;
+    $("openedRow").hidden = !(listed && listed.factory);
+    if (listed && listed.factory) {
+      const by = $("openedBy"); by.innerHTML = "";
+      const sp = document.createElement("span"); by.append(sp); who(sp, listed.by, account && listed.by === account);
+      by.append(document.createElement("br"));
+      const n = document.createElement("span"); n.className = "note";
+      n.textContent = "Through the factory" + (listed.time ? ", " + new Date(listed.time).toLocaleString("en-GB", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" }) : "") + ". The opener has no power over the pool.";
+      by.append(n);
+    }
     const badge = poolStatus(s);
     $("state").textContent = badge.label;
     $("state").className = "state " + badge.cls;
@@ -754,10 +907,12 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     const refundedAll = Object.values(refundedTo).reduce((a, b) => a + b, 0n), refundedN = Object.keys(refundedTo).length;
     $("remaining").textContent = s.st === "open" && !full ? (closed ? ksm(s.dep - s.tot) + " " + NET.symbol + " short." : ksm(s.dep - s.tot) + " " + NET.symbol + " still needed.")
       : s.st === "returning" ? (s.tot > 0n ? ksm(s.tot) + " " + NET.symbol + " still to refund." : refundedN ? ksm(refundedAll) + " " + NET.symbol + " refunded to " + refundedN + " address" + (refundedN === 1 ? "" : "es") + "." : "") : "";
+    const gone = blocked(s);
     $("next").textContent = {
-      open: full ? "The pool is full but the deposit is not on yet. Anyone can place it below." : closed ? "Funding closed before the pool filled. Anyone can close it and refund everyone. If nobody does, Birdbrain will." : "The payment that fills the pool tries to place the deposit on #" + s.ref + ".",
+      open: gone && !closed ? gone + " This pool cannot place it. Take your " + NET.symbol + " back now, or everyone is repaid after funding closes." + (isListed() ? " If nobody does it, Birdbrain will." : "")
+        : full ? "The pool is full but the deposit is not on yet. Anyone can place it below." : closed ? "Funding closed before the pool filled. Anyone can close it and refund everyone." + (isListed() ? " If nobody does, Birdbrain will." : "") : "The payment that fills the pool tries to place the deposit on #" + s.ref + ".",
       placed: "The deposit is on #" + s.ref + ". When the referendum ends, anyone can bring it back and refund everyone. If nobody does, Birdbrain will.",
-      returning: s.tot === 0n ? "Everyone has been refunded." : "The " + NET.symbol + " is back in the pool. Anyone can refund every group now. If nobody does, Birdbrain will.",
+      returning: s.tot === 0n ? "Everyone has been refunded." + (s.excess > 0n ? " " + ksm(s.excess) + " " + NET.symbol + " that nobody is owed is still in the pool, and anyone can send it on to the address fixed for it." : "") : "The " + NET.symbol + " is back in the pool. Anyone can refund every group now. If nobody does, Birdbrain will.",
     }[s.st];
     // A pool that filled closed when it filled, not at its deadline. The deadline is only a fallback while the history loads.
     const placedAt = (s.hist || []).find((h) => h.what === "Deposit placed" && h.t);
@@ -797,6 +952,15 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     renderActions();
   }
 
+  // Why a deposit can no longer go on, read live from governance, or null if it still can.
+  function blocked(s) {
+    if (s.st !== "open") return null;
+    if (s.refSt && s.refSt !== "ongoing" && s.refSt !== "unknown") return s.refSt === "missing" ? "Referendum #" + s.ref + " does not exist on " + NET.name + "." : "Referendum #" + s.ref + " has " + (s.refSt === "timed out" ? "timed out" : "ended (" + s.refSt + ")") + ", so no deposit can go on.";
+    if (s.refInfo && s.refInfo.hasDecisionDeposit) return "Someone else has already placed #" + s.ref + "'s decision deposit.";
+    if (listed && listed.hidden) return "Birdbrain does not list this pool (see above).";
+    return null;
+  }
+
   function button(label, fn, ghost) {
     const b = document.createElement("button");
     b.className = "btn" + (ghost ? " ghost" : ""); b.textContent = label; b.disabled = busy || !account;
@@ -808,7 +972,7 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     $("connect").hidden = !!account;
     $("changeWallet").hidden = !(account && wallets.size > 1) || busy;
     $("walletline").textContent = account ? "Connected as " + short(account) + " on " + NET.name + (s.bal !== undefined ? ", holding " + ksm(s.bal) + " " + NET.symbol : "") + "." : "Connect an Ethereum account in Talisman or MetaMask. It will be switched to " + NET.name + ".";
-    $("contributeBox").hidden = !(s.st === "open" && !full && !closed);
+    $("contributeBox").hidden = !(s.st === "open" && !full && !closed && !blocked(s));
     const low = account && s.bal !== undefined && s.bal < s.min;
     $("faucetBox").hidden = !(NET_KEY === "paseo" && account && (low || faucetShown));
     $("faucetLine").textContent = low
@@ -832,11 +996,12 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       : (s.mine > 0n ? "The deposit is back. Press Claim my share to receive your " + sym + "." : "Nothing of yours is waiting in this pool.");
     $("moreActions").innerHTML = "";
     if (s.st === "open" && s.mine > 0n) button("Take my " + NET.symbol + " back", () => act("withdraw"), true);
-    if (s.st === "open" && full && !closed) button("Place the deposit", () => act("place"));
+    if (s.st === "open" && full && !closed && !blocked(s)) button("Place the deposit", () => act("place"));
     if (s.st === "open" && closed) button("Close the pool and refund everyone", () => act("abandon"));
     if (s.st === "placed") button("Bring the deposit back", () => act("reclaim"));
     if (s.st === "returning" && s.tot > 0n) button("Refund everyone", () => act("payout", hex(0) + hex(s.count)));
     if (s.st === "returning" && s.mine > 0n) button("Claim my share", () => act("claim"), true);
+    if (s.st === "returning" && s.excess > 0n && s.tot === 0n) button("Send on the stray " + NET.symbol, () => act("sweep"), true);
   }
 
   // The Polkadot-format address behind an Ethereum account: its 20 bytes, then twelve 0xEE,
@@ -946,12 +1111,13 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       if (mine !== choice) return;
       if (!watched.has(p)) {
         watched.add(p);
-        p.on?.("accountsChanged", (a) => { if (eth !== p) return; account = (a[0] || "").toLowerCase() || null; load(); });
+        p.on?.("accountsChanged", (a) => { if (eth !== p) return; account = (a[0] || "").toLowerCase() || null; renderOpen(); if (POOL) load(); });
       }
       eth = p; account = String(first).toLowerCase();
       $("walletPick").hidden = true;
       say("");
-      await load();
+      renderOpen();
+      if (POOL) await load();
     } catch (e) { if (mine === choice) { eth = null; account = null; say(revertMessage(e), "bad"); } }
   }
 
@@ -960,7 +1126,8 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     choice++; eth = null; account = null; say("");
     window.dispatchEvent(new Event("eip6963:requestProvider"));
     showWallets();
-    load().catch(() => {});
+    renderOpen();
+    if (POOL) load().catch(() => {});
   };
 
   async function act(name, args = "", value = 0n) {
@@ -974,6 +1141,18 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       const bal = BigInt(await rpc("eth_getBalance", [account, "latest"]));
       if (bal <= value) throw new Error("insufficient funds");
       await rpc("eth_call", [tx, "latest"]);
+      if (name === "contribute") {
+        // Any payment may turn out to be the one that fills the pool, if another lands first,
+        // and then it also places the deposit. A wallet's estimate covers only the payment, so
+        // the placement would run out of gas (Paseo, 6 November). Set enough for both: twice
+        // the estimate, or the estimate for filling the pool now if that is more.
+        const est = BigInt(await rpc("eth_estimateGas", [tx]));
+        const left = S.dep - S.tot;
+        let fill = value === left ? est : 0n;
+        if (!fill && bal > left) fill = await rpc("eth_estimateGas", [{ ...tx, value: "0x" + left.toString(16) }]).then(BigInt).catch(() => 0n);
+        const gas = est * 2n > fill * 13n / 10n ? est * 2n : fill * 13n / 10n;
+        tx.gas = "0x" + gas.toString(16);
+      }
       const chain = await eth.request({ method: "eth_chainId" });
       if (parseInt(chain, 16) !== CHAIN_ID) throw new Error("Your wallet is not on " + NET.name + ". Reconnect to switch it.");
       say("Confirm it in your wallet…");
@@ -983,9 +1162,12 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
       for (let i = 0; i < 60 && !receipt; i++) { receipt = await rpc("eth_getTransactionReceipt", [hash]); if (!receipt) await new Promise((r) => setTimeout(r, 2000)); }
       if (!receipt) done = ["Sent, but not confirmed yet. Transaction " + short(hash) + ". Refresh in a minute."];
       else if (receipt.status !== "0x1") done = ["The transaction was included but failed. Nothing changed.", "bad"];
+      else if (name === "contribute" && (receipt.logs || []).some((l) => l.topics && l.topics[0] === AUTO_PLACE_FAILED))
+        done = ["Paid in, and that filled the pool. Placing the deposit in the same payment did not work, so nothing left the pool. Press Place the deposit to try again.", "bad"];
       else done = [{ contribute: "Paid in. Thank you.", withdraw: "Your " + NET.symbol + " is on its way back.", place: "The deposit is on the referendum.",
                  reclaim: "The deposit is back in the pool. Now refund everyone.", abandon: "The pool is closed. Now refund everyone.",
-                 payout: "Everyone who could be refunded has been.", claim: "Your share is on its way back." }[name], "good"];
+                 payout: "Everyone who could be refunded has been.", claim: "Your share is on its way back.",
+                 sweep: "The stray " + NET.symbol + " has been sent on." }[name], "good"];
     } catch (e) { done = [revertMessage(e), "bad"]; }
     // Re-read the pool before saying how it went, so the page and the message agree.
     // Still busy, so the background refresh cannot start a newer read that wins.
@@ -993,6 +1175,140 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     busy = false; if (S) renderActions();
     say(done[0], done[1]);
   }
+
+  // ------------------------------------------------------- referenda waiting for a deposit
+  const whenShort = (sec) => new Date(sec * 1000).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" });
+  const poolsFor = (n) => POOLS.filter((p) => !p.hidden && p.referendum === n);
+  function renderNeeds() {
+    if (!REFS) { $("needs").hidden = true; return; }
+    const now = Date.now() / 1000;
+    const rows = [...REFS.values()].filter((r) => r.status === "ongoing" && !r.hasDecisionDeposit && !r.pastTimeout).sort((a, b) => b.index - a.index);
+    $("needs").hidden = false;
+    $("needsLine").textContent = rows.length
+      ? rows.length + " ongoing referend" + (rows.length === 1 ? "um" : "a") + " on " + NET.name + (rows.length === 1 ? " has" : " have") + " no decision deposit yet. Without one, a referendum times out."
+        + (NET.factory ? " Anyone can open a pool for any of them." : " Pools for any referendum come with version 2, which is on Paseo only for now.")
+      : "Every ongoing referendum on " + NET.name + " has its decision deposit.";
+    const tb = $("needsTable").tBodies[0]; tb.innerHTML = "";
+    for (const r of rows) {
+      const tr = tb.insertRow();
+      const c1 = tr.insertCell(), a = document.createElement("a");
+      a.href = NET.subsquare + r.index; a.target = "_blank"; a.rel = "noopener"; a.textContent = "#" + r.index;
+      c1.append(a);
+      if (r.title) { const t = document.createElement("span"); t.className = "t"; t.textContent = r.title; c1.append(t); }
+      const c2 = tr.insertCell(); c2.textContent = planckUnits(r.depositPlanck) + " " + NET.symbol;
+      const t2 = document.createElement("span"); t2.className = "t"; t2.textContent = pretty(r.trackName) + " track"; c2.append(t2);
+      const c3 = tr.insertCell(); c3.textContent = "Times out about " + whenShort(r.timeoutEstimate);
+      const c4 = tr.insertCell();
+      const open = poolsFor(r.index).filter((p) => p.factory && p.fundingDeadline > now);
+      if (open.length) { const l = document.createElement("a"); l.href = poolHref({ ref: r.index }); l.textContent = "Pay in"; c4.append(l); }
+      else if (NET.factory) {
+        const b = document.createElement("button"); b.className = "linkbtn"; b.type = "button"; b.textContent = "Open a pool";
+        b.onclick = () => { $("openRef").value = String(r.index); renderOpen(); $("openPool").scrollIntoView({ behavior: "smooth" }); };
+        c4.append(b);
+      } else c4.textContent = "No pool yet";
+    }
+    $("needsUpdated").textContent = REFS_AT ? "Read from the chain by Birdbrain at " + new Date(REFS_AT).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) + ". A timeout is an estimate from block numbers." : "";
+  }
+
+  // ------------------------------------------------------- opening a pool
+  const DEC_OF = { kusama: 12, paseo: 10 };
+  function toPlanck(str) {
+    const d = DEC_OF[NET_KEY], t = String(str).trim().replace(/,/g, "");
+    if (!new RegExp("^\\d+(\\.\\d{1," + d + "})?$").test(t)) return null;
+    const [w, f = ""] = t.split(".");
+    return BigInt(w) * 10n ** BigInt(d) + BigInt(f.padEnd(d, "0"));
+  }
+  const fromPlanck = (p) => { const d = DEC_OF[NET_KEY], u = 10n ** BigInt(d); const w = p / u, f = (p % u).toString().padStart(d, "0").replace(/0+$/, ""); return w + (f ? "." + f : ""); };
+  let openFor = null;
+  function openMsg(text, kind) { $("openMsg").textContent = text; $("openMsg").className = "note" + (kind ? " " + kind : ""); }
+  function openProblem(r, n) {
+    if (!REFS) return "Birdbrain's reading of the chain is not answering just now, so the page cannot work out the terms. Try again in a few minutes.";
+    if (!r) return "#" + n + " is not an ongoing referendum on " + NET.name + ".";
+    if (r.hasDecisionDeposit) return "#" + n + " already has its decision deposit, so no pool is needed.";
+    if (r.pastTimeout) return "#" + n + " is past its timeout block and will time out at its next check, so a pool could not place.";
+    if (r.fundingDeadline < Date.now() / 1000 + 900) return "#" + n + " times out too soon for a pool to fill.";
+    return "";
+  }
+  function renderOpen() {
+    $("openPool").hidden = false;
+    $("openNoFactory").hidden = !!NET.factory;
+    $("openForm").hidden = !NET.factory;
+    if (!NET.factory) return;
+    const raw = $("openRef").value.trim().replace(/^#/, ""), n = /^\d+$/.test(raw) ? Number(raw) : null;
+    const r = n !== null && REFS ? REFS.get(n) : null, ongoing = r && r.status === "ongoing" ? r : null;
+    const problem = raw ? (n === null ? "Enter the referendum's number." : openProblem(ongoing, n)) : "";
+    $("openTerms").hidden = !ongoing;
+    $("openMore").hidden = !ongoing || !!problem;
+    if (ongoing) {
+      const t = $("oTitle"); t.innerHTML = "";
+      const a = document.createElement("a"); a.href = NET.subsquare + n; a.target = "_blank"; a.rel = "noopener"; a.textContent = "#" + n + (r.title ? " · " + r.title : "");
+      t.append(a);
+      $("oTrack").textContent = pretty(r.trackName);
+      $("oDeposit").textContent = planckUnits(r.depositPlanck) + " " + NET.symbol + ", the track's decision deposit";
+      $("oTimeout").textContent = whenShort(r.timeoutEstimate) + " (relay block " + r.timeoutRelay.toLocaleString("en-GB") + ")";
+      $("oClose").textContent = whenShort(r.fundingDeadline) + ", an hour after";
+      const existing = poolsFor(n), o = $("oPools"); o.innerHTML = "";
+      if (!existing.length) o.textContent = "None";
+      existing.forEach((p, i) => { if (i) o.append(", "); const l = document.createElement("a"); l.href = poolHref({ pool: p.address }); l.textContent = "Pool " + p.n; o.append(l); });
+      if (openFor !== n) {
+        openFor = n;
+        const dep = BigInt(r.depositPlanck), unit = 10n ** BigInt(DEC_OF[NET_KEY]);
+        const pct = dep / 100n, sugg = pct >= unit ? pct / unit * unit : pct;
+        $("openMin").value = fromPlanck(sugg > 0n ? sugg : dep);
+      }
+    }
+    if (account && !$("openSweep").value.trim()) $("openSweep").value = account;
+    const minP = ongoing ? toPlanck($("openMin").value) : null;
+    const badMin = ongoing && !problem && (minP === null || minP === 0n || minP > BigInt(r.depositPlanck));
+    const badSweep = ongoing && !problem && account && !/^0x[0-9a-fA-F]{40}$/.test($("openSweep").value.trim());
+    $("openConnect").hidden = !!account || !ongoing || !!problem;
+    $("openGo").hidden = !account || !ongoing || !!problem;
+    $("openGo").disabled = busy || !!badMin || !!badSweep;
+    if (busy) return;
+    if (problem) openMsg(problem, "bad");
+    else if (badMin) openMsg("The smallest payment must be more than 0 and no more than the deposit, in at most " + DEC_OF[NET_KEY] + " decimal places.", "bad");
+    else if (badSweep) openMsg("Enter a 0x address for stray money.", "bad");
+    else if (ongoing && poolsFor(n).some((p) => p.factory && p.fundingDeadline > Date.now() / 1000)) openMsg("A pool for #" + n + " is already open. Paying into it is usually better than opening another.");
+    else openMsg("");
+  }
+  async function openPool() {
+    if (busy) return;
+    const n = Number($("openRef").value.trim().replace(/^#/, "")), r = REFS && REFS.get(n);
+    const minP = toPlanck($("openMin").value), sweep = $("openSweep").value.trim().toLowerCase();
+    if (!r || openProblem(r, n) || !minP || !/^0x[0-9a-f]{40}$/.test(sweep)) return renderOpen();
+    busy = true; renderOpen(); if (S) renderActions();
+    let done;
+    try {
+      openMsg("Checking #" + n + " is still open for a deposit…");
+      const st = await refStatus(n);
+      if (st !== "ongoing" && st !== "unknown") throw new Error("#" + n + " is no longer ongoing (" + st + "). Nothing was sent.");
+      const head = await rpc("eth_getBlockByNumber", ["latest", false]);
+      if (Number(head.timestamp) >= r.fundingDeadline - 600) throw new Error("#" + n + " times out too soon for a pool to fill. Nothing was sent.");
+      const data = "0x" + SEL.open + hex(n) + hex(r.depositPlanck) + hex(minP) + hex(r.fundingDeadline) + hex(BigInt(sweep));
+      const tx = { from: account, to: NET.factory.address, data, value: "0x0" };
+      await rpc("eth_call", [tx, "latest"]);
+      const chain = await eth.request({ method: "eth_chainId" });
+      if (parseInt(chain, 16) !== CHAIN_ID) throw new Error("Your wallet is not on " + NET.name + ". Reconnect to switch it.");
+      openMsg("Confirm it in your wallet…");
+      const hash = await eth.request({ method: "eth_sendTransaction", params: [tx] });
+      openMsg("Sent. Waiting for the next block…");
+      let receipt = null;
+      for (let i = 0; i < 60 && !receipt; i++) { receipt = await rpc("eth_getTransactionReceipt", [hash]); if (!receipt) await new Promise((res) => setTimeout(res, 2000)); }
+      if (!receipt) done = ["Sent, but not confirmed yet. Transaction " + short(hash) + ". Refresh in a minute."];
+      else if (receipt.status !== "0x1") done = ["The transaction was included but failed. Nothing changed.", "bad"];
+      else {
+        const log = (receipt.logs || []).find((l) => l.address.toLowerCase() === NET.factory.address && l.topics[0] === POOL_OPENED);
+        const pool = log ? addr(log.topics[2]) : null;
+        done = [pool ? "The pool for #" + n + " is open at " + pool + ". Taking you to it." : "The pool is open. It appears here within a few minutes.", "good"];
+        if (pool) setTimeout(() => { location.href = poolHref({ pool }); }, 1500);
+      }
+    } catch (e) { done = [e && /Nothing was sent/.test(e.message) ? e.message : revertMessage(e), "bad"]; }
+    busy = false; renderOpen(); if (S) renderActions();
+    openMsg(done[0], done[1]);
+  }
+  ["input", "change"].forEach((ev) => { $("openRef").addEventListener(ev, renderOpen); $("openMin").addEventListener(ev, renderOpen); $("openSweep").addEventListener(ev, renderOpen); });
+  $("openConnect").onclick = connect;
+  $("openGo").onclick = openPool;
 
   $("connect").onclick = connect;
   let faucetWin = null, faucetPoll = null;
@@ -1017,11 +1333,16 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
   };
   $("ack").onchange = () => renderActions();
   $("rest").onclick = () => { if (S) $("amt").value = ksm(S.dep - S.tot, 18).replace(/,/g, ""); };
-  $("contribute").onclick = () => {
+  $("contribute").onclick = async () => {
     const wei = parseKsm($("amt").value), left = S.dep - S.tot;
     if (wei === null || wei === 0n) return say("Enter an amount in " + NET.symbol + ", up to " + DECIMALS + " decimal places.", "bad");
     if (wei > left) return say("That is more than the pool still needs (" + ksm(left, 18) + " " + NET.symbol + ").", "bad");
     if (wei < S.min && wei !== left) return say("The smallest payment is " + ksm(S.min) + " " + NET.symbol + ", unless it fills the pool exactly.", "bad");
+    // Governance is read again now, not from the last refresh: after a timeout the chain
+    // refuses the deposit, and a payment would only wait to be repaid.
+    say("Checking the referendum is still open…");
+    const st = await refStatus(S.ref);
+    if (st !== "ongoing" && st !== "unknown") { S.refSt = st; render(); return say(blocked(S) + " Nothing was sent.", "bad"); }
     act("contribute", "", wei);
   };
 
@@ -1033,25 +1354,49 @@ footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-co
     $("trust").innerHTML = 'This pool is on Paseo, Polkadot\'s test network. It runs the same contract as a Kusama pool, with PAS, test money that has no value. Get some free from <a href="https://faucet.polkadot.io/" target="_blank" rel="noopener">faucet.polkadot.io</a>: choose Paseo, then Asset Hub.';
     $("planckNote").textContent = "1 PAS is 10,000,000,000";
   }
-  if (listed && listed.pending) {
-    const t = document.createElement("a");
-    t.href = NET.subsquare + listed.referendum; t.target = "_blank"; t.rel = "noopener"; t.textContent = listed.title;
-    $("pRefline").textContent = "Kusama referendum #" + listed.referendum + " · " + listed.track;
-    $("pTitle").append(t);
-    $("pDeposit").textContent = listed.deposit;
-    $("pTimeout").textContent = listed.timeout;
-    $("pHash").textContent = listed.proposal;
-    $("pMirror").href = "?net=paseo&pool=" + listed.mirror;
-    for (const [k, text] of listed.checks) { const li = document.createElement("li"); li.className = k; li.textContent = text; $("pChecks").append(li); }
-    $("pendingview").hidden = false;
-    return;
+  function trustLine() {
+    if (!POOL) return;
+    if (!listed) { $("trust").textContent = "This pool is not one Birdbrain lists. Anyone can create a contract and send you a link to it here. Check the address with the group that sent it before you pay in."; return; }
+    if (listed.hidden) { $("trust").textContent = "Birdbrain does not list this pool: " + listed.check.reasons.join("; ") + ". It was opened through the factory, so its code is the published code, and anyone in it can still take their money back or be repaid. The page does not take payments into it."; return; }
+    if (listed.version === 2) {
+      $("trust").innerHTML = "Version 2 of the contract, opened through the factory" + (NET.test ? " on Paseo, Polkadot's test network, with PAS, test money that has no value" : "") + '. It has not had an independent review yet. A killed referendum loses the deposit. <a href="' + SOURCE + '/tree/main/contracts/v2" target="_blank" rel="noopener">Review the code</a>.';
+      $("ackReview").textContent = "Version 2 of this contract has not had an independent review yet.";
+    }
   }
-  drawChooser();
-  if (!POOL) { $("nopool").hidden = false; $("tryPaseo").hidden = NET.test || !POOLS.some((p) => p.net === "paseo"); return; }
-  if (!listed) $("trust").textContent = "This pool is not one Birdbrain lists. Anyone can create a contract and send you a link to it here. Check the address with the group that sent it before you pay in.";
-  readTabs().catch(() => {});
-  load().catch((e) => { $("poolview").hidden = true; $("nopool").hidden = false; $("nopool").querySelector("h2").textContent = "This pool could not be read."; $("nopool").querySelector("p").textContent = e.message; });
-  setInterval(() => { if (!busy) { load().catch(() => {}); readTabs().catch(() => {}); } }, 20000);
+  (async () => {
+    await discover().catch(() => {});
+    pick();
+    if (listed && listed.pending) {
+      const t = document.createElement("a");
+      t.href = NET.subsquare + listed.referendum; t.target = "_blank"; t.rel = "noopener"; t.textContent = listed.title;
+      $("pRefline").textContent = "Kusama referendum #" + listed.referendum + " · " + listed.track;
+      $("pTitle").append(t);
+      $("pDeposit").textContent = listed.deposit;
+      $("pTimeout").textContent = listed.timeout;
+      $("pHash").textContent = listed.proposal;
+      $("pMirror").href = "?net=paseo&pool=" + listed.mirror;
+      for (const [k, text] of listed.checks) { const li = document.createElement("li"); li.className = k; li.textContent = text; $("pChecks").append(li); }
+      $("pendingview").hidden = false;
+      return;
+    }
+    drawChooser(); renderNeeds(); renderOpen();
+    if (!POOL) { $("nopool").hidden = false; $("tryPaseo").hidden = NET.test; }
+    else {
+      trustLine();
+      readTabs().catch(() => {});
+      load().catch((e) => { $("poolview").hidden = true; $("nopool").hidden = false; $("nopool").querySelector("h2").textContent = "This pool could not be read."; $("nopool").querySelector("p").textContent = e.message; });
+    }
+    let ticks = 0;
+    setInterval(async () => {
+      if (busy) return;
+      if (++ticks % 3 === 0) {
+        await discover().catch(() => {});
+        if (POOL) { listed = POOLS.find((p) => p.address === POOL) || null; trustLine(); }
+        drawChooser(); renderNeeds(); renderOpen();
+      }
+      if (POOL) { load().catch(() => {}); readTabs().catch(() => {}); }
+    }, 20000);
+  })();
 })();
 </script>
 </body>

@@ -1,11 +1,13 @@
 [Unit]
-Description=Settle a decision deposit pool if nobody else has: close it or reclaim the deposit, then refund everyone
+Description=Settle every listed decision deposit pool nobody else has: close it or reclaim the deposit, refund everyone, sweep stray KSM
 After=network-online.target
 
 [Service]
 Type=oneshot
 StateDirectory=cdd-settle
 WorkingDirectory=/opt/cdd-settle
-ExecStart=/usr/local/bin/bun settle.ts kusama 0xfcd8058e46b8ac6f02f1cc71e2912c5ffdc095ce /opt/cdd-settle/kusama-fees.key
+# Each network runs on its own: a leading "-" so one network's trouble never skips the other.
+ExecStart=-/usr/local/bin/bun settle.ts kusama all /opt/cdd-settle/kusama-fees.key
+ExecStart=-/usr/local/bin/bun settle.ts paseo all /opt/cdd-settle/paseo-fees.key
 StandardOutput=append:/var/log/cdd-settle.log
 StandardError=append:/var/log/cdd-settle.log

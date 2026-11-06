@@ -1,0 +1,15 @@
+[Unit]
+Description=Birdbrain decision deposit: pool events from Asset Hub's Substrate side (lab/decision-deposit/indexer)
+After=network-online.target
+
+[Service]
+WorkingDirectory=/opt/cdd-indexer
+Environment=OUT=/var/lib/cdd-indexer/events
+ExecStart=/usr/local/bin/bun run indexer.ts
+Restart=always
+RestartSec=10
+DynamicUser=no
+User=www-data
+
+[Install]
+WantedBy=multi-user.target

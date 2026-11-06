@@ -1,0 +1,1 @@
+{ "name": "cdd-indexer", "private": true, "type": "module", "dependencies": { "@polkadot/api": "16" } }
