@@ -1,0 +1,29 @@
+{
+  "network": "paseo",
+  "slug": "audit-sealed",
+  "kind": "sealed",
+  "purpose": "unfunded sealed tender: sealed bids, sealed budget and quality scores fixed before prices open, all on chain; placeholder asset so it can never hold money; winner paid separately",
+  "deployer": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+  "at": "2026-11-23T16:47:54.167Z",
+  "costKsmOrPas": 0.8608,
+  "asset": "0xdd85dd5e5126383ba7413e1917e664eb5e0fff11",
+  "tender": {
+    "address": "0xe683b5f98b1320f532e580fc8919d417f8b657cd",
+    "tx": "0x3469bba3c818b159f6e603221d35641153088dc07699d4ae5542dce72f2305ea",
+    "block": 16129244,
+    "gasUsed": "860800",
+    "bytecodeSha256": "1f8322e9e6b4267177be52559cc6d91cc6877cbd5758731c4ebd50e02fa25cc9",
+    "buyer": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+    "reviewer": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+    "resolver": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+    "specification": "0xe3a1d89aeb395e5998f3af642615d1329a336d6efe9a2b899f1322f7f07fd0cd",
+    "specificationSource": "tenders/audit-sealed-paseo-spec-at-deploy.md",
+    "ceilingCommitment": "0xc9fd4e2dbd2f8ee0e74798ec6024cb52dd2b86648502f1d3ca43d6b161078389",
+    "budgetSecret": "keys/tenders/audit-sealed-paseo.json",
+    "bidClose": 1795453009,
+    "scoreClose": 1795453309,
+    "revealClose": 1795453729,
+    "activationClose": 1795454269,
+    "reviewPeriod": 604800
+  }
+}

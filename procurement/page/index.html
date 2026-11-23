@@ -103,10 +103,12 @@ Birdbrain <span class="experiment">EXPERIMENT</span></a>
 <div class="hero">
   <div class="eyebrow muted">Procurement on Kusama Asset Hub</div>
   <h1>Bid on a tender</h1>
-  <p class="lead">A tender is one contract for one piece of work. It publishes what is wanted and the most it will pay. Anyone can bid a price, tied to a document setting out what they will deliver. The buyer then awards the work, and payment is held and released milestone by milestone.</p>
+  <p class="lead">A tender is one contract for one piece of work. It publishes what is wanted. Anyone can offer to do it at a price, tied to a document setting out what they will deliver. On a sealed tender, nobody sees a price, or the budget, until bidding has closed and the quality scores are fixed. The buyer then awards the work, and payment is held and released milestone by milestone.</p>
   <div class="banner" id="demoBanner"><b>Unfunded demonstration.</b> This tender is tied to a placeholder token named "NOT dUSD" with no supply, so it can never receive or pay out money. A bid records your price and terms on Kusama Asset Hub and does nothing else. The contracts have not been independently reviewed.</div>
+  <div class="banner" id="liveBanner" hidden><b>Real bids, paid outside the contract.</b> This tender is choosing who does real work. Bids and the award are recorded on Kusama Asset Hub, but the contract is tied to a placeholder token with no supply, so it holds no money. The winner is paid directly by the funder, as the specification sets out. The work is not funded yet. The contracts have not been independently reviewed.</div>
   <div class="banner test" id="testBanner" hidden><b>Testing area.</b> Paseo is Polkadot's test network. PAS has no value.</div>
   <div class="tabs" id="nets"></div>
+  <div class="tabs" id="tenders"></div>
 </div>
 
 <section>
@@ -121,10 +123,17 @@ Birdbrain <span class="experiment">EXPERIMENT</span></a>
     </div>
     <div>
       <h2>How it runs</h2>
-      <ol class="steps">
+      <ol class="steps" id="stepsSealed" hidden>
+        <li><b>Sealed bidding.</b> Each bidder records a seal on chain: a hash of their price, their offer and a secret. Nobody, the buyer included, can see a price. The budget is sealed the same way when the tender is opened.</li>
+        <li><b>Quality scoring.</b> Bids close. Bidders publish their offers, which leave the price out. The buyer scores experience, method and dates and fixes a hash of those scores on chain, once. Prices are still closed.</li>
+        <li><b>Prices open.</b> Each bidder opens their own seal. The contract checks it matches and records the price. Then the budget is opened. A bid above it cannot be awarded.</li>
+        <li><b>Award.</b> The buyer adds the price points to the fixed quality scores, picks the winner and records the reason on chain, then publishes every offer, price and score.</li>
+        <li><b>Delivery and payment.</b> Milestones, review, disputes and withdrawals work as on an open tender. <span class="muted" id="fundNoteSealed">On this tender the contract holds no money, so payment happens outside it.</span></li>
+      </ol>
+      <ol class="steps" id="stepsOpen">
         <li><b>Bidding.</b> Anyone bids a price up to the ceiling, with the hash of a document describing their offer. A later bid from the same address replaces the earlier one.</li>
         <li><b>Award.</b> After bidding closes, the buyer picks one bid, splits its price into milestones with due dates and records a reason on chain.</li>
-        <li><b>Acceptance and funding.</b> The winner checks the milestones and accepts. Accepting pulls the full price into the contract. <span class="muted">On this demonstration that step always fails, because the placeholder token cannot move.</span></li>
+        <li><b>Acceptance and funding.</b> The winner checks the milestones and accepts. Accepting pulls the full price into the contract. <span class="muted" id="fundNote">On this tender that step always fails, because the placeholder token cannot move.</span></li>
         <li><b>Delivery.</b> The winner submits evidence for each milestone. The reviewer approves it, or either side raises a dispute and the resolver divides that milestone's money.</li>
         <li><b>Payment.</b> Each person withdraws what they are owed. Every step leaves a public event, which is the start of a delivery record.</li>
       </ol>
@@ -135,24 +144,32 @@ Birdbrain <span class="experiment">EXPERIMENT</span></a>
 
 <section>
   <h2>Bids so far</h2>
-  <p class="muted small">Bids are open: everyone can see every price. A sealed round, where prices stay hidden until bidding closes, is one of the open design choices.</p>
-  <div class="tablebox"><table><thead><tr><th>Bidder</th><th class="n">Price</th><th>Terms hash</th><th>When</th></tr></thead><tbody id="bids"></tbody></table></div>
+  <p class="muted small" id="bidsNote">Bids are open: everyone can see every price as it arrives.</p>
+  <div class="tablebox"><table><thead><tr id="bidsHead"><th>Bidder</th><th class="n">Price</th><th>Terms hash</th><th>When</th></tr></thead><tbody id="bids"></tbody></table></div>
   <div class="empty" id="noBids" hidden>No bids yet.</div>
 </section>
 
 <section id="bidSection">
   <div class="grid">
     <div>
-      <h2>Place a bid</h2>
-      <p>Write your offer below, or choose a file. The page hashes it with keccak-256 and puts only the hash on chain. Publish the document somewhere others can read it, such as a gist or the forum thread, so anyone can check it matches.</p>
-      <label for="price">Your price, in the tender's units</label>
+      <h2 id="formTitle">Place a bid</h2>
+      <div class="check" id="phaseNote" hidden></div>
+      <div id="openPanel" hidden>
+        <p>Choose the bid file the page saved when you sealed your bid. The page checks it against the seal on chain, then sends your price and offer hash to open it.</p>
+        <div class="row2 small"><label class="btn" style="margin:0;color:var(--ink)">Choose your bid file<input type="file" id="bidFile" accept=".json,application/json" hidden></label><span id="bidFileName" class="muted"></span></div>
+        <dl id="bidFileFacts"></dl>
+      </div>
+      <div id="bidForm">
+      <p id="formIntro">Write your offer below, or choose a file. The page hashes it with keccak-256 and puts only the hash on chain. Publish the document somewhere others can read it, such as a gist or the forum thread, so anyone can check it matches.</p>
+      <label for="price" id="priceLabel">Your price, in the tender's units</label>
       <input type="text" id="price" inputmode="decimal" placeholder="e.g. 8500" autocomplete="off">
       <div class="small muted" id="priceHint"></div>
-      <label for="terms">Your terms</label>
+      <label for="terms" id="termsLabel">Your terms</label>
       <textarea id="terms" spellcheck="true"></textarea>
       <div class="row2 small" style="margin-top:8px"><label class="btn" style="margin:0;color:var(--ink)">Use a file instead<input type="file" id="termsFile" hidden></label><span id="fileName" class="muted"></span><button type="button" class="btn" id="clearFile" hidden>Use the text box</button></div>
       <div class="small" style="margin-top:10px">Terms hash: <span class="mono" id="termsHash">-</span></div>
-      <label style="color:var(--ink);display:flex;gap:10px;align-items:flex-start;margin-top:18px"><input type="checkbox" id="ack" style="margin-top:6px"><span class="small">I understand my price and address are public, that this demonstration can never pay anyone, and that sending a bid costs a small network fee in <span class="sym">KSM</span>.</span></label>
+      </div>
+      <label id="ackRow" style="color:var(--ink);display:flex;gap:10px;align-items:flex-start;margin-top:18px"><input type="checkbox" id="ack" style="margin-top:6px"><span class="small"><span id="ackPublic">I understand my price and address are public</span>, <span id="ackPay">that this demonstration can never pay anyone</span>, and that sending a bid costs a small network fee in <span class="sym">KSM</span>.</span></label>
       <div class="row2" style="margin-top:18px">
         <button type="button" class="btn" id="connect">Connect a wallet</button>
         <button type="button" class="btn primary" id="send" disabled>Place bid</button>
@@ -163,8 +180,16 @@ Birdbrain <span class="experiment">EXPERIMENT</span></a>
     </div>
     <div>
       <h2>Before you bid</h2>
-      <ul class="notes">
-        <li>You need an Ethereum-style wallet such as MetaMask or Talisman, set to <span id="netName">Kusama Asset Hub</span>, holding a little <span class="sym">KSM</span> for the fee.</li>
+      <ul class="notes" id="notesSealed" hidden>
+        <li>You need an Ethereum-style wallet such as MetaMask or Talisman, set to <span class="netName">Kusama Asset Hub</span>, holding a little <span class="sym">KSM</span> for two network fees: one to seal, one to open.</li>
+        <li><b>Leave the price out of your offer document.</b> It is scored before any price is seen.</li>
+        <li>When you seal, the page saves a bid file holding your price and a secret, and keeps a copy in this browser. <b>Keep the file.</b> Without it your bid cannot be opened, and nobody can recover it for you.</li>
+        <li>You can seal again before bids close. Only the last seal counts, so open with the file from the last one.</li>
+        <li>Publish your offer as soon as bids close, then come back while prices are open to open your bid. A seal never opened is not a bid.</li>
+        <li>Your address cannot be the buyer, reviewer or resolver.</li>
+      </ul>
+      <ul class="notes" id="notesOpen">
+        <li>You need an Ethereum-style wallet such as MetaMask or Talisman, set to <span class="netName">Kusama Asset Hub</span>, holding a little <span class="sym">KSM</span> for the fee.</li>
         <li>Your bid must be above zero and no more than the ceiling, and bidding must still be open.</li>
         <li>Your address cannot be the buyer, reviewer or resolver if you want to be awarded the work.</li>
         <li>Your terms hash is permanent. Change one character of the document and the hash changes, so keep the exact file you hashed.</li>
@@ -202,15 +227,27 @@ for(let x=0;x<5;x++)for(let y=0;y<5;y++)B[y+5*((2*x+3*y)%5)]=rot(A[x+5*y],RO[x+5
 let h="";for(let i=0;i<4;i++){let v=A[i];for(let k=0;k<8;k++){h+=Number(v&255n).toString(16).padStart(2,"0");v>>=8n}}return "0x"+h}
   const NETS = {
     kusama: { chainId: 420420418, name: "Kusama Asset Hub", symbol: "KSM", rpc: "https://eth-rpc-kusama.polkadot.io", explorer: "https://blockscout-kusama.polkadot.io", test: false,
-              tender: "0x8006674375a90d626029781c41cb163263479b70", from: 24177334, spec: "/tools/tender/spec/demo.md", label: "Kusama · demonstration" },
+              tenders: {
+                audit: null,
+                demo: { address: "0x8006674375a90d626029781c41cb163263479b70", from: 24177334, spec: "/tools/tender/spec/demo.md", label: "Practice tender", kind: "demo" } },
+              label: "Kusama" },
     paseo:  { chainId: 420420417, name: "Paseo Asset Hub", symbol: "PAS", rpc: "https://eth-rpc-testnet.polkadot.io", explorer: "https://blockscout-testnet.polkadot.io", test: true,
-              tender: "0xe738f7fad584e231bf46f4b402b9bd52ec8b78d7", from: 16124732, spec: "/tools/tender/spec/demo.md", label: "Testing area: Paseo" },
+              tenders: {
+                audit: { address: "0xe683b5f98b1320f532e580fc8919d417f8b657cd", from: 16129244, spec: "/tools/tender/spec/audit-sealed-paseo.md", label: "Security review (sealed rehearsal)", kind: "live" },
+                demo: { address: "0xe738f7fad584e231bf46f4b402b9bd52ec8b78d7", from: 16124732, spec: "/tools/tender/spec/demo.md", label: "Practice tender", kind: "demo" } },
+              label: "Testing area: Paseo" },
   };
   const SEL = { asset: "38d52e0f", buyer: "7150d8ae", reviewer: "a54044f8", resolver: "04f3bcec", specification: "53100933", ceiling: "753ed1bd",
+    ceilingCommitment: "caab33df", scoreClose: "9652eb03", revealClose: "02dc2f59", qualityScores: "b9c9a067", commitCount: "9123988b", revealCount: "aed5be35",
+    commitments: "e8fcf723", commit: "f14fcbc8", reveal: "af697a6f",
     bidClose: "c7303cfa", activationClose: "03c2f932", reviewPeriod: "3b249810", state: "c19d93fb", contractor: "fbfd2045", bids: "62ea82db", bid: "ea1591bb",
     name: "06fdde03", symbol: "95d89b41", decimals: "313ce567", totalSupply: "18160ddd", balanceOf: "70a08231" };
   const EV = {
     "0x7688c47abe05d00c4c928b2463ce78311682f000513dde54988eca2d6b01072f": "BidPlaced",
+    "0x4993d1a01dd11fa6de1acf5952a36cf1b3f02f1fa3e764d14aa461230ec02eb0": "BidCommitted",
+    "0x8a8d5b54fe996d33200acfece64e0e7eaebfe64aace6a9139d9544c5cef34537": "BidRevealed",
+    "0x2a7f712b5b59e89eb789a19a1ac96fa5849390a2beee566877425a4050c9e1de": "ScoresCommitted",
+    "0x2fd973bd4ed4e7d47f7d0eac2ec2418a7dcc665ea6ea8b48a35d89a154abf677": "CeilingRevealed",
     "0x329e4fd8690fcd92a207427e85bc6e7656db85ee385d1e7bbf7311e397102a9b": "Awarded",
     "0xed1cd0670ee0c0017f550451a038818c696d0b6a9d6ce5b369e44275573cf9b0": "Activated",
     "0x465ddfeee4b3d0fb72ba16ca1e8d4ecf86373b44e51658af98043162de372b4c": "Submitted",
@@ -235,8 +272,7 @@ Milestones and dates
 1. (deliverable) by (date), (share of price)
 2. (deliverable) by (date), (share of price)
 
-Price: (the same figure you bid)
-Assumptions and exclusions
+{PRICE}Assumptions and exclusions
 - (anything the price depends on)
 `;
 
@@ -245,7 +281,10 @@ Assumptions and exclusions
   const NET_KEY = NETS[q.get("net")] ? q.get("net") : "kusama";
   const NET = NETS[NET_KEY];
   const custom = /^0x[0-9a-fA-F]{40}$/.test(q.get("tender") || "") ? q.get("tender").toLowerCase() : null;
-  const TENDER = custom || NET.tender;
+  const LIST = Object.entries(NET.tenders).filter(([, t]) => t);
+  const TKEY = !custom && NET.tenders[q.get("tender")] ? q.get("tender") : LIST[0][0];
+  const TD = custom ? null : NET.tenders[TKEY];
+  const TENDER = custom || TD.address;
   const CHAIN = { chainId: "0x" + NET.chainId.toString(16), chainName: NET.name, nativeCurrency: { name: NET.symbol, symbol: NET.symbol, decimals: 18 }, rpcUrls: [NET.rpc], blockExplorerUrls: [NET.explorer] };
 
   let id = 0, T = null, eth = null, account = null, busy = false, fileBytes = null;
@@ -273,13 +312,18 @@ Assumptions and exclusions
   for (const [k, n] of Object.entries(NETS)) {
     const a = document.createElement("a");
     a.className = "tab" + (n.test ? " test" : ""); a.href = "?net=" + k; a.textContent = n.label;
-    if (k === NET_KEY && !custom) a.setAttribute("aria-current", "page");
+    if (k === NET_KEY) a.setAttribute("aria-current", "page");
     $("nets").append(a);
+  }
+  for (const [k, t] of LIST) {
+    const a = document.createElement("a");
+    a.className = "tab"; a.href = "?net=" + NET_KEY + "&tender=" + k; a.textContent = t.label;
+    if (k === TKEY && !custom) a.setAttribute("aria-current", "page");
+    $("tenders").append(a);
   }
   $("testBanner").hidden = !NET.test;
   document.querySelectorAll(".sym").forEach((e) => (e.textContent = NET.symbol));
-  $("netName").textContent = NET.name;
-  $("terms").value = TEMPLATE.replace("{TENDER}", TENDER + " on " + NET.name);
+  document.querySelectorAll(".netName").forEach((e) => (e.textContent = NET.name));
 
   async function load() {
     const names = ["asset", "buyer", "reviewer", "resolver", "specification", "ceiling", "bidClose", "activationClose", "reviewPeriod", "state", "contractor"];
@@ -292,12 +336,46 @@ Assumptions and exclusions
       ceiling: big(word(r.ceiling, 0)), bidClose: Number(big(word(r.bidClose, 0))), activationClose: Number(big(word(r.activationClose, 0))), review: Number(big(word(r.reviewPeriod, 0))),
       state: Number(big(word(r.state, 0))), contractor: addr(word(r.contractor, 0)), aName: str(aName), aSym: str(aSym), dec: Number(big(word(aDec, 0))), supply: big(word(aSup, 0)), held: big(word(aBal, 0)) };
     T.placeholder = T.supply === 0n && /NOT/i.test(T.aName + T.aSym);
-    $("demoBanner").hidden = !T.placeholder;
+    let cc = null; try { cc = await call(TENDER, "0x" + SEL.ceilingCommitment); } catch {}
+    T.sealed = !!cc && cc.length >= 66 && big(word(cc, 0)) !== 0n;
+    if (T.sealed) {
+      const xs = ["scoreClose", "revealClose", "qualityScores", "commitCount", "revealCount"];
+      const v = await Promise.all(xs.map((n) => call(TENDER, "0x" + SEL[n])));
+      T.ceilingCommitment = "0x" + word(cc, 0); T.scoreClose = Number(big(word(v[0], 0))); T.revealClose = Number(big(word(v[1], 0)));
+      T.scores = "0x" + word(v[2], 0); T.commits = Number(big(word(v[3], 0))); T.reveals = Number(big(word(v[4], 0)));
+    }
+    if (!$("terms").value) $("terms").value = TEMPLATE.replace("{TENDER}", TENDER + " on " + NET.name).replace("{PRICE}", T.sealed ? "Price: not in this document. It goes only into your sealed bid.\n" : "Price: (the same figure you bid)\n");
+    applyMode();
+    const live = TD && TD.kind === "live";
+    $("demoBanner").hidden = !T.placeholder || live;
+    $("liveBanner").hidden = !live;
+    if (live) $("ackPay").textContent = "that the contract holds no money and payment, if the work is funded, comes from the funder as the specification sets out";
     renderFacts(); renderForm();
     await Promise.all([loadEvents(), checkSpec()]);
   }
 
+  function phase() {
+    const now = Date.now() / 1000;
+    if (T.state !== 0) return "after";
+    if (now < T.bidClose) return "bidding";
+    if (!T.sealed) return "closed";
+    if (now < T.scoreClose) return "scoring";
+    if (now < T.revealClose) return "opening";
+    return "closed";
+  }
+  const money = (v) => (TD && TD.kind === "live" ? "US$" + fmt(v, T.dec) : fmt(v, T.dec) + " " + esc(T.aSym));
+  function applyMode() {
+    const s = T.sealed;
+    $("stepsSealed").hidden = !s; $("stepsOpen").hidden = s; $("notesSealed").hidden = !s; $("notesOpen").hidden = s;
+    if (!s) return;
+    $("bidsNote").textContent = "Sealed: until bids close only the seals are public. Each price appears when its bidder opens it, after the quality scores are fixed on chain.";
+    $("bidsHead").innerHTML = '<th>Bidder</th><th class="n">Price</th><th>Offer hash</th><th>Sealed</th><th>Opened</th>';
+    $("formIntro").innerHTML = "Write your offer below, or choose a file. <b>Leave the price out of it.</b> The page hashes the offer with keccak-256. Your price goes only into the seal, with a secret the page makes for you.";
+    $("priceLabel").textContent = "Your price, in US dollars"; $("termsLabel").textContent = "Your offer";
+    $("ackPublic").textContent = "I understand my address and seal are public now, my price becomes public when I open my bid, and I must keep the bid file to open it";
+  }
   function renderFacts() {
+    if (T.sealed) return renderSealedFacts();
     const now = Date.now() / 1000;
     const s = STATES[T.state] || "Unknown";
     const open = T.state === 0 && now < T.bidClose;
@@ -309,7 +387,7 @@ Assumptions and exclusions
       ["Contract", link("address", TENDER, TENDER)],
       ["Paid in", `${esc(T.aName)} (${esc(T.aSym)}), ${link("address", T.asset)}` + (T.placeholder ? ` <span class="muted">placeholder with no supply</span>` : "")],
       ["Held now", fmt(T.held, T.dec) + " " + esc(T.aSym)],
-      ["Ceiling", fmt(T.ceiling, T.dec) + " " + esc(T.aSym) + (T.placeholder ? ' <span class="muted">nominal</span>' : "")],
+      ["Ceiling", TD && TD.kind === "live" ? "US$" + fmt(T.ceiling, T.dec) + ' <span class="muted">a cap on bids, not a budget</span>' : fmt(T.ceiling, T.dec) + " " + esc(T.aSym) + (T.placeholder ? ' <span class="muted">nominal</span>' : "")],
       ["Bids close", when(T.bidClose)],
       ["Award and acceptance by", when(T.activationClose)],
       ["Review period", Math.round(T.review / 86400) + " days per milestone"],
@@ -322,27 +400,59 @@ Assumptions and exclusions
     $("facts").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
   }
 
+  function renderSealedFacts() {
+    const now = Date.now() / 1000, ph = phase();
+    const label = { bidding: "Sealed bidding", scoring: "Scoring quality", opening: "Prices opening", closed: "Waiting for award", after: STATES[T.state] || "Unknown" }[ph];
+    $("state").textContent = label; $("state").className = "state " + (ph === "after" ? (STATES[T.state] || "").toLowerCase() : "bidding");
+    const next = { bidding: T.bidClose, scoring: T.scoreClose, opening: T.revealClose }[ph];
+    const left = next ? next - now : 0;
+    const span = left > 86400 ? Math.floor(left / 86400) + " days" : left > 3600 ? Math.floor(left / 3600) + " hours" : Math.max(1, Math.ceil(left / 60)) + " minutes";
+    $("countdown").textContent = next ? { bidding: "Bids close", scoring: "Prices open", opening: "Opening closes" }[ph] + " in " + span : "";
+    const rows = [
+      ["Contract", link("address", TENDER, TENDER)],
+      ["Paid in", `${esc(T.aName)} (${esc(T.aSym)}), ${link("address", T.asset)}` + (T.placeholder ? ` <span class="muted">placeholder with no supply</span>` : "")],
+      ["Held now", fmt(T.held, T.dec) + " " + esc(T.aSym)],
+      ["Budget", T.ceiling > 0n ? money(T.ceiling) + ' <span class="muted">opened, bids above it cannot be awarded</span>' : 'Sealed until prices have opened <div class="mono muted">' + T.ceilingCommitment + "</div>"],
+      ["Seals so far", String(T.commits) + (T.reveals ? ", " + T.reveals + " opened" : "")],
+      ["Sealed bids close", when(T.bidClose)],
+      ["Quality scores fixed by", when(T.scoreClose) + (T.scores !== "0x" + "0".repeat(64) ? '<div class="mono">' + T.scores + "</div>" : ' <span class="muted">not fixed yet</span>')],
+      ["Prices opened by", when(T.revealClose)],
+      ["Award and acceptance by", when(T.activationClose)],
+      ["Review period", Math.round(T.review / 86400) + " days per milestone"],
+      ["Buyer", link("address", T.buyer)],
+      ["Reviewer", link("address", T.reviewer)],
+      ["Resolver", link("address", T.resolver)],
+      ["Specification hash", `<span class="mono">${T.spec}</span>`],
+    ];
+    if (T.state > 0) rows.splice(3, 0, ["Awarded to", link("address", T.contractor)]);
+    $("facts").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+  }
+
   async function checkSpec() {
     const box = $("specCheck");
     if (custom) { box.innerHTML = "This tender was opened by address, so the page does not know where its specification is published. Ask the buyer for the document and compare its keccak-256 hash with the one above."; box.className = "check"; return; }
     try {
-      const r = await fetch(NET.spec, { cache: "no-store" });
+      const r = await fetch(TD.spec, { cache: "no-store" });
       if (!r.ok) throw new Error(r.status);
       const h = keccak256(new Uint8Array(await r.arrayBuffer()));
-      if (h === T.spec) { box.innerHTML = `The <a href="${NET.spec}">published specification</a> hashes to the value on chain. You are bidding on that document.`; box.className = "check ok"; }
-      else { box.innerHTML = `The <a href="${NET.spec}">published specification</a> does <b>not</b> match the hash on chain (${h}). Do not bid until this is explained.`; box.className = "check bad"; }
+      if (h === T.spec) { box.innerHTML = `The <a href="${TD.spec}">published specification</a> hashes to the value on chain. You are bidding on that document.`; box.className = "check ok"; }
+      else { box.innerHTML = `The <a href="${TD.spec}">published specification</a> does <b>not</b> match the hash on chain (${h}). Do not bid until this is explained.`; box.className = "check bad"; }
     } catch { box.textContent = "Could not fetch the published specification to check it."; box.className = "check bad"; }
   }
 
   async function loadEvents() {
-    const logs = await rpc("eth_getLogs", [{ address: TENDER, fromBlock: custom ? "0x0" : "0x" + NET.from.toString(16), toBlock: "latest" }]);
+    const logs = await rpc("eth_getLogs", [{ address: TENDER, fromBlock: custom ? "0x0" : "0x" + TD.from.toString(16), toBlock: "latest" }]);
     const blocks = {};
     for (const b of [...new Set(logs.map((l) => l.blockNumber))]) { const x = await rpc("eth_getBlockByNumber", [b, false]); blocks[b] = x ? Number(BigInt(x.timestamp)) : 0; }
-    const latest = new Map(), record = [];
+    const latest = new Map(), seals = new Map(), record = [];
     for (const l of logs) {
       const kind = EV[l.topics[0]], d = l.data, t = blocks[l.blockNumber];
       const tx = link("tx", l.transactionHash, when(t));
-      if (kind === "BidPlaced") latest.set(addr(l.topics[1].slice(2)), { price: big(word(d, 0)), terms: "0x" + word(d, 1), tx });
+      if (kind === "BidCommitted") { const a = addr(l.topics[1].slice(2)); seals.set(a, { ...(seals.get(a) || {}), seal: "0x" + word(d, 0), sealedTx: tx }); }
+      else if (kind === "BidRevealed") { const a = addr(l.topics[1].slice(2)); seals.set(a, { ...(seals.get(a) || {}), price: big(word(d, 0)), terms: "0x" + word(d, 1), openTx: tx }); }
+      else if (kind === "ScoresCommitted") record.push(["Quality scores fixed", `<span class="mono">${"0x" + word(d, 0)}</span>, before any price was opened`, tx]);
+      else if (kind === "CeilingRevealed") record.push(["Budget opened", money(big(word(d, 0))), tx]);
+      else if (kind === "BidPlaced") latest.set(addr(l.topics[1].slice(2)), { price: big(word(d, 0)), terms: "0x" + word(d, 1), tx });
       else if (kind === "Awarded") record.push(["Awarded", `to ${link("address", addr(l.topics[1].slice(2)))}, reason <span class="mono">${"0x" + word(d, 0)}</span>`, tx]);
       else if (kind === "Activated") record.push(["Accepted and funded", "the full price is held in the contract", tx]);
       else if (kind === "Submitted") record.push(["Evidence submitted", `milestone ${Number(big(l.topics[1].slice(2))) + 1}, <span class="mono">${"0x" + word(d, 0)}</span>`, tx]);
@@ -351,8 +461,18 @@ Assumptions and exclusions
       else if (kind === "Claimed") record.push(["Withdrawn", `${fmt(big(word(d, 0)), T.dec)} ${esc(T.aSym)} by ${link("address", addr(l.topics[1].slice(2)))}`, tx]);
       else if (kind === "Closed") record.push(["Closed", "", tx]);
     }
+    if (T.sealed) {
+      const ph = phase();
+      const rows = [...seals.entries()].sort((a, b) => (a[1].price === undefined) - (b[1].price === undefined) || (a[1].price < b[1].price ? -1 : a[1].price > b[1].price ? 1 : 0));
+      const shut = ph === "bidding" || ph === "scoring" ? "sealed" : ph === "opening" ? "not opened yet" : "never opened";
+      $("bids").innerHTML = rows.map(([a, b]) => `<tr><td>${link("address", a)}${account && a === account ? ' <span class="muted">(you)</span>' : ""}</td><td class="n">${b.price !== undefined ? money(b.price) : '<span class="muted">' + shut + "</span>"}</td><td class="mono">${b.terms ? b.terms.slice(0, 18) + "…" : "-"}</td><td>${b.sealedTx || ""}</td><td>${b.openTx || ""}</td></tr>`).join("");
+      $("noBids").hidden = rows.length > 0;
+      $("record").innerHTML = record.map(([k, v, t]) => `<tr><td>${k}</td><td>${v}</td><td>${t}</td></tr>`).join("");
+      $("noRecord").hidden = record.length > 0;
+      return;
+    }
     const bids = [...latest.entries()].sort((a, b) => (a[1].price < b[1].price ? -1 : 1));
-    $("bids").innerHTML = bids.map(([a, b]) => `<tr><td>${link("address", a)}${account && a === account ? ' <span class="muted">(you)</span>' : ""}</td><td class="n">${fmt(b.price, T.dec)} ${esc(T.aSym)}</td><td class="mono">${b.terms.slice(0, 18)}…</td><td>${b.tx}</td></tr>`).join("");
+    $("bids").innerHTML = bids.map(([a, b]) => `<tr><td>${link("address", a)}${account && a === account ? ' <span class="muted">(you)</span>' : ""}</td><td class="n">${TD && TD.kind === "live" ? "US$" + fmt(b.price, T.dec) : fmt(b.price, T.dec) + " " + esc(T.aSym)}</td><td class="mono">${b.terms.slice(0, 18)}…</td><td>${b.tx}</td></tr>`).join("");
     $("noBids").hidden = bids.length > 0;
     $("record").innerHTML = record.map(([k, v, t]) => `<tr><td>${k}</td><td>${v}</td><td>${t}</td></tr>`).join("");
     $("noRecord").hidden = record.length > 0;
@@ -366,15 +486,67 @@ Assumptions and exclusions
   }
   function renderForm() {
     if (!T) return;
+    if (T.sealed) return renderSealedForm();
     const h = termsHash();
     $("termsHash").textContent = h || "-";
-    $("priceHint").textContent = "Up to " + fmt(T.ceiling, T.dec) + " " + T.aSym + ", at most " + T.dec + " decimal places.";
+    $("priceHint").textContent = TD && TD.kind === "live" ? "In US dollars, up to " + fmt(T.ceiling, T.dec) + "." : "Up to " + fmt(T.ceiling, T.dec) + " " + T.aSym + ", at most " + T.dec + " decimal places.";
     const p = parseAmount($("price").value, T.dec);
     const open = T.state === 0 && Date.now() / 1000 < T.bidClose;
     $("send").disabled = busy || !account || !open || !h || !p || p > T.ceiling || !$("ack").checked;
     $("connect").textContent = account ? "Change wallet" : "Connect a wallet";
     $("who").textContent = account ? "Connected: " + short(account) : "";
     if (!open && !busy && T) say(T.state === 0 ? "Bidding has closed on this tender." : "This tender is past bidding.");
+  }
+  let bidFile = null;
+  const store = () => "tender-bid:" + NET_KEY + ":" + TENDER + ":" + account;
+  function renderSealedForm() {
+    const ph = phase(), h = termsHash(), p = parseAmount($("price").value, T.dec);
+    $("termsHash").textContent = h || "-";
+    $("priceHint").textContent = "In US dollars. The budget is sealed, so bid what the work is worth to you.";
+    $("formTitle").textContent = ph === "opening" ? "Open your bid" : "Seal a bid";
+    $("bidForm").hidden = ph !== "bidding"; $("ackRow").hidden = ph !== "bidding"; $("openPanel").hidden = ph !== "opening";
+    const note = { scoring: "Bids are closed. If you sealed a bid, publish your offer now, without the price. You can open your bid from " + when(T.scoreClose) + ".",
+      closed: "Prices have closed. The award is next.", after: "This tender is past bidding." }[ph];
+    $("phaseNote").hidden = !note; if (note) $("phaseNote").textContent = note;
+    if (!bidFile && account && ph === "opening") { try { const j = JSON.parse(localStorage.getItem(store()) || "null"); if (j) useBidFile(j, "saved in this browser"); } catch {} }
+    $("send").hidden = ph !== "bidding" && ph !== "opening";
+    $("send").textContent = ph === "opening" ? "Open my bid" : "Seal my bid";
+    $("send").disabled = busy || !account || (ph === "bidding" ? !h || !p || !$("ack").checked : !bidFile);
+    $("connect").textContent = account ? "Change wallet" : "Connect a wallet";
+    $("who").textContent = account ? "Connected: " + short(account) : "";
+  }
+  function useBidFile(j, from) {
+    bidFile = j; $("bidFileName").textContent = from;
+    $("bidFileFacts").innerHTML = [["Tender", short(j.tender)], ["Bidder", short(j.bidder)], ["Price", money(BigInt(j.priceUnits))], ["Offer hash", j.termsHash.slice(0, 18) + "…"]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+  }
+  $("bidFile").addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try { const j = JSON.parse(await f.text()); if (!j.salt || !j.termsHash || !j.priceUnits) throw 0; useBidFile(j, f.name); say(""); }
+    catch { bidFile = null; say("That is not a bid file from this page.", "bad"); }
+    renderForm();
+  });
+  const hexBytes = (h) => Uint8Array.from(h.slice(2).match(/../g), (x) => parseInt(x, 16));
+  function sealOf(bidder, price, terms, salt) { return keccak256(hexBytes("0x" + pad(BigInt(TENDER)) + pad(BigInt(bidder)) + pad(price) + terms.slice(2) + salt.slice(2))); }
+  function download(name, obj) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" })); a.download = name; document.body.append(a); a.click(); a.remove(); }
+  async function sealedSend() {
+    const ph = phase();
+    let data;
+    if (ph === "bidding") {
+      const price = parseAmount($("price").value, T.dec), terms = termsHash();
+      const salt = "0x" + [...crypto.getRandomValues(new Uint8Array(32))].map((b) => b.toString(16).padStart(2, "0")).join("");
+      const seal = sealOf(account, price, terms, salt);
+      const file = { kind: "birdbrain-sealed-bid", network: NET_KEY, tender: TENDER, bidder: account, priceUnits: price.toString(), price: fmt(price, T.dec), termsHash: terms, salt, seal, sealedAt: new Date().toISOString() };
+      localStorage.setItem(store(), JSON.stringify(file));
+      download("bid-" + TENDER.slice(2, 8) + "-" + account.slice(2, 8) + ".json", file);
+      data = "0x" + SEL.commit + seal.slice(2);
+      return [data, "Your bid is sealed on chain. Keep the bid file the page saved: you need it to open your bid after " + when(T.scoreClose) + "."];
+    }
+    const j = bidFile;
+    if (j.tender.toLowerCase() !== TENDER || j.bidder.toLowerCase() !== account) throw new Error("This bid file is for " + short(j.tender) + " from " + short(j.bidder) + ". Connect that address on this tender.");
+    const onChain = "0x" + word(await call(TENDER, "0x" + SEL.commitments + pad(BigInt(account))), 0);
+    if (sealOf(account, BigInt(j.priceUnits), j.termsHash, j.salt) !== onChain) throw new Error("This file does not match your latest seal on chain. If you sealed more than once, use the file from the last seal.");
+    data = "0x" + SEL.reveal + pad(BigInt(j.priceUnits)) + j.termsHash.slice(2) + j.salt.slice(2);
+    return [data, "Your bid is open. Its price is now public."];
   }
   ["price", "terms", "ack"].forEach((k) => $(k).addEventListener("input", renderForm));
   $("ack").addEventListener("change", renderForm);
@@ -427,15 +599,16 @@ Assumptions and exclusions
     const m = (e && (e.message || "")) + " " + JSON.stringify((e && e.data) || "");
     if (e && e.code === 4001 || /rejected|denied/i.test(m)) return "You declined it in your wallet. Nothing was sent.";
     if (/insufficient funds/i.test(m)) return "Not enough " + NET.symbol + " in this account for the network fee.";
-    if (/revert/i.test(m)) return "The tender refused this bid. Check the price is within the ceiling and bidding is still open.";
+    if (/revert/i.test(m)) return T && T.sealed ? "The tender refused this. Check the window is still open, and that you have not already opened this bid." : "The tender refused this bid. Check the price is within the ceiling and bidding is still open.";
     return (e && e.message) || "Something went wrong.";
   }
   $("send").onclick = async () => {
     if (busy) return;
-    const price = parseAmount($("price").value, T.dec), h = termsHash();
-    const tx = { from: account, to: TENDER, data: "0x" + SEL.bid + pad(price) + h.slice(2), value: "0x0" };
+    let tx, done = "Your bid is on chain. Keep the exact terms you hashed, and publish them so others can check.";
     busy = true; renderForm();
     try {
+      if (T.sealed) { const [data, okMsg] = await sealedSend(); tx = { from: account, to: TENDER, data, value: "0x0" }; done = okMsg; }
+      else { const price = parseAmount($("price").value, T.dec), h = termsHash(); tx = { from: account, to: TENDER, data: "0x" + SEL.bid + pad(price) + h.slice(2), value: "0x0" }; }
       say("Checking the tender will accept it…");
       await rpc("eth_call", [tx, "latest"]);
       const est = BigInt(await rpc("eth_estimateGas", [tx]));
@@ -449,11 +622,12 @@ Assumptions and exclusions
       for (let i = 0; i < 60 && !rc; i++) { rc = await rpc("eth_getTransactionReceipt", [hash]); if (!rc) await new Promise((r) => setTimeout(r, 2000)); }
       if (!rc) say("Sent, but not confirmed yet (" + short(hash) + "). Refresh in a minute.");
       else if (rc.status !== "0x1") say("The transaction was included but failed. Nothing changed.", "bad");
-      else { say("Your bid is on chain. Keep the exact terms you hashed, and publish them so others can check.", "good"); await loadEvents(); }
+      else { say(done, "good"); await load(); }
     } catch (e) { say(explain(e), "bad"); }
     busy = false; renderForm();
   };
 
+  setInterval(() => { if (T && !busy) { renderFacts(); renderForm(); } }, 30000);
   load().catch((e) => { $("state").textContent = "Unavailable"; $("specCheck").textContent = e.message || "Could not read the tender."; $("specCheck").className = "check bad"; });
 })();
 </script>

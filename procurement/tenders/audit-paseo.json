@@ -1,0 +1,25 @@
+{
+  "network": "paseo",
+  "slug": "audit",
+  "purpose": "unfunded tender: real bids and award on chain, placeholder asset so it can never hold money; winner paid separately",
+  "deployer": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+  "at": "2026-11-23T16:27:34.533Z",
+  "costKsmOrPas": 0.835536,
+  "asset": "0xdd85dd5e5126383ba7413e1917e664eb5e0fff11",
+  "tender": {
+    "address": "0x4481bca62a2a54642a2538693c22cff8fa1f9508",
+    "tx": "0x8e446afdfd27caee690f1de45db1b5958c3e405fc1e036384c1bd6cd4d764f20",
+    "block": 16128643,
+    "gasUsed": "835536",
+    "bytecodeSha256": "8cd5b8bb51d3bdbf9dd0d2bb7a7f7f92926708c70fd347b3df79ab99185afc7c",
+    "buyer": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+    "reviewer": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+    "resolver": "0x78733cC3eFA10C34545a074c4320cC657DD93Af1",
+    "specification": "0xe019d4f44e336cda200b828120775bdc499301b1c5f07d54f7877d4a3da4c686",
+    "specificationSource": "tenders/audit-paseo-spec-at-deploy.md",
+    "ceiling": "15000000000",
+    "bidClose": 1797249600,
+    "activationClose": 1797854400,
+    "reviewPeriod": 604800
+  }
+}
