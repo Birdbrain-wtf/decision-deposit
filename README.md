@@ -76,3 +76,7 @@ bun compile.ts                                  # build/DecisionDepositPool.json
 Paseo scripts (`paseo/`) read keys from `KEYS` (default `keys/`) and `PASEO_MNEMONIC` (default `keys/paseo-mnemonic`), both ignored by git. Test money only. The contribute page is `page/index.html`.
 
 Birdbrain is a Decent initiative that tests, learns and educates in public. Apache-2.0.
+
+## Procurement prototype (separate from the pools)
+
+`procurement/` is a prototype tender contract for buying expert work on Kusama Asset Hub: open priced bids bound to a terms hash, an award split into milestones, escrow funded on the contractor's acceptance, reviewer approval, a resolver for disputes and pull payments. It shares no code or money with the decision deposit pools. An unfunded demonstration is live on Kusama Asset Hub, tied to a placeholder token with no supply so it can never hold value, and the bidder page is at https://birdbrain.wtf/tools/tender. Not independently reviewed. Details and known gaps: `procurement/README.md`. Run `forge test` in `procurement/`.

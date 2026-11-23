@@ -1,0 +1,31 @@
+{
+  "network": "kusama",
+  "purpose": "unfunded demonstration: placeholder asset, can never be funded, not dUSD",
+  "compiler": "solc 0.8.30+commit.73712a01.Emscripten.clang",
+  "deployer": "0x29c387E7693bABFB7CFf0709c681c4B90CeC4b61",
+  "at": "2026-11-23T14:18:42.113Z",
+  "costKsmOrPas": 0.05372728,
+  "asset": {
+    "address": "0x602dacc6969a454c5965616bf3cbce0a07608c6f",
+    "tx": "0xfaf9c2c5340cfaeb8f16a989fe753bef1641cb45e8bb7ea6aa72d13ce58d2841",
+    "block": 24177333,
+    "gasUsed": "2469088",
+    "bytecodeSha256": "c26a1fd2972c2a4f324ed8fe05ad1001729ae1c9ad49dae6a61e785a1ec67aa5"
+  },
+  "tender": {
+    "address": "0x8006674375a90d626029781c41cb163263479b70",
+    "tx": "0x19138d8fb8da8921feff09b88fb2afc7609afa8b0c387bed7df7d0e6b2ebf09d",
+    "block": 24177334,
+    "gasUsed": "2903640",
+    "bytecodeSha256": "8cd5b8bb51d3bdbf9dd0d2bb7a7f7f92926708c70fd347b3df79ab99185afc7c",
+    "buyer": "0x29c387E7693bABFB7CFf0709c681c4B90CeC4b61",
+    "reviewer": "0x29c387E7693bABFB7CFf0709c681c4B90CeC4b61",
+    "resolver": "0x29c387E7693bABFB7CFf0709c681c4B90CeC4b61",
+    "specification": "0x6b85f1c851bf1a1bf7cdec4428b27cbcf6380844c19a5c745e91c8e118dce31e",
+    "specificationSource": "lab/decision-deposit/procurement/README.md at deploy time",
+    "ceiling": "10000000000",
+    "bidClose": 1796653116,
+    "activationClose": 1797257916,
+    "reviewPeriod": 604800
+  }
+}

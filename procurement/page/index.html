@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bid on a tender · Birdbrain</title>
+<meta name="description" content="Read a procurement tender on Kusama Asset Hub, check its published specification and place a priced bid from your own wallet. The demonstration tender can never hold money.">
+<meta property="og:title" content="Bid on a tender · Birdbrain">
+<meta property="og:description" content="Competing priced bids, recorded on Kusama Asset Hub. An unfunded demonstration of on-chain procurement.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://birdbrain.wtf/tools/tender">
+<meta property="og:image" content="https://birdbrain.wtf/tools/tender/social.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://birdbrain.wtf/tools/tender/social.png">
+<style>
+:root{--ink:#202a31;--muted:#596771;--line:#dfe4e7;--soft:#f6f8f9;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 75% 10%,#f3f5f7,transparent 40%),#fff;color:var(--ink);font:16px/1.7 Inter,Arial,sans-serif}
+a{color:inherit;text-underline-offset:5px}
+button,input,textarea{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #526875;outline-offset:4px}
+.eyebrow{font:11px/1.6 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.14em}
+.muted{color:var(--muted)}
+main{max-width:1120px;margin:auto;padding:0 5vw}
+h1,h2,h3{font-style:normal;font-weight:400;line-height:1.08;letter-spacing:-.04em}
+h1{font-size:clamp(36px,4.4vw,56px);margin:20px 0 24px;max-width:820px}
+h2{font-size:clamp(26px,2.8vw,36px);margin:12px 0 22px}
+h3{font-size:20px;margin:0 0 10px;letter-spacing:-.02em}
+p{max-width:680px}
+.hero{padding:28px 0 20px}
+.lead{font-size:18px;color:var(--muted);max-width:660px}
+.banner{border:1px solid var(--line);border-left:2px solid rgba(245,158,11,.9);background:#fffdf8;padding:14px 18px;font-size:14px;max-width:780px;margin:8px 0}
+.banner.test{border-left-color:rgba(236,72,153,.8);background:#fff8fb}
+section{padding:32px 0;border-top:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:start}
+.grid>*{min-width:0}
+.card{border:1px solid var(--line);background:#fff;padding:26px}
+.card.soft{background:var(--soft)}
+dl{margin:14px 0 0}
+dl div{display:grid;grid-template-columns:170px 1fr;border-top:1px solid var(--line);padding:9px 0;font-size:14px}
+dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
+.mono{font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+.state{display:inline-block;border:1px solid #bfc9d0;border-radius:30px;padding:3px 12px;font:11px/1.8 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.1em}
+.state.bidding{border-color:rgba(16,185,129,.6)}.state.awarded,.state.active{border-color:rgba(59,130,246,.6)}.state.closed{border-color:rgba(220,38,38,.6)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
+.tab{border:1px solid var(--line);border-radius:12px;padding:8px 14px;background:#fff;font-size:14px;text-decoration:none}
+.tab[aria-current]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.tab.test{border-style:dashed;border-color:rgba(245,158,11,.8)}
+.check{font-size:14px;margin-top:12px;padding:10px 14px;border:1px solid var(--line);background:var(--soft)}
+.check.ok{border-color:rgba(16,185,129,.5);background:#f5fcf9}.check.bad{border-color:rgba(220,38,38,.5);background:#fff6f6}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th{font-weight:400;color:var(--muted);text-align:left;padding:6px 8px 6px 0;border-bottom:1px solid var(--line)}
+td{border-top:1px solid var(--line);padding:8px 8px 8px 0;vertical-align:top}
+td.n{text-align:right}th.n{text-align:right}
+.tablebox{overflow-x:auto}
+label{display:block;font-size:14px;color:var(--muted);margin:16px 0 6px}
+input[type=text],textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}
+textarea{min-height:200px;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}
+.row2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-block;border:1px solid var(--ink);border-radius:30px;padding:9px 20px;background:#fff;cursor:pointer;text-decoration:none;font-size:15px}
+.btn.primary{background:var(--ink);color:#fff}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.small{font-size:13px}
+#msg{min-height:1.6em;font-size:14px;margin-top:12px}#msg.bad{color:#9b2c2c}#msg.good{color:#1f6b4b}
+.walletlist{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.walletlist button{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:7px 12px;background:#fff;cursor:pointer}
+.walletlist img{width:18px;height:18px}
+.walletlist .noicon{width:18px;height:18px;border-radius:50%;background:#e5e9ec}
+ol.steps{padding-left:1.2em;max-width:760px}ol.steps li{margin:.55em 0}
+ul.notes{padding-left:1.1em;max-width:760px}ul.notes li{margin:.5em 0}
+details{border-top:1px solid var(--line);padding:14px 0}summary{cursor:pointer}
+.empty{color:var(--muted);font-size:14px;padding:12px 0}
+footer{padding:35px 5vw;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:25px;font-size:12px;color:var(--muted)}
+[hidden]{display:none!important}
+@media(max-width:860px){.grid{grid-template-columns:1fr}dl div{grid-template-columns:1fr}footer{display:block}}
+</style>
+<!--bb-chrome-head--><link rel="stylesheet" href="/assets/bb-chrome.css?v=20261112b"><!--/bb-chrome-head-->
+</head>
+<body>
+<!--bb-chrome-nav-->
+<nav class="bbx">
+<div class="nav-in">
+<a class="mark" href="/">
+<svg width="34" height="15" viewBox="0 0 106 46" aria-hidden="true">
+<g transform="translate(0 26) scale(.46)"><polygon class="f f1" points="0,28 34,0 36,12 6,30" fill="rgba(10,10,10,.05)" stroke="#b6bbc2" stroke-width="2.4"/><polygon class="f f1" points="36,12 70,28 40,30 34,18" fill="rgba(10,10,10,.05)" stroke="#b6bbc2" stroke-width="2.4"/></g>
+<g transform="translate(26 13) scale(.56)"><polygon class="f f2" points="0,28 34,0 36,12 6,30" fill="rgba(10,10,10,.05)" stroke="#b6bbc2" stroke-width="2.1"/><polygon class="f f2" points="36,12 70,28 40,30 34,18" fill="rgba(10,10,10,.05)" stroke="#b6bbc2" stroke-width="2.1"/></g>
+<g transform="translate(56 1) scale(.7)"><polygon class="f f3" points="0,28 34,0 36,12 6,30" fill="rgba(10,10,10,.05)" stroke="#b6bbc2" stroke-width="1.8"/><polygon class="f f3" points="36,12 70,28 40,30 34,18" fill="rgba(10,10,10,.05)" stroke="#b6bbc2" stroke-width="1.8"/></g>
+</svg>
+Birdbrain <span class="experiment">EXPERIMENT</span></a>
+<div class="nav-actions">
+<div class="more" id="more"><button class="more-btn" id="moreBtn" type="button" aria-expanded="false" aria-controls="exploreMenu">Explore <span aria-hidden="true">⌄</span></button>
+<div class="menu" id="exploreMenu"><span class="grp">Birdbrain</span><a href="/birdbrain"><span class="row"><svg class="mk prism" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L23 21H1ZM12 2v12L1 21M12 14l11 7M6.5 11.5h11L12 21Z"/></svg><span class="nm">About Birdbrain</span></span><span class="id">/birdbrain</span></a><a href="/editorial/birdbrain"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.8h6.6c.8 0 1.4.6 1.4 1.4v13c0-.8-.6-1.4-1.4-1.4H4V4.8zM20 4.8h-6.6c-.8 0-1.4.6-1.4 1.4v13c0-.8.6-1.4 1.4-1.4H20V4.8z"/></svg><span class="nm">Read our journal</span></span><span class="id">/editorial/birdbrain</span></a><a href="/chaos/join"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.6" y="6" width="13" height="12" rx="2.2"/><path d="m15.6 12.6 5.8 3.4V8l-5.8 3.4v1.2z"/></svg><span class="nm">Join a call</span></span><span class="id">/chaos/join</span></a><a href="/chaos-sessions"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 3.5a7 7 0 1 0 0 14 7 7 0 1 0 0-14z"/><path d="m15.45 15.45 4.55 4.55"/></svg><span class="nm">Chaos Sessions</span></span><span class="id">/chaos-sessions</span></a><a href="/docs"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 3H6.8A1.8 1.8 0 0 0 5 4.8v14.4A1.8 1.8 0 0 0 6.8 21h10.4a1.8 1.8 0 0 0 1.8-1.8V8.4L13.4 3z"/><path d="M13.4 3v5.4H19M8.6 13h6.8M8.6 16.6h4.6"/></svg><span class="nm">Documentation</span></span><span class="id">/docs</span></a><a href="/download"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10.5 12 15l4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span class="nm">Get the app</span></span><span class="id">/download</span></a><span class="grp col">Networks</span><a href="/networks/solo"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.8a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 1 0 0-4.4zM5.5 15.8a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 1 0 0-4.4zM18.5 15.8a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 1 0 0-4.4z"/><path d="M10.9 7.9 6.6 15.9M13.1 7.9l4.3 8M7.7 18h8.6"/></svg><span class="nm">Solo chain</span></span><span class="id">/networks/solo</span></a><a href="/networks/kabocha"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.2c-4.6 0-8.2 2.7-8.2 6.4S7.4 20 12 20s8.2-2.7 8.2-6.4S16.6 7.2 12 7.2z"/><path d="M12 7.2c-1.9 0-3.1 2.9-3.1 6.4S10.1 20 12 20s3.1-2.9 3.1-6.4S13.9 7.2 12 7.2zM12 7.2c0-1.5.6-2.6 1.8-3.2"/></svg><span class="nm">Kabocha</span></span><span class="id">/networks/kabocha</span></a><a href="/networks/kusama"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9.4 12 4l8.5 5.4z"/><path d="M5.6 10.2v7.4M9.9 10.2v7.4M14.1 10.2v7.4M18.4 10.2v7.4M3.5 20h17"/></svg><span class="nm">Kusama treasury</span></span><span class="id">/networks/kusama</span></a><a href="/explorer"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 3.8h6.6v6.6H3.8zM13.6 3.8h6.6v6.6h-6.6zM3.8 13.6h6.6v6.6H3.8z"/><path d="M13.6 13.6h6.6v6.6h-6.6zM10.4 7.1h3.2M7.1 10.4v3.2"/></svg><span class="nm">Birdbrain on chain</span></span><span class="id">/explorer</span></a><span class="grp">Tools</span><a href="/tools/cdd"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 11.2h16.4v9H3.8z"/><path d="M8.2 11.2V4.2h7.6v7M10.4 7.6h3.2M8.6 15.6h6.8"/></svg><span class="nm">Decision deposits</span></span><span class="id">/tools/cdd</span></a><a href="/tools/ksm-dot"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5h17"/><path d="M4 15.5l5-5 4 3 7-8M4 8.5l5 4.5 4-2 7 5.5"/></svg><span class="nm">KSM and DOT</span></span><span class="id">/tools/ksm-dot</span></a><a href="/tools/tender" aria-current="page"><span class="row"><svg class="mk" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M7 20h10M4 7h16"/><path d="M4 7 1.6 13h4.8zM20 7l-2.4 6h4.8z"/></svg><span class="nm">Tenders</span></span><span class="id">/tools/tender</span></a><a class="menu-door" href="/birdbrain/signin">Sign in</a></div>
+</div>
+<div class="me-slot" id="meSlot"><a class="btn" href="/birdbrain/signin">Sign in</a></div>
+</div>
+</div>
+</nav>
+<script defer src="/assets/bb-chrome.js?v=20261112b"></script>
+<!--/bb-chrome-nav-->
+<main>
+<div class="hero">
+  <div class="eyebrow muted">Procurement on Kusama Asset Hub</div>
+  <h1>Bid on a tender</h1>
+  <p class="lead">A tender is one contract for one piece of work. It publishes what is wanted and the most it will pay. Anyone can bid a price, tied to a document setting out what they will deliver. The buyer then awards the work, and payment is held and released milestone by milestone.</p>
+  <div class="banner" id="demoBanner"><b>Unfunded demonstration.</b> This tender is tied to a placeholder token named "NOT dUSD" with no supply, so it can never receive or pay out money. A bid records your price and terms on Kusama Asset Hub and does nothing else. The contracts have not been independently reviewed.</div>
+  <div class="banner test" id="testBanner" hidden><b>Testing area.</b> Paseo is Polkadot's test network. PAS has no value.</div>
+  <div class="tabs" id="nets"></div>
+</div>
+
+<section>
+  <div class="grid">
+    <div>
+      <h2>The tender</h2>
+      <div class="card">
+        <div class="row2"><span class="state" id="state">Loading</span><span class="muted small" id="countdown"></span></div>
+        <dl id="facts"></dl>
+        <div class="check" id="specCheck">Checking the published specification against the hash on chain…</div>
+      </div>
+    </div>
+    <div>
+      <h2>How it runs</h2>
+      <ol class="steps">
+        <li><b>Bidding.</b> Anyone bids a price up to the ceiling, with the hash of a document describing their offer. A later bid from the same address replaces the earlier one.</li>
+        <li><b>Award.</b> After bidding closes, the buyer picks one bid, splits its price into milestones with due dates and records a reason on chain.</li>
+        <li><b>Acceptance and funding.</b> The winner checks the milestones and accepts. Accepting pulls the full price into the contract. <span class="muted">On this demonstration that step always fails, because the placeholder token cannot move.</span></li>
+        <li><b>Delivery.</b> The winner submits evidence for each milestone. The reviewer approves it, or either side raises a dispute and the resolver divides that milestone's money.</li>
+        <li><b>Payment.</b> Each person withdraws what they are owed. Every step leaves a public event, which is the start of a delivery record.</li>
+      </ol>
+      <p class="small muted">Contract source, tests and the design notes: <a href="https://github.com/Birdbrain-wtf/decision-deposit/tree/main/procurement">github.com/Birdbrain-wtf/decision-deposit</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Bids so far</h2>
+  <p class="muted small">Bids are open: everyone can see every price. A sealed round, where prices stay hidden until bidding closes, is one of the open design choices.</p>
+  <div class="tablebox"><table><thead><tr><th>Bidder</th><th class="n">Price</th><th>Terms hash</th><th>When</th></tr></thead><tbody id="bids"></tbody></table></div>
+  <div class="empty" id="noBids" hidden>No bids yet.</div>
+</section>
+
+<section id="bidSection">
+  <div class="grid">
+    <div>
+      <h2>Place a bid</h2>
+      <p>Write your offer below, or choose a file. The page hashes it with keccak-256 and puts only the hash on chain. Publish the document somewhere others can read it, such as a gist or the forum thread, so anyone can check it matches.</p>
+      <label for="price">Your price, in the tender's units</label>
+      <input type="text" id="price" inputmode="decimal" placeholder="e.g. 8500" autocomplete="off">
+      <div class="small muted" id="priceHint"></div>
+      <label for="terms">Your terms</label>
+      <textarea id="terms" spellcheck="true"></textarea>
+      <div class="row2 small" style="margin-top:8px"><label class="btn" style="margin:0;color:var(--ink)">Use a file instead<input type="file" id="termsFile" hidden></label><span id="fileName" class="muted"></span><button type="button" class="btn" id="clearFile" hidden>Use the text box</button></div>
+      <div class="small" style="margin-top:10px">Terms hash: <span class="mono" id="termsHash">-</span></div>
+      <label style="color:var(--ink);display:flex;gap:10px;align-items:flex-start;margin-top:18px"><input type="checkbox" id="ack" style="margin-top:6px"><span class="small">I understand my price and address are public, that this demonstration can never pay anyone, and that sending a bid costs a small network fee in <span class="sym">KSM</span>.</span></label>
+      <div class="row2" style="margin-top:18px">
+        <button type="button" class="btn" id="connect">Connect a wallet</button>
+        <button type="button" class="btn primary" id="send" disabled>Place bid</button>
+        <span class="small muted" id="who"></span>
+      </div>
+      <div class="walletlist" id="walletList" hidden></div>
+      <div id="msg" role="status"></div>
+    </div>
+    <div>
+      <h2>Before you bid</h2>
+      <ul class="notes">
+        <li>You need an Ethereum-style wallet such as MetaMask or Talisman, set to <span id="netName">Kusama Asset Hub</span>, holding a little <span class="sym">KSM</span> for the fee.</li>
+        <li>Your bid must be above zero and no more than the ceiling, and bidding must still be open.</li>
+        <li>Your address cannot be the buyer, reviewer or resolver if you want to be awarded the work.</li>
+        <li>Your terms hash is permanent. Change one character of the document and the hash changes, so keep the exact file you hashed.</li>
+        <li>Nothing here checks who you are. A name, a track record or an on-chain identity are things a real tender would weigh, and how is still being designed.</li>
+      </ul>
+      <p class="small muted">The text box starts with a template. Edit it freely: only the hash goes on chain.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Delivery record</h2>
+  <p>Every award, milestone, dispute, settlement and withdrawal on this tender, in order. A finished project alone says little about how it was delivered. This record keeps the dates, the evidence and how disputes ended, so a contractor's next bid can be judged on more than a price.</p>
+  <div class="tablebox"><table><thead><tr><th>Event</th><th>Detail</th><th>When</th></tr></thead><tbody id="record"></tbody></table></div>
+  <div class="empty" id="noRecord" hidden>Nothing yet beyond bids. The record starts at the award.</div>
+</section>
+
+<section>
+  <h2>Why this exists</h2>
+  <p>Kusama's treasury mostly pays for work through single proposals: one team names its own scope, price and timetable, and voters say yes or no. There is no competing offer to compare against, no agreed way to accept the work, and no lasting record of how it went. This page is the bidding end of a prototype that borrows from UK public procurement to test a different route, starting with the security audit that the <a href="/tools/cdd">collaborative decision deposit</a> contracts need.</p>
+  <p class="small muted">Read more: the <a href="https://forum.polkadot.network/t/collaborative-decision-deposits-live-on-kusama-open-for-review/19187">decision deposit thread</a> on the Polkadot forum, the <a href="https://www.legislation.gov.uk/ukpga/2023/54/contents">Procurement Act 2023</a>, and the <a href="https://www.gov.uk/government/publications/procurement-act-2023-guidance-documents-manage-phase/guidance-contract-performance-notices-html">guidance on contract performance notices</a>.</p>
+</section>
+</main>
+<footer><span>Birdbrain is a Decent initiative that tests, learns and educates in public.</span><span><a href="https://github.com/Birdbrain-wtf/decision-deposit/tree/main/procurement">Contract source and tests</a></span></footer>
+
+<script>
+(() => {
+  const M=(1n<<64n)-1n;const RC=[],RO=new Array(25).fill(0);
+(()=>{let R=1;const bit=()=>{const b=R&1;R<<=1;if(R&0x100)R^=0x171;return b};for(let i=0;i<24;i++){let c=0n;for(let j=0;j<7;j++)if(bit())c|=1n<<BigInt((1<<j)-1);RC.push(c)}let x=1,y=0;for(let t=0;t<24;t++){RO[x+5*y]=((t+1)*(t+2)/2)%64;[x,y]=[y,(2*x+3*y)%5]}})();
+const rot=(v,n)=>n?((v<<BigInt(n))|(v>>BigInt(64-n)))&M:v;
+function keccak256(b){const r=136,p=new Uint8Array(Math.floor(b.length/r)*r+r);p.set(b);p[b.length]^=1;p[p.length-1]^=0x80;const A=new Array(25).fill(0n),B=new Array(25),C=new Array(5);
+for(let o=0;o<p.length;o+=r){for(let i=0;i<17;i++){let v=0n;for(let k=7;k>=0;k--)v=(v<<8n)|BigInt(p[o+i*8+k]);A[i]^=v}
+for(let n=0;n<24;n++){for(let x=0;x<5;x++)C[x]=A[x]^A[x+5]^A[x+10]^A[x+15]^A[x+20];for(let x=0;x<5;x++){const d=C[(x+4)%5]^rot(C[(x+1)%5],1);for(let y=0;y<25;y+=5)A[x+y]^=d}
+for(let x=0;x<5;x++)for(let y=0;y<5;y++)B[y+5*((2*x+3*y)%5)]=rot(A[x+5*y],RO[x+5*y]);for(let x=0;x<5;x++)for(let y=0;y<25;y+=5)A[x+y]=B[x+y]^((~B[(x+1)%5+y])&M&B[(x+2)%5+y]);A[0]^=RC[n]}}
+let h="";for(let i=0;i<4;i++){let v=A[i];for(let k=0;k<8;k++){h+=Number(v&255n).toString(16).padStart(2,"0");v>>=8n}}return "0x"+h}
+  const NETS = {
+    kusama: { chainId: 420420418, name: "Kusama Asset Hub", symbol: "KSM", rpc: "https://eth-rpc-kusama.polkadot.io", explorer: "https://blockscout-kusama.polkadot.io", test: false,
+              tender: "0x8006674375a90d626029781c41cb163263479b70", from: 24177334, spec: "/tools/tender/spec/demo.md", label: "Kusama · demonstration" },
+    paseo:  { chainId: 420420417, name: "Paseo Asset Hub", symbol: "PAS", rpc: "https://eth-rpc-testnet.polkadot.io", explorer: "https://blockscout-testnet.polkadot.io", test: true,
+              tender: "0xe738f7fad584e231bf46f4b402b9bd52ec8b78d7", from: 16124732, spec: "/tools/tender/spec/demo.md", label: "Testing area: Paseo" },
+  };
+  const SEL = { asset: "38d52e0f", buyer: "7150d8ae", reviewer: "a54044f8", resolver: "04f3bcec", specification: "53100933", ceiling: "753ed1bd",
+    bidClose: "c7303cfa", activationClose: "03c2f932", reviewPeriod: "3b249810", state: "c19d93fb", contractor: "fbfd2045", bids: "62ea82db", bid: "ea1591bb",
+    name: "06fdde03", symbol: "95d89b41", decimals: "313ce567", totalSupply: "18160ddd", balanceOf: "70a08231" };
+  const EV = {
+    "0x7688c47abe05d00c4c928b2463ce78311682f000513dde54988eca2d6b01072f": "BidPlaced",
+    "0x329e4fd8690fcd92a207427e85bc6e7656db85ee385d1e7bbf7311e397102a9b": "Awarded",
+    "0xed1cd0670ee0c0017f550451a038818c696d0b6a9d6ce5b369e44275573cf9b0": "Activated",
+    "0x465ddfeee4b3d0fb72ba16ca1e8d4ecf86373b44e51658af98043162de372b4c": "Submitted",
+    "0x7e3d476b0ad3176eefadbd6672356ef3884fad75f1344623a88d4a8087842336": "Disputed",
+    "0xb19e5d5b6e9f99abdf88eb8cb8a9acd39e91acb8ad625e8c847a25daa295071c": "Settled",
+    "0xd8138f8a3f377c5259ca548e70e4c2de94f129f5a11036a15b69513cba2b426a": "Claimed",
+    "0x1cdde67b72a90f19919ac732a437ac2f7a10fc128d28c2a6e525d89ce5cd9d3a": "Closed" };
+  const STATES = ["Bidding", "Awarded", "Active", "Closed"];
+  const TEMPLATE = `Bid for: the tender at {TENDER}
+Bidder: (name or team, and where to reach you)
+
+What we will deliver
+- (scope, in your own words, against the published specification)
+
+How we will do it
+- (method, tools, who does the work)
+
+Relevant experience
+- (past work, with links)
+
+Milestones and dates
+1. (deliverable) by (date), (share of price)
+2. (deliverable) by (date), (share of price)
+
+Price: (the same figure you bid)
+Assumptions and exclusions
+- (anything the price depends on)
+`;
+
+  const $ = (id) => document.getElementById(id);
+  const q = new URLSearchParams(location.search);
+  const NET_KEY = NETS[q.get("net")] ? q.get("net") : "kusama";
+  const NET = NETS[NET_KEY];
+  const custom = /^0x[0-9a-fA-F]{40}$/.test(q.get("tender") || "") ? q.get("tender").toLowerCase() : null;
+  const TENDER = custom || NET.tender;
+  const CHAIN = { chainId: "0x" + NET.chainId.toString(16), chainName: NET.name, nativeCurrency: { name: NET.symbol, symbol: NET.symbol, decimals: 18 }, rpcUrls: [NET.rpc], blockExplorerUrls: [NET.explorer] };
+
+  let id = 0, T = null, eth = null, account = null, busy = false, fileBytes = null;
+  async function rpc(method, params = []) {
+    const r = await fetch(NET.rpc, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params }) });
+    const j = await r.json();
+    if (j.error) { const e = new Error(j.error.message || "RPC error"); e.data = j.error.data; throw e; }
+    return j.result;
+  }
+  const call = (to, data, from) => rpc("eth_call", [{ to, data, ...(from ? { from } : {}) }, "latest"]);
+  const word = (h, i) => h.slice(2 + i * 64, 2 + (i + 1) * 64);
+  const big = (h) => BigInt("0x" + (h || "0"));
+  const addr = (w) => "0x" + w.slice(24);
+  const pad = (v) => BigInt(v).toString(16).padStart(64, "0");
+  function str(h) { try { const off = Number(big(word(h, 0))) * 2, len = Number(big(h.slice(2 + off, 2 + off + 64))); const b = h.slice(2 + off + 64, 2 + off + 64 + len * 2); return new TextDecoder().decode(Uint8Array.from(b.match(/../g) || [], (x) => parseInt(x, 16))); } catch { return "?"; } }
+  const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+  const link = (kind, v, text) => `<a href="${NET.explorer}/${kind}/${v}" target="_blank" rel="noopener" class="mono">${text || short(v)}</a>`;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  function fmt(v, d) { const u = 10n ** BigInt(d), w = v / u, f = (v % u).toString().padStart(d, "0").replace(/0+$/, ""); return w.toLocaleString("en-GB") + (f ? "." + f : ""); }
+  function parseAmount(s, d) { s = String(s).trim().replace(/,/g, ""); if (!new RegExp("^\\d+(\\.\\d{1," + d + "})?$").test(s)) return null; const [w, f = ""] = s.split("."); return BigInt(w) * 10n ** BigInt(d) + BigInt(f.padEnd(d, "0") || "0"); }
+  const when = (ts) => new Date(ts * 1000).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }) + " UTC";
+  function say(t, k) { $("msg").textContent = t; $("msg").className = k || ""; }
+
+  // ----- network tabs
+  for (const [k, n] of Object.entries(NETS)) {
+    const a = document.createElement("a");
+    a.className = "tab" + (n.test ? " test" : ""); a.href = "?net=" + k; a.textContent = n.label;
+    if (k === NET_KEY && !custom) a.setAttribute("aria-current", "page");
+    $("nets").append(a);
+  }
+  $("testBanner").hidden = !NET.test;
+  document.querySelectorAll(".sym").forEach((e) => (e.textContent = NET.symbol));
+  $("netName").textContent = NET.name;
+  $("terms").value = TEMPLATE.replace("{TENDER}", TENDER + " on " + NET.name);
+
+  async function load() {
+    const names = ["asset", "buyer", "reviewer", "resolver", "specification", "ceiling", "bidClose", "activationClose", "reviewPeriod", "state", "contractor"];
+    const out = await Promise.all(names.map((n) => call(TENDER, "0x" + SEL[n])));
+    const r = Object.fromEntries(names.map((n, i) => [n, out[i]]));
+    if (!r.asset || r.asset === "0x") throw new Error("No tender contract at " + TENDER + " on " + NET.name + ".");
+    const asset = addr(word(r.asset, 0));
+    const [aName, aSym, aDec, aSup, aBal] = await Promise.all([call(asset, "0x" + SEL.name), call(asset, "0x" + SEL.symbol), call(asset, "0x" + SEL.decimals), call(asset, "0x" + SEL.totalSupply), call(asset, "0x" + SEL.balanceOf + pad(BigInt(TENDER)))]);
+    T = { asset, buyer: addr(word(r.buyer, 0)), reviewer: addr(word(r.reviewer, 0)), resolver: addr(word(r.resolver, 0)), spec: "0x" + word(r.specification, 0),
+      ceiling: big(word(r.ceiling, 0)), bidClose: Number(big(word(r.bidClose, 0))), activationClose: Number(big(word(r.activationClose, 0))), review: Number(big(word(r.reviewPeriod, 0))),
+      state: Number(big(word(r.state, 0))), contractor: addr(word(r.contractor, 0)), aName: str(aName), aSym: str(aSym), dec: Number(big(word(aDec, 0))), supply: big(word(aSup, 0)), held: big(word(aBal, 0)) };
+    T.placeholder = T.supply === 0n && /NOT/i.test(T.aName + T.aSym);
+    $("demoBanner").hidden = !T.placeholder;
+    renderFacts(); renderForm();
+    await Promise.all([loadEvents(), checkSpec()]);
+  }
+
+  function renderFacts() {
+    const now = Date.now() / 1000;
+    const s = STATES[T.state] || "Unknown";
+    const open = T.state === 0 && now < T.bidClose;
+    $("state").textContent = T.state === 0 && !open ? "Bidding closed" : s;
+    $("state").className = "state " + s.toLowerCase();
+    const left = T.bidClose - now;
+    $("countdown").textContent = open ? "Bids close in " + (left > 86400 ? Math.floor(left / 86400) + " days" : Math.max(1, Math.floor(left / 3600)) + " hours") : "";
+    const rows = [
+      ["Contract", link("address", TENDER, TENDER)],
+      ["Paid in", `${esc(T.aName)} (${esc(T.aSym)}), ${link("address", T.asset)}` + (T.placeholder ? ` <span class="muted">placeholder with no supply</span>` : "")],
+      ["Held now", fmt(T.held, T.dec) + " " + esc(T.aSym)],
+      ["Ceiling", fmt(T.ceiling, T.dec) + " " + esc(T.aSym) + (T.placeholder ? ' <span class="muted">nominal</span>' : "")],
+      ["Bids close", when(T.bidClose)],
+      ["Award and acceptance by", when(T.activationClose)],
+      ["Review period", Math.round(T.review / 86400) + " days per milestone"],
+      ["Buyer", link("address", T.buyer)],
+      ["Reviewer", link("address", T.reviewer)],
+      ["Resolver", link("address", T.resolver)],
+      ["Specification hash", `<span class="mono">${T.spec}</span>`],
+    ];
+    if (T.state > 0) rows.splice(4, 0, ["Awarded to", link("address", T.contractor)]);
+    $("facts").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+  }
+
+  async function checkSpec() {
+    const box = $("specCheck");
+    if (custom) { box.innerHTML = "This tender was opened by address, so the page does not know where its specification is published. Ask the buyer for the document and compare its keccak-256 hash with the one above."; box.className = "check"; return; }
+    try {
+      const r = await fetch(NET.spec, { cache: "no-store" });
+      if (!r.ok) throw new Error(r.status);
+      const h = keccak256(new Uint8Array(await r.arrayBuffer()));
+      if (h === T.spec) { box.innerHTML = `The <a href="${NET.spec}">published specification</a> hashes to the value on chain. You are bidding on that document.`; box.className = "check ok"; }
+      else { box.innerHTML = `The <a href="${NET.spec}">published specification</a> does <b>not</b> match the hash on chain (${h}). Do not bid until this is explained.`; box.className = "check bad"; }
+    } catch { box.textContent = "Could not fetch the published specification to check it."; box.className = "check bad"; }
+  }
+
+  async function loadEvents() {
+    const logs = await rpc("eth_getLogs", [{ address: TENDER, fromBlock: custom ? "0x0" : "0x" + NET.from.toString(16), toBlock: "latest" }]);
+    const blocks = {};
+    for (const b of [...new Set(logs.map((l) => l.blockNumber))]) { const x = await rpc("eth_getBlockByNumber", [b, false]); blocks[b] = x ? Number(BigInt(x.timestamp)) : 0; }
+    const latest = new Map(), record = [];
+    for (const l of logs) {
+      const kind = EV[l.topics[0]], d = l.data, t = blocks[l.blockNumber];
+      const tx = link("tx", l.transactionHash, when(t));
+      if (kind === "BidPlaced") latest.set(addr(l.topics[1].slice(2)), { price: big(word(d, 0)), terms: "0x" + word(d, 1), tx });
+      else if (kind === "Awarded") record.push(["Awarded", `to ${link("address", addr(l.topics[1].slice(2)))}, reason <span class="mono">${"0x" + word(d, 0)}</span>`, tx]);
+      else if (kind === "Activated") record.push(["Accepted and funded", "the full price is held in the contract", tx]);
+      else if (kind === "Submitted") record.push(["Evidence submitted", `milestone ${Number(big(l.topics[1].slice(2))) + 1}, <span class="mono">${"0x" + word(d, 0)}</span>`, tx]);
+      else if (kind === "Disputed") record.push(["Disputed", `milestone ${Number(big(l.topics[1].slice(2))) + 1}`, tx]);
+      else if (kind === "Settled") record.push(["Settled", `milestone ${Number(big(l.topics[1].slice(2))) + 1}, ${fmt(big(word(d, 0)), T.dec)} ${esc(T.aSym)} to the contractor`, tx]);
+      else if (kind === "Claimed") record.push(["Withdrawn", `${fmt(big(word(d, 0)), T.dec)} ${esc(T.aSym)} by ${link("address", addr(l.topics[1].slice(2)))}`, tx]);
+      else if (kind === "Closed") record.push(["Closed", "", tx]);
+    }
+    const bids = [...latest.entries()].sort((a, b) => (a[1].price < b[1].price ? -1 : 1));
+    $("bids").innerHTML = bids.map(([a, b]) => `<tr><td>${link("address", a)}${account && a === account ? ' <span class="muted">(you)</span>' : ""}</td><td class="n">${fmt(b.price, T.dec)} ${esc(T.aSym)}</td><td class="mono">${b.terms.slice(0, 18)}…</td><td>${b.tx}</td></tr>`).join("");
+    $("noBids").hidden = bids.length > 0;
+    $("record").innerHTML = record.map(([k, v, t]) => `<tr><td>${k}</td><td>${v}</td><td>${t}</td></tr>`).join("");
+    $("noRecord").hidden = record.length > 0;
+  }
+
+  // ----- the bid form
+  function termsHash() {
+    if (fileBytes) return keccak256(fileBytes);
+    const t = $("terms").value;
+    return t.trim() ? keccak256(new TextEncoder().encode(t)) : null;
+  }
+  function renderForm() {
+    if (!T) return;
+    const h = termsHash();
+    $("termsHash").textContent = h || "-";
+    $("priceHint").textContent = "Up to " + fmt(T.ceiling, T.dec) + " " + T.aSym + ", at most " + T.dec + " decimal places.";
+    const p = parseAmount($("price").value, T.dec);
+    const open = T.state === 0 && Date.now() / 1000 < T.bidClose;
+    $("send").disabled = busy || !account || !open || !h || !p || p > T.ceiling || !$("ack").checked;
+    $("connect").textContent = account ? "Change wallet" : "Connect a wallet";
+    $("who").textContent = account ? "Connected: " + short(account) : "";
+    if (!open && !busy && T) say(T.state === 0 ? "Bidding has closed on this tender." : "This tender is past bidding.");
+  }
+  ["price", "terms", "ack"].forEach((k) => $(k).addEventListener("input", renderForm));
+  $("ack").addEventListener("change", renderForm);
+  $("termsFile").addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    fileBytes = new Uint8Array(await f.arrayBuffer());
+    $("fileName").textContent = f.name + " (" + f.size.toLocaleString("en-GB") + " bytes)";
+    $("terms").disabled = true; $("clearFile").hidden = false; renderForm();
+  });
+  $("clearFile").onclick = () => { fileBytes = null; $("termsFile").value = ""; $("fileName").textContent = ""; $("terms").disabled = false; $("clearFile").hidden = true; renderForm(); };
+
+  // ----- wallets (EIP-6963, window.ethereum as the fallback)
+  const wallets = new Map();
+  window.addEventListener("eip6963:announceProvider", (e) => {
+    const d = e.detail, k = d && d.info && d.info.uuid;
+    if (!k || !d.provider || typeof d.provider.request !== "function") return;
+    wallets.set(String(k), { name: String(d.info.name || "Wallet"), icon: String(d.info.icon || ""), provider: d.provider });
+  });
+  window.dispatchEvent(new Event("eip6963:requestProvider"));
+  function showWallets() {
+    const box = $("walletList"); box.textContent = "";
+    for (const w of wallets.values()) {
+      const b = document.createElement("button"); b.type = "button";
+      if (/^data:image\//.test(w.icon)) { const i = document.createElement("img"); i.src = w.icon; i.alt = ""; b.append(i); } else { const i = document.createElement("span"); i.className = "noicon"; b.append(i); }
+      b.append(document.createTextNode(w.name)); b.onclick = () => useWallet(w.provider); box.append(b);
+    }
+    box.hidden = false;
+  }
+  $("connect").onclick = async () => {
+    if (busy) return;
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+    if (!wallets.size) await new Promise((r) => setTimeout(r, 200));
+    if (wallets.size > 1) return showWallets();
+    const only = wallets.size ? [...wallets.values()][0].provider : window.ethereum;
+    if (!only) return say("No Ethereum-style wallet found in this browser. Install MetaMask or Talisman.", "bad");
+    useWallet(only);
+  };
+  let choice = 0;
+  async function useWallet(p) {
+    const mine = ++choice;
+    try {
+      const [first] = await p.request({ method: "eth_requestAccounts" });
+      try { await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN.chainId }] }); }
+      catch (e) { if (e.code === 4902 || /unrecognized|not added/i.test(e.message || "")) await p.request({ method: "wallet_addEthereumChain", params: [CHAIN] }); else throw e; }
+      if (mine !== choice) return;
+      eth = p; account = String(first).toLowerCase(); $("walletList").hidden = true; say(""); renderForm(); loadEvents().catch(() => {});
+    } catch (e) { if (mine === choice) { eth = null; account = null; say(explain(e), "bad"); renderForm(); } }
+  }
+  function explain(e) {
+    const m = (e && (e.message || "")) + " " + JSON.stringify((e && e.data) || "");
+    if (e && e.code === 4001 || /rejected|denied/i.test(m)) return "You declined it in your wallet. Nothing was sent.";
+    if (/insufficient funds/i.test(m)) return "Not enough " + NET.symbol + " in this account for the network fee.";
+    if (/revert/i.test(m)) return "The tender refused this bid. Check the price is within the ceiling and bidding is still open.";
+    return (e && e.message) || "Something went wrong.";
+  }
+  $("send").onclick = async () => {
+    if (busy) return;
+    const price = parseAmount($("price").value, T.dec), h = termsHash();
+    const tx = { from: account, to: TENDER, data: "0x" + SEL.bid + pad(price) + h.slice(2), value: "0x0" };
+    busy = true; renderForm();
+    try {
+      say("Checking the tender will accept it…");
+      await rpc("eth_call", [tx, "latest"]);
+      const est = BigInt(await rpc("eth_estimateGas", [tx]));
+      tx.gas = "0x" + (est * 3n / 2n).toString(16);
+      const c = await eth.request({ method: "eth_chainId" });
+      if (parseInt(c, 16) !== NET.chainId) throw new Error("Your wallet is not on " + NET.name + ". Reconnect to switch it.");
+      say("Confirm it in your wallet…");
+      const hash = await eth.request({ method: "eth_sendTransaction", params: [tx] });
+      say("Sent. Waiting for the next block…");
+      let rc = null;
+      for (let i = 0; i < 60 && !rc; i++) { rc = await rpc("eth_getTransactionReceipt", [hash]); if (!rc) await new Promise((r) => setTimeout(r, 2000)); }
+      if (!rc) say("Sent, but not confirmed yet (" + short(hash) + "). Refresh in a minute.");
+      else if (rc.status !== "0x1") say("The transaction was included but failed. Nothing changed.", "bad");
+      else { say("Your bid is on chain. Keep the exact terms you hashed, and publish them so others can check.", "good"); await loadEvents(); }
+    } catch (e) { say(explain(e), "bad"); }
+    busy = false; renderForm();
+  };
+
+  load().catch((e) => { $("state").textContent = "Unavailable"; $("specCheck").textContent = e.message || "Could not read the tender."; $("specCheck").className = "check bad"; });
+})();
+</script>
+</body>
+</html>
